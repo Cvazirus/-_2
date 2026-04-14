@@ -30,7 +30,7 @@ import { differenceInHours } from 'date-fns';
 
 import FinanceJournal from './components/FinanceJournal';
 
-type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal';
+type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -53,7 +53,26 @@ export default function App() {
   const [parts, setParts] = useState<Part[]>(() => {
     try {
       const saved = localStorage.getItem('app_parts');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((p: Part) => {
+            if (p.operationNumbers?.length === 1) {
+              const op = p.operationNumbers[0];
+              if (!p.operationPrices || !p.operationPrices[op]) {
+                return {
+                  ...p,
+                  operationPrices: {
+                    ...(p.operationPrices || {}),
+                    [op]: p.pricePerUnit
+                  }
+                };
+              }
+            }
+            return p;
+          });
+        }
+      }
     } catch (e) {
       console.error('Error parsing parts', e);
     }
@@ -333,14 +352,18 @@ export default function App() {
 
       if (journal.type === 'parts') {
         const journalParts = parts.filter(p => p.journalId === journal.id);
-        const partsData = journalParts.map(p => ({
-          'Номер детали': p.code,
-          'Название': p.name,
-          'Цена за единицу': p.pricePerUnit,
-          'Количество': p.currentQuantity,
-          'Номера операций': p.operationNumbers.join(', '),
-          'Итоговая стоимость': p.pricePerUnit * p.currentQuantity
-        }));
+        const partsData = journalParts.map(p => {
+          const opsTotal = p.operationNumbers.reduce((sum, op) => sum + (p.operationPrices?.[op] || 0), 0);
+          return {
+            'Номер детали': p.code,
+            'Название': p.name,
+            'Цена за единицу': p.pricePerUnit,
+            'Количество': p.currentQuantity,
+            'Номера операций': p.operationNumbers.join(', '),
+            'Общая цена операций': opsTotal,
+            'Итоговая стоимость': p.pricePerUnit * p.currentQuantity
+          };
+        });
         const wsParts = XLSX.utils.json_to_sheet(partsData);
         XLSX.utils.book_append_sheet(wb, wsParts, journal.name.substring(0, 31));
       } else {
@@ -401,15 +424,19 @@ export default function App() {
 
       if (effectiveType === 'parts') {
         const journalParts = parts.filter(p => p.journalId === journal.id);
-        const headers = ['Номер детали', 'Название', 'Цена за единицу', 'Количество', 'Номера операций', 'Итоговая стоимость'];
-        const rows = journalParts.map(p => [
-          p.code,
-          p.name,
-          p.pricePerUnit,
-          p.currentQuantity,
-          p.operationNumbers.join(', '),
-          p.pricePerUnit * p.currentQuantity
-        ]);
+        const headers = ['Номер детали', 'Название', 'Цена за единицу', 'Количество', 'Номера операций', 'Общая цена операций', 'Итоговая стоимость'];
+        const rows = journalParts.map(p => {
+          const opsTotal = p.operationNumbers.reduce((sum, op) => sum + (p.operationPrices?.[op] || 0), 0);
+          return [
+            p.code,
+            p.name,
+            p.pricePerUnit,
+            p.currentQuantity,
+            p.operationNumbers.join(', '),
+            opsTotal,
+            p.pricePerUnit * p.currentQuantity
+          ];
+        });
         
         csvContent = [
           headers.join(';'),
@@ -640,7 +667,7 @@ export default function App() {
             const currentQuantity = Number((qtyStr || '').replace(/\s/g, '').replace(',', '.')) || 0;
             const operationNumbers = (opsStr || '').split(',').map(s => s.trim()).filter(Boolean);
 
-            newParts.push({
+            const newPart: Part = {
               id: Math.random().toString(36).substr(2, 9),
               journalId: journal.id,
               code,
@@ -648,9 +675,18 @@ export default function App() {
               pricePerUnit,
               currentQuantity,
               operationNumbers,
+              operationPrices: {},
               history: [],
               lastUpdate: new Date().toISOString(),
-            });
+            };
+
+            if (newPart.operationNumbers.length === 1) {
+              newPart.operationPrices = {
+                [newPart.operationNumbers[0]]: newPart.pricePerUnit
+              };
+            }
+
+            newParts.push(newPart);
           }
           setParts([...parts, ...newParts]);
           showToast(`Импортировано ${newParts.length} деталей в "${journal.name}"`);
@@ -721,17 +757,28 @@ export default function App() {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         if (journal.type === 'parts') {
-          const newParts: Part[] = jsonData.map((row: any) => ({
-            id: Math.random().toString(36).substr(2, 9),
-            journalId: journal.id,
-            code: String(row['Номер детали'] || ''),
-            name: String(row['Название'] || ''),
-            pricePerUnit: Number(row['Цена за единицу']) || 0,
-            currentQuantity: Number(row['Количество']) || 0,
-            operationNumbers: String(row['Номера операций'] || '').split(',').map(s => s.trim()).filter(Boolean),
-            history: [],
-            lastUpdate: new Date().toISOString(),
-          }));
+          const newParts: Part[] = jsonData.map((row: any) => {
+            const operationNumbers = String(row['Номера операций'] || '').split(',').map(s => s.trim()).filter(Boolean);
+            const pricePerUnit = Number(row['Цена за единицу']) || 0;
+            const newPart: Part = {
+              id: Math.random().toString(36).substr(2, 9),
+              journalId: journal.id,
+              code: String(row['Номер детали'] || ''),
+              name: String(row['Название'] || ''),
+              pricePerUnit,
+              currentQuantity: Number(row['Количество']) || 0,
+              operationNumbers,
+              operationPrices: {},
+              history: [],
+              lastUpdate: new Date().toISOString(),
+            };
+            if (newPart.operationNumbers.length === 1) {
+              newPart.operationPrices = {
+                [newPart.operationNumbers[0]]: newPart.pricePerUnit
+              };
+            }
+            return newPart;
+          });
           setParts([...parts, ...newParts]);
         } else {
           const newOps: Operation[] = jsonData.map((row: any) => ({
@@ -847,9 +894,16 @@ export default function App() {
       pricePerUnit: newPartData.pricePerUnit || 0,
       currentQuantity: newPartData.currentQuantity || 0,
       operationNumbers: newPartData.operationNumbers || [],
+      operationPrices: {},
       history: [],
       lastUpdate: new Date().toISOString(),
     };
+
+    if (newPart.operationNumbers.length === 1) {
+      newPart.operationPrices = {
+        [newPart.operationNumbers[0]]: newPart.pricePerUnit
+      };
+    }
 
     setParts([...parts, newPart]);
     
@@ -858,8 +912,6 @@ export default function App() {
     }
     
     updateLocalTimestamp();
-    setShowPartForm(false);
-    closeModal();
     
     sendTelegramMessage(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
   };
@@ -877,6 +929,14 @@ export default function App() {
       lastUpdate: new Date().toISOString(),
     };
 
+    if (updatedPart.operationNumbers.length === 1) {
+      const op = updatedPart.operationNumbers[0];
+      updatedPart.operationPrices = {
+        ...(updatedPart.operationPrices || {}),
+        [op]: updatedPart.pricePerUnit
+      };
+    }
+
     setParts(parts.map(p => p.id === partToUpdate.id ? updatedPart : p));
     if (selectedPart?.id === partToUpdate.id) {
       setSelectedPart(updatedPart);
@@ -887,9 +947,6 @@ export default function App() {
       const diff = newQuantity - oldQuantity;
       createOperation(updatedPart, Math.abs(diff), oldQuantity, diff > 0 ? 'arrival' : 'write-off');
     }
-
-    setShowPartForm(false);
-    closeModal();
   };
 
   const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off') => {
@@ -949,6 +1006,61 @@ export default function App() {
 
     const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : '🟡 Возврат';
     sendTelegramMessage(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
+  };
+
+  const handleManualWriteOff = (partId: string, writeOffQty: number, includedOperations: string[]) => {
+    const part = parts.find(p => p.id === partId);
+    if (!part) return;
+
+    const newQuantity = part.currentQuantity - writeOffQty;
+    const customPricePerUnit = part.operationNumbers.length > 0 
+      ? includedOperations.reduce((sum, op) => sum + (part.operationPrices?.[op] || 0), 0)
+      : part.pricePerUnit;
+
+    const updatedPart: Part = {
+      ...part,
+      currentQuantity: newQuantity,
+      lastUpdate: new Date().toISOString()
+    };
+
+    const opJournal = journals.find(j => j.type === 'operations') || journals[0];
+    const now = new Date();
+    const mmdd = `${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
+    const opCode = `${mmdd}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+    const newOp: Operation = {
+      id: Math.random().toString(36).substr(2, 9),
+      journalId: opJournal.id,
+      operationCode: opCode,
+      type: 'write-off',
+      date: now.toISOString(),
+      partId: part.id,
+      partCode: part.code,
+      partName: part.name,
+      operationNumbers: includedOperations,
+      quantity: writeOffQty,
+      pricePerUnit: customPricePerUnit,
+      sum: writeOffQty * customPricePerUnit,
+      wasQuantity: part.currentQuantity,
+      becameQuantity: newQuantity
+    };
+
+    setOperations(prev => [newOp, ...prev]);
+
+    updatedPart.history = [{
+      id: newOp.id,
+      date: newOp.date,
+      type: newOp.type,
+      quantity: newOp.quantity
+    }, ...(part.history || [])];
+
+    setParts(prev => prev.map(p => p.id === partId ? updatedPart : p));
+    if (selectedPart?.id === partId) {
+      setSelectedPart(updatedPart);
+    }
+    updateLocalTimestamp();
+    
+    sendTelegramMessage(`🔴 <b>Ручное списание</b>\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${writeOffQty} шт.\nОстаток: ${newQuantity} шт.\nОперации: ${includedOperations.length > 0 ? includedOperations.join(', ') : 'нет'}`);
   };
 
   const cancelOperation = (operationId: string) => {
@@ -1073,6 +1185,7 @@ export default function App() {
               onSort={() => openModal('sort')}
               showMenu={true}
               onAutoWriteOff={() => openModal('auto-write-off')}
+              onShowMissingPrices={() => changeView('parts-without-price')}
               {...commonHeaderProps}
             />
             <PartsList 
@@ -1095,6 +1208,7 @@ export default function App() {
               onEdit={() => {
                 openModal('part-form');
               }}
+              onShowMissingPrices={() => changeView('parts-without-price')}
               {...commonHeaderProps}
             />
             {selectedPart && <PartDetail 
@@ -1108,7 +1222,28 @@ export default function App() {
                 handleBack();
                 showToast('Деталь удалена');
               }}
+              onManualWriteOff={(qty, ops) => handleManualWriteOff(selectedPart.id, qty, ops)}
             />}
+          </div>
+        );
+      case 'parts-without-price':
+        const missingPriceParts = parts.filter(p => p.currentQuantity > 0 && p.pricePerUnit === 0);
+        return (
+          <div className="bg-background min-h-screen">
+            <Header 
+              title="Детали без цены" 
+              onBack={handleBack} 
+              showSearch={false}
+              showMenu={false}
+              {...commonHeaderProps}
+            />
+            <PartsList 
+              parts={missingPriceParts} 
+              onSelectPart={(part) => {
+                setSelectedPart(part);
+                changeView('part-detail');
+              }} 
+            />
           </div>
         );
       case 'operations-log':
@@ -1170,7 +1305,16 @@ export default function App() {
         <PartForm 
           part={selectedPart} 
           initialCode={initialPartCode}
-          onSave={selectedPart ? updatePart : addPart} 
+          onSave={(data) => {
+            if (selectedPart) {
+              updatePart(data);
+            } else {
+              addPart(data);
+            }
+            setShowPartForm(false);
+            setInitialPartCode(undefined);
+            closeModal();
+          }} 
           onClose={() => {
             setShowPartForm(false);
             setInitialPartCode(undefined);

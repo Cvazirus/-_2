@@ -15,6 +15,7 @@ export interface Part {
   pricePerUnit: number;
   currentQuantity: number;
   operationNumbers: string[];
+  operationPrices?: Record<string, number>;
   notes?: string;
   history: HistoryEntry[];
   lastUpdate: string;

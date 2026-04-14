@@ -193,3 +193,16 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
+
+@keyframes neon-breathe {
+  0%, 100% {
+    box-shadow: 0 4px 20px -5px var(--neon-color);
+  }
+  50% {
+    box-shadow: 0 4px 30px -2px var(--neon-color);
+  }
+}
+
+.neon-card {
+  animation: neon-breathe 3s infinite ease-in-out;
+}

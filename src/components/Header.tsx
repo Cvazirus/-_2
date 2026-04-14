@@ -23,6 +23,7 @@ interface HeaderProps {
   onCsvOperations?: () => void;
   onTelegramSettings?: () => void;
   onSyncSettings?: () => void;
+  onShowMissingPrices?: () => void;
   isDark?: boolean;
   user?: User | null;
   onLogin?: () => void;
@@ -147,7 +148,17 @@ export default function Header({
                   </button>
                 )}
                 
-                {(showSearch || showSort || showEdit) && (
+                {onShowMissingPrices && (
+                  <button 
+                    onClick={() => { onShowMissingPrices(); setIsMenuOpen(false); }}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
+                  >
+                    <Search size={20} className="text-muted-foreground" />
+                    <span className="text-foreground font-medium">Без цены</span>
+                  </button>
+                )}
+                
+                {(showSearch || showSort || showEdit || onShowMissingPrices) && (
                   <div className="border-t border-card-border my-1"></div>
                 )}
 
