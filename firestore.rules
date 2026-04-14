@@ -1,0 +1,51 @@
+rules_version = '2';
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (must match request.auth.uid)
+// Fields:
+//   - journals: list - User's journals
+//   - parts: list - User's parts
+//   - operations: list - User's operations
+//   - updatedAt: string - ISO date string of last local update
+//   - syncTimestamp: timestamp - Server timestamp of sync
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string &&
+        dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    function isValidUserData(data) {
+      return (
+        (!('journals' in data) || data.journals is list) &&
+        (!('parts' in data) || data.parts is list) &&
+        (!('operations' in data) || data.operations is list) &&
+        (!('updatedAt' in data) || data.updatedAt is string) &&
+        (!('syncTimestamp' in data) || data.syncTimestamp is timestamp)
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserData(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserData(request.resource.data);
+      allow delete: if isOwner(userId);
+    }
+  }
+}

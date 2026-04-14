@@ -1,0 +1,34 @@
+{
+  "entities": {
+    "UserData": {
+      "title": "User Data",
+      "description": "The complete database for a user, including journals, parts, and operations.",
+      "type": "object",
+      "properties": {
+        "journals": {
+          "type": "array",
+          "description": "List of journals"
+        },
+        "parts": {
+          "type": "array",
+          "description": "List of parts"
+        },
+        "operations": {
+          "type": "array",
+          "description": "List of operations"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserData",
+      "description": "User-specific data storage"
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "Remix: Учёт деталей",
+  "description": "Приложение для учёта деталей, приходов и списаний с журналом операций.",
+  "requestFramePermissions": ["publickey-credentials-get", "publickey-credentials-create"]
+}
