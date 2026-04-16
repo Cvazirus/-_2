@@ -1,9 +1,9 @@
 {
-  "apiKey": "AIzaSyByO-Kx9jfWtFYW6wyLNJmI60evCCmu9Ys",
-  "authDomain": "gen-lang-client-0200775403.firebaseapp.com",
-  "projectId": "gen-lang-client-0200775403",
-  "storageBucket": "gen-lang-client-0200775403.firebasestorage.app",
-  "messagingSenderId": "744967648518",
-  "appId": "1:744967648518:web:af992ca5e180a88c3fda87",
+  "apiKey": "AIzaSyCG6iWh8nBY8R5yx-h7N78ez6KzMjivI5A",
+  "authDomain": "sklad-afa39.firebaseapp.com",
+  "projectId": "sklad-afa39",
+  "storageBucket": "sklad-afa39.firebasestorage.app",
+  "messagingSenderId": "88451972000",
+  "appId": "1:88451972000:web:871e097d445b20e24a42c5",
   "firestoreDatabaseId": "(default)"
 }
