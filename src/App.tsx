@@ -48,7 +48,7 @@ export default function App() {
     } catch (e) {
       console.error('Error parsing journals', e);
     }
-    return [{ id: 'default', name: 'Основной', description: 'Главный журнал', createdAt: new Date().toISOString() }];
+    return [{ id: 'default', name: 'Основной', type: 'parts' as const, color: '#007AFF' }];
   });
   const [parts, setParts] = useState<Part[]>(() => {
     try {
@@ -81,7 +81,10 @@ export default function App() {
   const [operations, setOperations] = useState<Operation[]>(() => {
     try {
       const saved = localStorage.getItem('app_operations');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
     } catch (e) {
       console.error('Error parsing operations', e);
     }
@@ -113,6 +116,18 @@ export default function App() {
 
   const currentViewRef = useRef<View>(view);
   const scrollPositions = useRef<Record<string, number>>({});
+
+  // Refs to read latest state in syncData without re-creating the callback
+  const journalsRef = useRef(journals);
+  const partsRef = useRef(parts);
+  const operationsRef = useRef(operations);
+  const localUpdatedAtRef = useRef(localUpdatedAt);
+  const lastSyncTimeRef = useRef(lastSyncTime);
+  useEffect(() => { journalsRef.current = journals; }, [journals]);
+  useEffect(() => { partsRef.current = parts; }, [parts]);
+  useEffect(() => { operationsRef.current = operations; }, [operations]);
+  useEffect(() => { localUpdatedAtRef.current = localUpdatedAt; }, [localUpdatedAt]);
+  useEffect(() => { lastSyncTimeRef.current = lastSyncTime; }, [lastSyncTime]);
 
   useEffect(() => {
     currentViewRef.current = view;
@@ -189,7 +204,10 @@ export default function App() {
     if (modal === 'sync') setShowSyncModal(true);
     if (modal === 'sort') setShowSortModal(true);
     if (modal === 'csv') setShowCsvModal(true);
-    if (modal === 'journal-select') setJournalSelectAction(action as any);
+    if (modal === 'journal-select') {
+      const validAction = (action === 'export' || action === 'import' || action === 'csv') ? action : null;
+      setJournalSelectAction(validAction);
+    }
   };
 
   const replaceModal = (modal: string, action: string | null = null) => {
@@ -202,7 +220,7 @@ export default function App() {
     setShowSyncModal(modal === 'sync');
     setShowSortModal(modal === 'sort');
     setShowCsvModal(modal === 'csv');
-    setJournalSelectAction(modal === 'journal-select' ? action as any : null);
+    setJournalSelectAction(modal === 'journal-select' && (action === 'export' || action === 'import' || action === 'csv') ? action : null);
   };
 
   const closeModal = () => {
@@ -225,10 +243,11 @@ export default function App() {
 
   const syncData = useCallback(async (force = false) => {
     if (!auth.currentUser) return;
-    
+
     const now = new Date();
-    if (!force && lastSyncTime) {
-      const hoursSinceSync = differenceInHours(now, new Date(lastSyncTime));
+    const currentLastSyncTime = lastSyncTimeRef.current;
+    if (!force && currentLastSyncTime) {
+      const hoursSinceSync = differenceInHours(now, new Date(currentLastSyncTime));
       if (hoursSinceSync < 3) return;
     }
 
@@ -246,47 +265,48 @@ export default function App() {
         throw e;
       }
 
+      // Read latest values from refs to avoid stale closures
+      const currentJournals = journalsRef.current;
+      const currentParts = partsRef.current;
+      const currentOperations = operationsRef.current;
+      const currentLocalUpdatedAt = localUpdatedAtRef.current;
+
       const localData = {
-        journals,
-        parts,
-        operations,
-        updatedAt: localUpdatedAt
+        journals: currentJournals,
+        parts: currentParts,
+        operations: currentOperations,
+        updatedAt: currentLocalUpdatedAt
       };
 
       if (docSnap.exists()) {
         const remoteData = docSnap.data();
         const remoteUpdatedAt = remoteData.updatedAt ? new Date(remoteData.updatedAt) : new Date(0);
-        const localUpdatedAtDate = new Date(localUpdatedAt);
+        const localUpdatedAtDate = new Date(currentLocalUpdatedAt);
 
-        // Logic to prevent overwriting cloud with empty local data
-        const isLocalEmpty = parts.length === 0 && operations.length === 0 && journals.length <= 1;
-        const isRemoteEmpty = (!remoteData.parts || remoteData.parts.length === 0) && 
+        const isLocalEmpty = currentParts.length === 0 && currentOperations.length === 0 && currentJournals.length <= 1;
+        const isRemoteEmpty = (!remoteData.parts || remoteData.parts.length === 0) &&
                               (!remoteData.operations || remoteData.operations.length === 0);
 
         if (force) {
-          // In force mode, we just push local to remote (or we could have a separate pull)
           await setDoc(userDocRef, {
             ...localData,
-            updatedAt: new Date().toISOString(), // Update timestamp on push
+            updatedAt: new Date().toISOString(),
             syncTimestamp: serverTimestamp()
           }, { merge: true });
           showToast('Данные принудительно сохранены в облако');
         } else if (isLocalEmpty && !isRemoteEmpty) {
-          // Local is empty but remote has data -> Pull from remote
-          if (remoteData.journals) setJournals(remoteData.journals);
-          if (remoteData.parts) setParts(remoteData.parts);
-          if (remoteData.operations) setOperations(remoteData.operations);
+          if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
+          if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
+          if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
           setLocalUpdatedAt(remoteData.updatedAt || new Date().toISOString());
           showToast('Данные восстановлены из облака');
         } else if (remoteUpdatedAt > localUpdatedAtDate) {
-          // Remote is newer -> Pull from remote
-          if (remoteData.journals) setJournals(remoteData.journals);
-          if (remoteData.parts) setParts(remoteData.parts);
-          if (remoteData.operations) setOperations(remoteData.operations);
+          if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
+          if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
+          if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
           setLocalUpdatedAt(remoteData.updatedAt);
           showToast('Данные обновлены из облака');
         } else if (localUpdatedAtDate > remoteUpdatedAt || isRemoteEmpty) {
-          // Local is newer or remote is empty -> Push to remote
           await setDoc(userDocRef, {
             ...localData,
             syncTimestamp: serverTimestamp()
@@ -294,7 +314,6 @@ export default function App() {
           showToast('Данные сохранены в облако');
         }
       } else {
-        // First time sync for this user
         await setDoc(userDocRef, {
           ...localData,
           syncTimestamp: serverTimestamp()
@@ -311,14 +330,19 @@ export default function App() {
     } finally {
       setIsSyncing(false);
     }
-  }, [journals, parts, operations, lastSyncTime, localUpdatedAt]);
+  }, []); // reads latest state via refs — no state deps, no re-creation on data changes
 
-  // Periodic sync check
+  // Periodic sync + re-sync on reconnect
   useEffect(() => {
     if (user) {
       syncData();
       const interval = setInterval(() => syncData(), 60000); // Check every minute
-      return () => clearInterval(interval);
+      const handleOnline = () => syncData();
+      window.addEventListener('online', handleOnline);
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('online', handleOnline);
+      };
     }
   }, [user, syncData]);
 
@@ -370,6 +394,19 @@ export default function App() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Wrapper that surfaces Telegram delivery failures in the UI
+  const notifyTelegram = (message: string) => {
+    notifyTelegram(message).then(success => {
+      if (!success) {
+        const token = localStorage.getItem('tg_bot_token');
+        const chatId = localStorage.getItem('tg_chat_id');
+        if (token && chatId) {
+          showToast('Не удалось отправить уведомление в Telegram');
+        }
+      }
+    });
   };
 
   const handleExport = () => {
@@ -446,9 +483,9 @@ export default function App() {
       }
       if (docSnap.exists()) {
         const remoteData = docSnap.data();
-        if (remoteData.journals) setJournals(remoteData.journals);
-        if (remoteData.parts) setParts(remoteData.parts);
-        if (remoteData.operations) setOperations(remoteData.operations);
+        if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
+        if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
+        if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
         const remoteUpdated = remoteData.updatedAt || new Date().toISOString();
         setLocalUpdatedAt(remoteUpdated);
         localStorage.setItem('app_local_updated_at', remoteUpdated);
@@ -717,7 +754,7 @@ export default function App() {
             const operationNumbers = (opsStr || '').split(',').map(s => s.trim()).filter(Boolean);
 
             const newPart: Part = {
-              id: Math.random().toString(36).substr(2, 9),
+              id: crypto.randomUUID(),
               journalId: journal.id,
               code,
               name,
@@ -746,9 +783,9 @@ export default function App() {
             if (row.length < 3) continue;
             
             newOps.push({
-              id: String(row[0] || Math.random().toString(36).substr(2, 9)),
+              id: String(row[0] || crypto.randomUUID()),
               journalId: journal.id,
-              operationCode: `IMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+              operationCode: `IMP-${crypto.randomUUID().substring(0, 8).toUpperCase()}`,
               type: row[3] === 'Приход' ? 'arrival' : row[3] === 'Списание' ? 'write-off' : 'return',
               date: new Date().toISOString(), // Fallback
               partId: '',
@@ -810,7 +847,7 @@ export default function App() {
             const operationNumbers = String(row['Номера операций'] || '').split(',').map(s => s.trim()).filter(Boolean);
             const pricePerUnit = Number(row['Цена за единицу']) || 0;
             const newPart: Part = {
-              id: Math.random().toString(36).substr(2, 9),
+              id: crypto.randomUUID(),
               journalId: journal.id,
               code: String(row['Номер детали'] || ''),
               name: String(row['Название'] || ''),
@@ -831,9 +868,9 @@ export default function App() {
           setParts([...parts, ...newParts]);
         } else {
           const newOps: Operation[] = jsonData.map((row: any) => ({
-            id: String(row['ID'] || Math.random().toString(36).substr(2, 9)),
+            id: String(row['ID'] || crypto.randomUUID()),
             journalId: journal.id,
-            operationCode: `IMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+            operationCode: `IMP-${crypto.randomUUID().substring(0, 8).toUpperCase()}`,
             type: row['Тип'] === 'Приход' ? 'arrival' : row['Тип'] === 'Списание' ? 'write-off' : 'return',
             date: new Date().toISOString(), // Fallback, parsing ru-RU dates from Excel is complex
             partId: '',
@@ -936,7 +973,7 @@ export default function App() {
 
   const addPart = (newPartData: Partial<Part>) => {
     const newPart: Part = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       journalId: selectedJournal?.id || journals[0].id,
       code: newPartData.code || '',
       name: newPartData.name || '',
@@ -962,7 +999,7 @@ export default function App() {
     
     updateLocalTimestamp();
     
-    sendTelegramMessage(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
+    notifyTelegram(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
   };
 
   const updatePart = (updatedData: Partial<Part>) => {
@@ -1016,7 +1053,7 @@ export default function App() {
     const operationCode = `${mmdd}-${nextNum}`;
     
     const newOp: Operation = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       journalId: opJournal.id,
       operationCode,
       type,
@@ -1054,7 +1091,7 @@ export default function App() {
     }
 
     const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : '🟡 Возврат';
-    sendTelegramMessage(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
+    notifyTelegram(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
   };
 
   const handleManualWriteOff = (partId: string, writeOffQty: number, includedOperations: string[]) => {
@@ -1075,10 +1112,14 @@ export default function App() {
     const opJournal = journals.find(j => j.type === 'operations') || journals[0];
     const now = new Date();
     const mmdd = `${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
-    const opCode = `${mmdd}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+    const todayOpsCount = operations.filter(op => {
+      const d = new Date(op.date);
+      return d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+    }).length;
+    const opCode = `${mmdd}-${(todayOpsCount + 1).toString().padStart(4, '0')}`;
 
     const newOp: Operation = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       journalId: opJournal.id,
       operationCode: opCode,
       type: 'write-off',
@@ -1109,7 +1150,7 @@ export default function App() {
     }
     updateLocalTimestamp();
     
-    sendTelegramMessage(`🔴 <b>Ручное списание</b>\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${writeOffQty} шт.\nОстаток: ${newQuantity} шт.\nОперации: ${includedOperations.length > 0 ? includedOperations.join(', ') : 'нет'}`);
+    notifyTelegram(`🔴 <b>Ручное списание</b>\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${writeOffQty} шт.\nОстаток: ${newQuantity} шт.\nОперации: ${includedOperations.length > 0 ? includedOperations.join(', ') : 'нет'}`);
   };
 
   const cancelOperation = (operationId: string) => {
@@ -1139,7 +1180,7 @@ export default function App() {
 
   const addJournal = (data: Partial<Journal>) => {
     const newJournal: Journal = {
-      id: Math.random().toString(36).substr(2, 9),
+      id: crypto.randomUUID(),
       name: data.name || 'Новый журнал',
       type: data.type || 'parts',
       color: data.color || '#007AFF',
@@ -1147,6 +1188,27 @@ export default function App() {
     setJournals([...journals, newJournal]);
     updateLocalTimestamp();
     closeModal();
+  };
+
+  const renameJournal = (id: string, newName: string) => {
+    setJournals(prev => prev.map(j => j.id === id ? { ...j, name: newName } : j));
+    updateLocalTimestamp();
+  };
+
+  const deleteJournal = (id: string) => {
+    const journal = journals.find(j => j.id === id);
+    if (!journal) return;
+    const partCount = parts.filter(p => p.journalId === id).length;
+    const opCount = operations.filter(o => o.journalId === id).length;
+    const label = partCount + opCount > 0
+      ? ` и ${partCount + opCount} связанных записей`
+      : '';
+    if (!window.confirm(`Удалить журнал "${journal.name}"${label}? Это действие нельзя отменить.`)) return;
+    setJournals(prev => prev.filter(j => j.id !== id));
+    setParts(prev => prev.filter(p => p.journalId !== id));
+    setOperations(prev => prev.filter(o => o.journalId !== id));
+    updateLocalTimestamp();
+    showToast(`Журнал "${journal.name}" удалён`);
   };
 
   const renderView = () => {
@@ -1181,9 +1243,10 @@ export default function App() {
               onTelegramSettings={() => openModal('tg-settings')}
               {...commonHeaderProps}
             />
-            <Dashboard 
-              partsCount={parts.length} 
+            <Dashboard
+              partsCount={parts.length}
               operationsCount={operations.length}
+              journals={journals}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
                 changeView('parts-list');
@@ -1194,6 +1257,8 @@ export default function App() {
                 changeView('operations-log');
               }}
               onViewFinance={() => changeView('finance-journal')}
+              onRenameJournal={renameJournal}
+              onDeleteJournal={deleteJournal}
             />
           </div>
         );
