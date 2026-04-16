@@ -61,6 +61,9 @@ export default defineConfig(({mode}) => {
         }
       })
     ],
+    build: {
+      minify: 'esbuild',
+    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
