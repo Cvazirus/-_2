@@ -21,6 +21,9 @@ export default defineConfig(({mode}) => {
           display: 'standalone'
         },
         workbox: {
+          // 'development' skips terser minification inside workbox-build,
+          // preventing worker-thread OOM crashes on low-memory devices (Termux)
+          mode: 'development',
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
           navigateFallback: '/index.html',
           runtimeCaching: [
