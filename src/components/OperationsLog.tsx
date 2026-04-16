@@ -29,7 +29,7 @@ export default function OperationsLog({ operations, onSelectOperation }: Operati
   };
 
   return (
-    <div className="bg-background min-h-[calc(100vh-64px)] p-4 pb-24 space-y-4">
+    <div className="bg-background min-h-[calc(100dvh-64px)] p-4 pb-24 space-y-4">
       {sortedDates.map((dateStr) => {
         const dateOps = grouped[dateStr];
         const isExpanded = expandedDates.includes(dateStr);

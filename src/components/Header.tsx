@@ -55,6 +55,7 @@ export default function Header({
   onCsvOperations,
   onTelegramSettings,
   onSyncSettings,
+  onShowMissingPrices,
   isDark = false,
   user,
   onLogin,

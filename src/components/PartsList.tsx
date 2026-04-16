@@ -6,15 +6,28 @@ import React, { useState, useRef, UIEvent } from 'react';
 interface PartsListProps {
   parts: Part[];
   onSelectPart: (part: Part) => void;
+  scrollPosition?: number;
+  onScrollChange?: (position: number) => void;
 }
 
-export default function PartsList({ parts, onSelectPart }: PartsListProps) {
+export default function PartsList({ parts, onSelectPart, scrollPosition = 0, onScrollChange }: PartsListProps) {
   const totalValue = parts.reduce((acc, part) => acc + (part.currentQuantity * part.pricePerUnit), 0);
   const [showBottomBar, setShowBottomBar] = useState(true);
   const lastScrollY = useRef(0);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollPosition;
+    }
+  }, []); // Only on mount
 
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     const currentScrollY = e.currentTarget.scrollTop;
+    
+    if (onScrollChange) {
+      onScrollChange(currentScrollY);
+    }
     
     if (Math.abs(currentScrollY - lastScrollY.current) < 10) return;
 
@@ -77,8 +90,9 @@ export default function PartsList({ parts, onSelectPart }: PartsListProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] bg-background relative overflow-hidden">
+    <div className="flex flex-col h-[calc(100dvh-64px)] bg-background relative overflow-hidden">
       <div 
+        ref={scrollContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-3 pb-24"
         onScroll={handleScroll}
       >

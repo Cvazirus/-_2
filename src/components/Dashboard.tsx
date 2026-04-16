@@ -72,7 +72,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   );
 
   return (
-    <div className="p-4 space-y-4 flex flex-col min-h-[calc(100vh-80px)]" ref={menuRef}>
+    <div className="p-4 space-y-4 flex flex-col min-h-[calc(100dvh-80px)]" ref={menuRef}>
       <motion.div 
         whileTap={{ scale: 0.98 }}
         onClick={onOpenParts}

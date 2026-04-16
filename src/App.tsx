@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { Part, Operation, Journal } from './types';
 import Header from './components/Header';
@@ -111,13 +111,41 @@ export default function App() {
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => localStorage.getItem('app_last_sync'));
   const [localUpdatedAt, setLocalUpdatedAt] = useState<string>(() => localStorage.getItem('app_local_updated_at') || new Date(0).toISOString());
 
+  const currentViewRef = useRef<View>(view);
+  const scrollPositions = useRef<Record<string, number>>({});
+
   useEffect(() => {
+    currentViewRef.current = view;
+  }, [view]);
+
+  useEffect(() => {
+    // Restore scroll position when view changes
+    if (view === 'parts-list' || view === 'parts-without-price') {
+      window.scrollTo(0, 0);
+    } else if (scrollPositions.current[view] !== undefined) {
+      // Small timeout to ensure DOM is updated
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositions.current[view]);
+      }, 0);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [view]);
+
+  useEffect(() => {
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    
     // Set the initial state as root to trap the back button
     window.history.replaceState({ view: 'dashboard', modal: null, isRoot: true }, '');
     // Push the actual working state
     window.history.pushState({ view: 'dashboard', modal: null }, '');
 
     const handlePopState = (e: PopStateEvent) => {
+      if (currentViewRef.current !== 'parts-list' && currentViewRef.current !== 'parts-without-price') {
+        scrollPositions.current[currentViewRef.current] = window.scrollY;
+      }
       const state = e.state;
       if (state) {
         if (state.isRoot) {
@@ -144,6 +172,9 @@ export default function App() {
   }, []);
 
   const changeView = (newView: View) => {
+    if (view !== 'parts-list' && view !== 'parts-without-price') {
+      scrollPositions.current[view] = window.scrollY;
+    }
     window.history.pushState({ view: newView, modal: null }, '');
     setView(newView);
   };
@@ -204,7 +235,16 @@ export default function App() {
     setIsSyncing(true);
     try {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      const docSnap = await getDoc(userDocRef);
+      let docSnap;
+      try {
+        docSnap = await getDoc(userDocRef);
+      } catch (e: any) {
+        if (e.message?.includes('offline') || e.code === 'unavailable') {
+          console.log('Offline mode detected, skipping sync');
+          return;
+        }
+        throw e;
+      }
 
       const localData = {
         journals,
@@ -394,7 +434,16 @@ export default function App() {
     setIsSyncing(true);
     try {
       const userDocRef = doc(db, 'users', auth.currentUser.uid);
-      const docSnap = await getDoc(userDocRef);
+      let docSnap;
+      try {
+        docSnap = await getDoc(userDocRef);
+      } catch (e: any) {
+        if (e.message?.includes('offline') || e.code === 'unavailable') {
+          showToast('Нет подключения к интернету');
+          return;
+        }
+        throw e;
+      }
       if (docSnap.exists()) {
         const remoteData = docSnap.data();
         if (remoteData.journals) setJournals(remoteData.journals);
@@ -1120,7 +1169,7 @@ export default function App() {
     switch (view) {
       case 'dashboard':
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Учёт" 
               showSearch={false} 
@@ -1170,7 +1219,7 @@ export default function App() {
           });
         }
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Карточки деталей" 
               onBack={handleBack} 
@@ -1194,12 +1243,16 @@ export default function App() {
                 setSelectedPart(part);
                 changeView('part-detail');
               }} 
+              scrollPosition={scrollPositions.current['parts-list'] || 0}
+              onScrollChange={(pos) => {
+                scrollPositions.current['parts-list'] = pos;
+              }}
             />
           </div>
         );
       case 'part-detail':
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Карточка детали" 
               onBack={handleBack}
@@ -1229,7 +1282,7 @@ export default function App() {
       case 'parts-without-price':
         const missingPriceParts = parts.filter(p => p.currentQuantity > 0 && p.pricePerUnit === 0);
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Детали без цены" 
               onBack={handleBack} 
@@ -1243,13 +1296,17 @@ export default function App() {
                 setSelectedPart(part);
                 changeView('part-detail');
               }} 
+              scrollPosition={scrollPositions.current['parts-without-price'] || 0}
+              onScrollChange={(pos) => {
+                scrollPositions.current['parts-without-price'] = pos;
+              }}
             />
           </div>
         );
       case 'operations-log':
         const filteredOperations = operations.filter(op => op.partCode.toLowerCase().includes(searchQuery.toLowerCase()));
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Перемещение деталей" 
               onBack={handleBack} 
@@ -1268,7 +1325,7 @@ export default function App() {
         );
       case 'operation-detail':
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title={selectedOperation ? selectedOperation.operationCode : 'Операция'} 
               onBack={handleBack} 
@@ -1281,7 +1338,7 @@ export default function App() {
         );
       case 'finance-journal':
         return (
-          <div className="bg-background min-h-screen">
+          <div className="bg-background min-h-[100dvh]">
             <Header 
               title="Финансовый журнал" 
               onBack={handleBack} 
@@ -1298,7 +1355,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30 text-foreground transition-colors duration-300">
+    <div className="min-h-[100dvh] font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30 text-foreground transition-colors duration-300">
       {renderView()}
       
       {showPartForm && (

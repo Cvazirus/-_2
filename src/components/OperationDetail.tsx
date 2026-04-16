@@ -16,7 +16,7 @@ export default function OperationDetail({ operation, onCancel }: OperationDetail
   );
 
   return (
-    <div className="bg-background min-h-[calc(100vh-64px)] p-4 space-y-6">
+    <div className="bg-background min-h-[calc(100dvh-64px)] p-4 space-y-6">
       <div className="bg-card-bg rounded-2xl p-4 shadow-sm border border-card-border">
         <InfoRow 
           label="Тип операции" 

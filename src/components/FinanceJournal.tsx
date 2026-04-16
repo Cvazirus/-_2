@@ -317,8 +317,8 @@ export default function FinanceJournal({ operations }: FinanceJournalProps) {
             <p className="text-2xl font-bold">{formatMoney(totalGross)}</p>
           </div>
           <div>
-            <p className="text-blue-100 text-sm mb-1">К выплате (на руки)</p>
-            <p className="text-3xl font-bold">{formatMoney(salaryNet)}</p>
+            <p className="text-blue-100 text-sm mb-1">К выплате за месяц</p>
+            <p className="text-3xl font-bold">{formatMoney(totalNet)}</p>
           </div>
         </div>
       </div>

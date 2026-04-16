@@ -12,29 +12,17 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
         manifest: {
           name: 'Учёт деталей',
           short_name: 'Учёт',
           description: 'Приложение для учёта деталей и операций',
           theme_color: '#ffffff',
           background_color: '#ffffff',
-          display: 'standalone',
-          icons: [
-            {
-              src: 'pwa-192x192.png',
-              sizes: '192x192',
-              type: 'image/png'
-            },
-            {
-              src: 'pwa-512x512.png',
-              sizes: '512x512',
-              type: 'image/png'
-            }
-          ]
+          display: 'standalone'
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+          navigateFallback: '/index.html',
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -65,6 +53,11 @@ export default defineConfig(({mode}) => {
               }
             }
           ]
+        },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          navigateFallback: 'index.html',
         }
       })
     ],
