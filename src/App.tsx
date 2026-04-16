@@ -398,7 +398,7 @@ export default function App() {
 
   // Wrapper that surfaces Telegram delivery failures in the UI
   const notifyTelegram = (message: string) => {
-    notifyTelegram(message).then(success => {
+    sendTelegramMessage(message).then(success => {
       if (!success) {
         const token = localStorage.getItem('tg_bot_token');
         const chatId = localStorage.getItem('tg_chat_id');
