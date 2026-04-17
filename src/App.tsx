@@ -37,6 +37,9 @@ export default function App() {
   const [theme, setTheme] = useState<string>(() => {
     return localStorage.getItem('app_theme') || 'light';
   });
+  const [fontSize, setFontSize] = useState<string>(() => {
+    return localStorage.getItem('app_font_size') || 'medium';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [journals, setJournals] = useState<Journal[]>(() => {
     try {
@@ -958,6 +961,12 @@ export default function App() {
     localStorage.setItem('app_theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    const scales: Record<string, string> = { small: '0.85', medium: '1', large: '1.15', xlarge: '1.3' };
+    document.documentElement.style.setProperty('--font-scale', scales[fontSize] || '1');
+    localStorage.setItem('app_font_size', fontSize);
+  }, [fontSize]);
+
   const toggleTheme = (newTheme?: string) => {
     if (newTheme) {
       setTheme(newTheme);
@@ -1236,7 +1245,9 @@ export default function App() {
       onThemeToggle: toggleTheme,
       onSyncSettings: () => openModal('sync'),
       onCsvOperations: () => openModal('journal-select', 'csv'),
-      isDark: theme === 'dark'
+      isDark: theme === 'dark',
+      fontSize,
+      onFontSizeChange: setFontSize,
     };
 
     switch (view) {
