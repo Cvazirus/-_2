@@ -2,6 +2,7 @@ import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X } f
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import { Journal } from '../types';
+import { XPBox, XPClipboardList, XPWallet, XPMoreHorizontal, XPEdit, XPTrash2, XPCheck, XPX } from './XPIcons';
 
 interface DashboardProps {
   partsCount: number;
@@ -12,6 +13,7 @@ interface DashboardProps {
   onViewFinance: () => void;
   onRenameJournal: (id: string, newName: string) => void;
   onDeleteJournal: (id: string) => void;
+  currentTheme?: string;
 }
 
 export default function Dashboard({
