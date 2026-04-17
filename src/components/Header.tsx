@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Upload, FileSpreadsheet, MessageCircle, LogIn, LogOut, Cloud, RefreshCw, RefreshCcw, User as UserIcon, ArrowUpDown, Wand2 } from 'lucide-react';
+import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Upload, FileSpreadsheet, MessageCircle, LogIn, LogOut, Cloud, RefreshCw, RefreshCcw, User as UserIcon, ArrowUpDown, Wand2, Database, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 
@@ -66,7 +66,7 @@ export default function Header({
   lastSync
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [activeSubmenu, setActiveSubmenu] = useState<'export' | 'import' | null>(null);
+  const [activeSubmenu, setActiveSubmenu] = useState<'data' | 'theme' | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -163,66 +163,63 @@ export default function Header({
                   <div className="border-t border-card-border my-1"></div>
                 )}
 
-                {onSyncSettings && (
-                  <button 
-                    onClick={() => { onSyncSettings(); setIsMenuOpen(false); }}
-                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
-                  >
-                    <Cloud size={20} className="text-muted-foreground" />
-                    <span className="text-foreground font-medium">Синхронизация</span>
-                  </button>
-                )}
-                {onTelegramSettings && (
-                  <button 
-                    onClick={() => { onTelegramSettings(); setIsMenuOpen(false); }}
-                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
-                  >
-                    <MessageCircle size={20} className="text-muted-foreground" />
-                    <span className="text-foreground font-medium">Настройки Telegram</span>
-                  </button>
-                )}
-                {onCsvOperations && (
-                  <button 
-                    onClick={() => { onCsvOperations(); setIsMenuOpen(false); }}
-                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
-                  >
-                    <FileSpreadsheet size={20} className="text-muted-foreground" />
-                    <span className="text-foreground font-medium">Экспорт и импорт в CSV</span>
-                  </button>
-                )}
-                
-                <div className="border-t border-card-border my-1"></div>
-
-                {(onExport || onExportExcel) && (
+                {(onSyncSettings || onTelegramSettings || onCsvOperations || onExport || onExportExcel || onImport || onImportExcel) && (
                   <>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setActiveSubmenu(activeSubmenu === 'export' ? null : 'export'); }}
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setActiveSubmenu(activeSubmenu === 'data' ? null : 'data'); }}
                       className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-muted transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <Download size={20} className="text-muted-foreground" />
-                        <span className="text-foreground font-medium">Экспорт</span>
+                        <Database size={20} className="text-muted-foreground" />
+                        <span className="text-foreground font-medium">Данные</span>
                       </div>
-                      <span className="text-gray-400 text-xs">{activeSubmenu === 'export' ? '▲' : '▼'}</span>
+                      <ChevronRight size={16} className={`text-gray-400 transition-transform ${activeSubmenu === 'data' ? 'rotate-90' : ''}`} />
                     </button>
-                    {activeSubmenu === 'export' && (
-                      <div className="bg-muted">
+                    {activeSubmenu === 'data' && (
+                      <div className="bg-muted border-t border-card-border">
+                        {onSyncSettings && (
+                          <button onClick={() => { onSyncSettings(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <Cloud size={16} className="text-muted-foreground" />
+                            <span className="text-foreground text-sm font-medium">Синхронизация</span>
+                          </button>
+                        )}
+                        {onTelegramSettings && (
+                          <button onClick={() => { onTelegramSettings(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <MessageCircle size={16} className="text-muted-foreground" />
+                            <span className="text-foreground text-sm font-medium">Telegram</span>
+                          </button>
+                        )}
+                        {(onSyncSettings || onTelegramSettings) && (onExportExcel || onExport || onImportExcel || onImport || onCsvOperations) && (
+                          <div className="border-t border-card-border mx-4 my-1" />
+                        )}
                         {onExportExcel && (
-                          <button 
-                            onClick={() => { onExportExcel(); setIsMenuOpen(false); setActiveSubmenu(null); }}
-                            className="w-full text-left px-8 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                          >
-                            <FileSpreadsheet size={16} className="text-green-600 dark:text-green-500" />
-                            <span className="text-foreground text-sm font-medium">В Excel</span>
+                          <button onClick={() => { onExportExcel(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <FileSpreadsheet size={16} className="text-green-600 dark:text-green-400" />
+                            <span className="text-foreground text-sm font-medium">Экспорт в Excel</span>
                           </button>
                         )}
                         {onExport && (
-                          <button 
-                            onClick={() => { onExport(); setIsMenuOpen(false); setActiveSubmenu(null); }}
-                            className="w-full text-left px-8 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                          >
+                          <button onClick={() => { onExport(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
                             <Download size={16} className="text-muted-foreground" />
-                            <span className="text-foreground text-sm font-medium">БД (JSON)</span>
+                            <span className="text-foreground text-sm font-medium">Экспорт БД (JSON)</span>
+                          </button>
+                        )}
+                        {onImportExcel && (
+                          <button onClick={() => { onImportExcel(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <FileSpreadsheet size={16} className="text-blue-600 dark:text-blue-400" />
+                            <span className="text-foreground text-sm font-medium">Импорт из Excel</span>
+                          </button>
+                        )}
+                        {onImport && (
+                          <button onClick={() => { onImport(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <Upload size={16} className="text-muted-foreground" />
+                            <span className="text-foreground text-sm font-medium">Импорт БД (JSON)</span>
+                          </button>
+                        )}
+                        {onCsvOperations && (
+                          <button onClick={() => { onCsvOperations(); setIsMenuOpen(false); setActiveSubmenu(null); }} className="w-full text-left px-6 py-2.5 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+                            <FileSpreadsheet size={16} className="text-muted-foreground" />
+                            <span className="text-foreground text-sm font-medium">CSV операций</span>
                           </button>
                         )}
                       </div>
@@ -230,43 +227,6 @@ export default function Header({
                   </>
                 )}
 
-                {(onImport || onImportExcel) && (
-                  <>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setActiveSubmenu(activeSubmenu === 'import' ? null : 'import'); }}
-                      className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-muted transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Upload size={20} className="text-muted-foreground" />
-                        <span className="text-foreground font-medium">Импорт</span>
-                      </div>
-                      <span className="text-gray-400 text-xs">{activeSubmenu === 'import' ? '▲' : '▼'}</span>
-                    </button>
-                    {activeSubmenu === 'import' && (
-                      <div className="bg-muted">
-                        {onImportExcel && (
-                          <button 
-                            onClick={() => { onImportExcel(); setIsMenuOpen(false); setActiveSubmenu(null); }}
-                            className="w-full text-left px-8 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                          >
-                            <FileSpreadsheet size={16} className="text-green-600 dark:text-green-500" />
-                            <span className="text-foreground text-sm font-medium">Из Excel</span>
-                          </button>
-                        )}
-                        {onImport && (
-                          <button 
-                            onClick={() => { onImport(); setIsMenuOpen(false); setActiveSubmenu(null); }}
-                            className="w-full text-left px-8 py-2 flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
-                          >
-                            <Upload size={16} className="text-muted-foreground" />
-                            <span className="text-foreground text-sm font-medium">БД (JSON)</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-                
                 <div className="border-t border-card-border my-1"></div>
                 
                 <button 
