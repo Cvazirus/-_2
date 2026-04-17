@@ -113,6 +113,9 @@ export default function App() {
   const [initialPartCode, setInitialPartCode] = useState<string | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
   const [user, setUser] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => localStorage.getItem('app_last_sync'));
@@ -229,6 +232,26 @@ export default function App() {
 
   const closeModal = () => {
     window.history.back();
+  };
+
+  useEffect(() => {
+    const handler = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      // Only show if not already installed (standalone)
+      if (!window.matchMedia('(display-mode: standalone)').matches) {
+        setShowInstallBanner(true);
+      }
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') setShowInstallBanner(false);
   };
 
   useEffect(() => {
@@ -1676,6 +1699,31 @@ export default function App() {
             handleImportCsvForJournal(selectedCsvJournal, typeOverride);
           }}
         />
+      )}
+
+      {showInstallBanner && (
+        <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-primary-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-semibold text-sm">Установить приложение</div>
+              <div className="text-xs opacity-80">Работает без браузера, полный экран</div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={handleInstall}
+                className="bg-white text-primary-600 font-bold text-sm px-3 py-1.5 rounded-lg active:scale-95"
+              >
+                Установить
+              </button>
+              <button
+                onClick={() => setShowInstallBanner(false)}
+                className="opacity-70 text-white px-1 py-1 active:scale-95 text-lg leading-none"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {toastMessage && (
