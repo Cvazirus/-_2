@@ -256,6 +256,8 @@ export default function Header({
                     <button onClick={() => { onThemeToggle?.('business'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#334155] text-[#f8fafc] border border-[#475569]">Деловой синий (Business Blue)</button>
                     <button onClick={() => { onThemeToggle?.('beige'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#f5f0e6] text-[#4a3f35] border border-[#e6dfd3]">Светло-бежевая (Light Beige)</button>
                     <button onClick={() => { onThemeToggle?.('walnut'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#3d2b1f] text-[#e8dcc7] border border-[#5c4033]">Темный орех</button>
+                    <button onClick={() => { onThemeToggle?.('xp-light'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium border border-[#9c9a94]" style={{background:'#ece9d8',color:'#000',fontFamily:'Tahoma,sans-serif',borderRadius:0}}>🪟 Windows XP</button>
+                    <button onClick={() => { onThemeToggle?.('xp-dark'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium border border-[#3d4358]" style={{background:'#1c1f2b',color:'#d4d0c8',fontFamily:'Tahoma,sans-serif',borderRadius:0}}>🪟 Windows XP Dark</button>
                   </div>
                 )}
 
