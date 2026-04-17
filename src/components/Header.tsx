@@ -2,6 +2,7 @@ import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Up
          FileSpreadsheet, MessageCircle, Cloud, RefreshCcw, ArrowUpDown, Wand2,
          Database, ChevronRight, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { User } from 'firebase/auth';
 import {
   XPArrowLeft, XPPlus, XPSearch, XPMoreHorizontal, XPEdit, XPArrowUpDown, XPWand,
@@ -180,7 +181,7 @@ export default function Header({
         )}
       </div>
 
-      {isMenuOpen && (
+      {isMenuOpen && createPortal(
         <>
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/50 z-40" onClick={closeMenu} />
@@ -404,7 +405,8 @@ export default function Header({
               <div className="h-6" />
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </header>
   );

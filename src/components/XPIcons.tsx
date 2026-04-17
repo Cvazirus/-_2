@@ -3,6 +3,170 @@
 
 type P = { size?: number };
 
+/* ─── Dashboard card icons (large) ───────────────────────────── */
+
+/** Parts card — 3D cardboard box with tape */
+export function XPBox({ size = 40 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <defs>
+        <linearGradient id="xpBxFront" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#c8deff"/>
+          <stop offset="100%" stopColor="#4477ee"/>
+        </linearGradient>
+        <linearGradient id="xpBxSide" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%"   stopColor="#2244bb"/>
+          <stop offset="100%" stopColor="#1133aa"/>
+        </linearGradient>
+        <linearGradient id="xpBxTop" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#eef4ff"/>
+          <stop offset="100%" stopColor="#88aaee"/>
+        </linearGradient>
+        <filter id="xpBxSh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000033" floodOpacity="0.35"/></filter>
+      </defs>
+      {/* Front face */}
+      <rect x="7" y="22" width="26" height="20" fill="url(#xpBxFront)" stroke="#1133aa" strokeWidth="0.8" filter="url(#xpBxSh)"/>
+      {/* Right side face */}
+      <polygon points="33,22 41,16 41,36 33,42" fill="url(#xpBxSide)" stroke="#0a2288" strokeWidth="0.8"/>
+      {/* Top face */}
+      <polygon points="7,22 15,16 41,16 33,22" fill="url(#xpBxTop)" stroke="#0a2288" strokeWidth="0.8"/>
+      {/* Tape vertical strip */}
+      <rect x="18" y="22" width="8" height="20" fill="#f5e07a" opacity="0.75"/>
+      <polygon points="18,22 22,16 26,16 22,22" fill="#f5e07a" opacity="0.75"/>
+      {/* Tape fold line */}
+      <line x1="22" y1="22" x2="22" y2="42" stroke="#d4b84a" strokeWidth="0.6" opacity="0.8"/>
+      {/* Highlight */}
+      <ellipse cx="15" cy="25" rx="4" ry="1.5" fill="rgba(255,255,255,0.35)"/>
+    </svg>
+  );
+}
+
+/** Operations card — clipboard with ruled paper */
+export function XPClipboardList({ size = 40 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <defs>
+        <linearGradient id="xpClipBoard" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#c8a060"/>
+          <stop offset="100%" stopColor="#885020"/>
+        </linearGradient>
+        <linearGradient id="xpClipPaper" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#ffffff"/>
+          <stop offset="100%" stopColor="#e8eaf0"/>
+        </linearGradient>
+        <filter id="xpClipSh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000033" floodOpacity="0.3"/></filter>
+      </defs>
+      {/* Board */}
+      <rect x="8" y="10" width="32" height="36" rx="2" fill="url(#xpClipBoard)" stroke="#663a10" strokeWidth="0.8" filter="url(#xpClipSh)"/>
+      {/* Paper */}
+      <rect x="11" y="14" width="26" height="29" rx="1" fill="url(#xpClipPaper)" stroke="#aaa" strokeWidth="0.5"/>
+      {/* Clip */}
+      <rect x="17" y="6" width="14" height="8" rx="3" fill="#c0c0c0" stroke="#888" strokeWidth="0.8"/>
+      <rect x="20" y="5" width="8" height="5" rx="2" fill="#d8d8d8" stroke="#999" strokeWidth="0.7"/>
+      {/* Lines */}
+      {[20, 25, 30, 35].map(y => (
+        <line key={y} x1="14" y1={y} x2="34" y2={y} stroke="#99aacc" strokeWidth="1.2"/>
+      ))}
+      {/* Checkbox dots */}
+      <rect x="14" y="18" width="3.5" height="3.5" rx="0.5" fill="#316ac5" stroke="#1a3a88" strokeWidth="0.5"/>
+      <rect x="14" y="23" width="3.5" height="3.5" rx="0.5" fill="none" stroke="#aaa" strokeWidth="0.7"/>
+      <rect x="14" y="28" width="3.5" height="3.5" rx="0.5" fill="none" stroke="#aaa" strokeWidth="0.7"/>
+      {/* Checkmark on first */}
+      <path d="M15 19.5 L16 21 L18 18.5" stroke="white" strokeWidth="1" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+/** Finance card — leather wallet with coins */
+export function XPWallet({ size = 40 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none">
+      <defs>
+        <linearGradient id="xpWltBody" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#b87840"/>
+          <stop offset="60%"  stopColor="#8a5020"/>
+          <stop offset="100%" stopColor="#5c3010"/>
+        </linearGradient>
+        <linearGradient id="xpWltFlap" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#cc9050"/>
+          <stop offset="100%" stopColor="#7a4018"/>
+        </linearGradient>
+        <radialGradient id="xpCoin1" cx="45%" cy="38%">
+          <stop offset="0%"   stopColor="#ffe880"/>
+          <stop offset="60%"  stopColor="#e8c020"/>
+          <stop offset="100%" stopColor="#a87800"/>
+        </radialGradient>
+        <filter id="xpWltSh"><feDropShadow dx="1" dy="2" stdDeviation="1.5" floodColor="#000" floodOpacity="0.35"/></filter>
+      </defs>
+      {/* Wallet body */}
+      <rect x="5" y="14" width="36" height="26" rx="3" fill="url(#xpWltBody)" stroke="#4a2008" strokeWidth="0.8" filter="url(#xpWltSh)"/>
+      {/* Wallet opening / flap */}
+      <path d="M5 14 Q5 8 24 8 Q43 8 43 14" fill="url(#xpWltFlap)" stroke="#4a2008" strokeWidth="0.8"/>
+      {/* Card pocket */}
+      <rect x="8" y="18" width="24" height="14" rx="2" fill="#6a3010" stroke="#4a2008" strokeWidth="0.6" opacity="0.6"/>
+      {/* Coin slot */}
+      <rect x="32" y="18" width="8" height="14" rx="2" fill="#5a2808" stroke="#4a2008" strokeWidth="0.6"/>
+      {/* Coins */}
+      <circle cx="36" cy="22" r="3.5" fill="url(#xpCoin1)" stroke="#a87800" strokeWidth="0.6"/>
+      <circle cx="36" cy="28" r="3.5" fill="url(#xpCoin1)" stroke="#a87800" strokeWidth="0.6"/>
+      {/* $ on coin */}
+      <text x="34.5" y="24" fontSize="4" fill="#7a5800" fontWeight="bold" fontFamily="Arial">$</text>
+      {/* Leather stitch */}
+      <rect x="7" y="39" width="34" height="1" rx="0.5" fill="#4a2008" opacity="0.4"/>
+      {/* Highlight */}
+      <ellipse cx="18" cy="16" rx="8" ry="2" fill="rgba(255,255,255,0.2)"/>
+    </svg>
+  );
+}
+
+/** Delete / Recycle bin — the iconic XP recycle bin */
+export function XPTrash2({ size = 16 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <linearGradient id="xpBinCan" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%"   stopColor="#f0ece4"/>
+          <stop offset="100%" stopColor="#b8b4ac"/>
+        </linearGradient>
+      </defs>
+      {/* Bin body */}
+      <path d="M5.5 8.5 L7 21 L17 21 L18.5 8.5 Z"
+            fill="url(#xpBinCan)" stroke="#888a8c" strokeWidth="0.8"/>
+      {/* Vertical ribs */}
+      <line x1="9.5"  y1="10" x2="9"   y2="19.5" stroke="#aaa" strokeWidth="0.7" opacity="0.6"/>
+      <line x1="12"   y1="10" x2="12"  y2="19.5" stroke="#aaa" strokeWidth="0.7" opacity="0.6"/>
+      <line x1="14.5" y1="10" x2="15"  y2="19.5" stroke="#aaa" strokeWidth="0.7" opacity="0.6"/>
+      {/* Recycle arrows (3 blue arrows in triangle) */}
+      <path d="M10 13 L9 16 L11.5 16 Z" fill="#316ac5" opacity="0.8"/>
+      <path d="M14 13 L12.5 16 L15 16 Z" fill="#316ac5" opacity="0.8" transform="rotate(120 13 14.5)"/>
+      <path d="M12 17.5 L10.5 14.5 L13.5 14.5 Z" fill="#316ac5" opacity="0.8" transform="rotate(240 12 15.5)"/>
+      {/* Lid */}
+      <rect x="4" y="6" width="16" height="2.5" rx="1" fill="#d4d0c8" stroke="#888a8c" strokeWidth="0.7"/>
+      {/* Handle */}
+      <path d="M10 3.5 Q10 2.5 12 2.5 Q14 2.5 14 3.5 L14 6 L10 6 Z"
+            fill="#d4d0c8" stroke="#888a8c" strokeWidth="0.7"/>
+    </svg>
+  );
+}
+
+/** Confirm checkmark — green XP-style */
+export function XPCheck({ size = 18 }: P) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <defs>
+        <radialGradient id="xpChkBg" cx="38%" cy="33%">
+          <stop offset="0%"   stopColor="#aaffaa"/>
+          <stop offset="55%"  stopColor="#22cc22"/>
+          <stop offset="100%" stopColor="#0a7a0a"/>
+        </radialGradient>
+      </defs>
+      <circle cx="12" cy="12" r="10" fill="url(#xpChkBg)" stroke="#0a5a0a" strokeWidth="0.8"/>
+      <path d="M6.5 12 L10.5 16 L17.5 8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      <ellipse cx="9" cy="8" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.3)" transform="rotate(-30 9 8)"/>
+    </svg>
+  );
+}
+
 /* ─── Navigation ─────────────────────────────────────────────── */
 
 export function XPArrowLeft({ size = 22 }: P) {
