@@ -203,8 +203,8 @@ export default function PartDetail({ part, onUpdate, onDelete, onManualWriteOff 
           {part.history.length > 0 ? part.history.map((entry) => (
             <div key={entry.id} className="flex justify-between items-center py-2 border-b border-card-border last:border-0">
               <span className="text-muted-foreground text-sm">{format(new Date(entry.date), 'dd.MM.yyyy HH:mm')}</span>
-              <span className={`font-medium ${entry.type === 'arrival' ? 'text-green-600 dark:text-green-500' : 'text-yellow-600 dark:text-yellow-500'}`}>
-                {entry.type === 'arrival' ? 'Приход' : entry.type === 'write-off' ? 'Списание' : 'Возврат'} {entry.type === 'arrival' ? '+' : '-'}{entry.quantity} шт.
+              <span className={`font-medium ${entry.type === 'arrival' ? 'text-green-600 dark:text-green-500' : entry.type === 'delete' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-500'}`}>
+                {entry.type === 'arrival' ? 'Приход' : entry.type === 'write-off' ? 'Списание' : entry.type === 'delete' ? 'Удаление' : 'Возврат'} {entry.type === 'arrival' ? '+' : '-'}{entry.quantity} шт.
               </span>
             </div>
           )) : (
