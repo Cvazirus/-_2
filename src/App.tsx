@@ -449,7 +449,7 @@ export default function App() {
           'ID': o.id,
           'Дата': new Date(o.date).toLocaleString('ru-RU'),
           'Номер детали': o.partCode,
-          'Тип': o.type === 'arrival' ? 'Приход' : o.type === 'write-off' ? 'Списание' : 'Возврат',
+          'Тип': o.type === 'arrival' ? 'Приход' : o.type === 'write-off' ? 'Списание' : o.type === 'delete' ? 'Удаление' : 'Возврат',
           'Количество': o.quantity,
           'Цена за единицу': o.pricePerUnit,
           'Сумма': o.sum
@@ -1005,9 +1005,7 @@ export default function App() {
   const deleteParts = (partIds: string[]) => {
     const toDelete = parts.filter(p => partIds.includes(p.id));
     toDelete.forEach(part => {
-      if (part.currentQuantity > 0) {
-        createOperation(part, part.currentQuantity, part.currentQuantity, 'write-off');
-      }
+      createOperation(part, part.currentQuantity, part.currentQuantity, 'delete');
     });
     setParts(prev => prev.filter(p => !partIds.includes(p.id)));
     updateLocalTimestamp();
@@ -1048,9 +1046,9 @@ export default function App() {
     }
   };
 
-  const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off') => {
+  const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off' | 'delete') => {
     const opJournal = journals.find(j => j.type === 'operations') || journals[0];
-    const becameQuantity = wasQuantity + (type === 'arrival' ? quantity : -quantity);
+    const becameQuantity = type === 'arrival' ? wasQuantity + quantity : 0;
     
     // Generate MMDD-NNNN format
     const now = new Date();
@@ -1103,7 +1101,7 @@ export default function App() {
       } : null);
     }
 
-    const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : '🟡 Возврат';
+    const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : type === 'delete' ? '🗑 Удаление' : '🟡 Возврат';
     notifyTelegram(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
   };
 

@@ -69,9 +69,9 @@ export default function OperationsLog({ operations, onSelectOperation }: Operati
                         className="p-4 rounded-xl border border-card-border bg-background flex items-center gap-4 cursor-pointer active:bg-muted transition-colors"
                       >
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 ${
-                          op.type === 'arrival' ? 'bg-green-500' : 'bg-yellow-500'
+                          op.type === 'arrival' ? 'bg-green-500' : op.type === 'delete' ? 'bg-red-500' : 'bg-yellow-500'
                         }`}>
-                          {op.type === 'arrival' ? 'П' : 'С'}
+                          {op.type === 'arrival' ? 'П' : op.type === 'delete' ? 'У' : 'С'}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-foreground font-medium truncate">
