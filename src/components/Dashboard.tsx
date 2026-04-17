@@ -25,7 +25,9 @@ export default function Dashboard({
   onViewFinance,
   onRenameJournal,
   onDeleteJournal,
+  currentTheme,
 }: DashboardProps) {
+  const isXP = currentTheme === 'xp-light' || currentTheme === 'xp-dark';
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const [renamingCard, setRenamingCard] = useState<'parts' | 'operations' | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -98,14 +100,14 @@ export default function Dashboard({
             onClick={(e) => handleRename(e, cardType)}
             className="w-full px-4 py-3 flex items-center gap-3 text-left text-foreground hover:bg-primary-50 transition-colors"
           >
-            <Edit2 size={16} />
+            {isXP ? <XPEdit size={16} /> : <Edit2 size={16} />}
             <span className="font-medium">Переименовать</span>
           </button>
           <button
             onClick={(e) => handleDelete(e, cardType)}
             className="w-full px-4 py-3 flex items-center gap-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
           >
-            <Trash2 size={16} />
+            {isXP ? <XPTrash2 size={16} /> : <Trash2 size={16} />}
             <span className="font-medium">Удалить</span>
           </button>
         </motion.div>
@@ -126,14 +128,14 @@ export default function Dashboard({
       >
         <div className="flex justify-between items-start mb-6">
           <div className="bg-primary-50 p-4 rounded-2xl">
-            <Box size={40} strokeWidth={1.5} className="text-primary-600" />
+            {isXP ? <XPBox size={40} /> : <Box size={40} strokeWidth={1.5} className="text-primary-600" />}
           </div>
           <div className="relative">
             <button
               onClick={(e) => handleMenuClick(e, 'parts')}
               className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
             >
-              <MoreHorizontal size={20} />
+              {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
             </button>
             <MenuDropdown isOpen={openMenu === 'parts'} cardType="parts" />
           </div>
@@ -153,10 +155,10 @@ export default function Dashboard({
                 className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
               />
               <button onClick={() => commitRename('parts')} className="text-green-500">
-                <Check size={18} />
+                {isXP ? <XPCheck size={18} /> : <Check size={18} />}
               </button>
               <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                <X size={18} />
+                {isXP ? <XPX size={18} /> : <X size={18} />}
               </button>
             </div>
           ) : (
@@ -174,14 +176,14 @@ export default function Dashboard({
       >
         <div className="flex justify-between items-start mb-6">
           <div className="bg-primary-50 p-4 rounded-2xl">
-            <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />
+            {isXP ? <XPClipboardList size={40} /> : <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />}
           </div>
           <div className="relative">
             <button
               onClick={(e) => handleMenuClick(e, 'operations')}
               className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
             >
-              <MoreHorizontal size={20} />
+              {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
             </button>
             <MenuDropdown isOpen={openMenu === 'operations'} cardType="operations" />
           </div>
@@ -201,10 +203,10 @@ export default function Dashboard({
                 className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
               />
               <button onClick={() => commitRename('operations')} className="text-green-500">
-                <Check size={18} />
+                {isXP ? <XPCheck size={18} /> : <Check size={18} />}
               </button>
               <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                <X size={18} />
+                {isXP ? <XPX size={18} /> : <X size={18} />}
               </button>
             </div>
           ) : (
@@ -222,7 +224,7 @@ export default function Dashboard({
       >
         <div className="flex justify-between items-start mb-6">
           <div className="bg-primary-50 p-4 rounded-2xl">
-            <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />
+            {isXP ? <XPWallet size={40} /> : <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />}
           </div>
         </div>
 
