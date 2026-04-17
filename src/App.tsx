@@ -1348,14 +1348,9 @@ export default function App() {
         }
         return (
           <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Карточки деталей" 
-              onBack={handleBack} 
-              showAdd={true} 
-              onAdd={() => {
-                setSelectedPart(null);
-                openModal('part-form');
-              }} 
+            <Header
+              title="Карточки деталей"
+              onBack={handleBack}
               showSearch={true}
               onSearch={() => openModal('search')}
               showSort={true}
@@ -1372,6 +1367,10 @@ export default function App() {
                 changeView('part-detail');
               }}
               onDeleteParts={deleteParts}
+              onAdd={() => {
+                setSelectedPart(null);
+                openModal('part-form');
+              }}
               scrollPosition={scrollPositions.current['parts-list'] || 0}
               onScrollChange={(pos) => {
                 scrollPositions.current['parts-list'] = pos;

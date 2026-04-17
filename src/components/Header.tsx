@@ -163,12 +163,12 @@ export default function Header({
             {isXP ? <XPWand size={20} /> : <Wand2 size={20} />}
           </button>
         )}
-        {showAdd && (
+        {showSearch && (
           <button
-            onClick={onAdd}
+            onClick={onSearch}
             className="flex items-center justify-center w-10 h-10 bg-card-bg text-foreground rounded-full hover:bg-muted transition-all active:scale-95 shadow-sm border border-card-border"
           >
-            {isXP ? <XPPlus size={22} /> : <Plus size={22} />}
+            {isXP ? <XPSearch size={20} /> : <Search size={20} />}
           </button>
         )}
         {showMenu && (

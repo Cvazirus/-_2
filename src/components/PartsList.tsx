@@ -1,17 +1,18 @@
 import { Part } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Trash2, CheckCircle2, Circle, X } from 'lucide-react';
+import { Trash2, CheckCircle2, Circle, X, Plus } from 'lucide-react';
 import React, { useState, useRef, UIEvent, useCallback } from 'react';
 
 interface PartsListProps {
   parts: Part[];
   onSelectPart: (part: Part) => void;
   onDeleteParts: (ids: string[]) => void;
+  onAdd?: () => void;
   scrollPosition?: number;
   onScrollChange?: (position: number) => void;
 }
 
-export default function PartsList({ parts, onSelectPart, onDeleteParts, scrollPosition = 0, onScrollChange }: PartsListProps) {
+export default function PartsList({ parts, onSelectPart, onDeleteParts, onAdd, scrollPosition = 0, onScrollChange }: PartsListProps) {
   const totalValue = parts.reduce((acc, part) => acc + (part.currentQuantity * part.pricePerUnit), 0);
   const [showBottomBar, setShowBottomBar] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
@@ -203,6 +204,22 @@ export default function PartsList({ parts, onSelectPart, onDeleteParts, scrollPo
             <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Записей: {parts.length}</span>
             <span className="text-xl font-bold text-blue-600 dark:text-blue-400">{totalValue.toLocaleString()} ₽</span>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* FAB — add button, hides when scrolling down */}
+      <AnimatePresence>
+        {showBottomBar && !isSelecting && onAdd && (
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: 'spring', bounce: 0.3, duration: 0.3 }}
+            onClick={onAdd}
+            className="absolute bottom-20 right-4 z-20 w-14 h-14 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-full shadow-lg flex items-center justify-center transition-colors"
+          >
+            <Plus size={28} strokeWidth={2.5} />
+          </motion.button>
         )}
       </AnimatePresence>
 
