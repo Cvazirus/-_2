@@ -1,21 +1,20 @@
-const CACHE = 'sklad-v1';
+const CACHE = 'sklad-v2';
 
 self.addEventListener('install', e => {
-  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE).then(c =>
-      c.addAll(['/', '/index.html'])
-    )
+    caches.open(CACHE)
+      .then(c => c.addAll(['/', '/index.html']))
+      .catch(() => {}) // не блокировать установку если кеш упал
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', e => {
@@ -30,7 +29,7 @@ self.addEventListener('fetch', e => {
         if (res.ok) cache.put(e.request, res.clone());
         return res;
       }).catch(() => null);
-      return cached || fresh;
+      return cached || await fresh;
     })
   );
 });

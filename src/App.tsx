@@ -1734,9 +1734,9 @@ export default function App() {
               </button>
             ) : (
               <div className="text-xs text-white/70 space-y-1">
-                <div>Нажмите <span className="text-white font-bold">⋮</span> в браузере</div>
-                <div>→ <span className="text-white font-semibold">Добавить на главный экран</span></div>
-                <div>→ откроется без строки браузера</div>
+                <div>Нажмите <span className="text-white font-bold">⋮</span> в Chrome</div>
+                <div>→ <span className="text-white font-semibold">Установить приложение</span></div>
+                <div className="text-white/40 pt-1">⚠ «Добавить на главный экран» — это ярлык, не приложение</div>
               </div>
             )}
           </div>
