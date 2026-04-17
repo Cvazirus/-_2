@@ -37,8 +37,9 @@ export default function App() {
   const [theme, setTheme] = useState<string>(() => {
     return localStorage.getItem('app_theme') || 'light';
   });
-  const [fontSize, setFontSize] = useState<string>(() => {
-    return localStorage.getItem('app_font_size') || 'medium';
+  const [fontSize, setFontSize] = useState<number>(() => {
+    const stored = parseFloat(localStorage.getItem('app_font_size') || '');
+    return isNaN(stored) || stored < 0.5 ? 1 : stored;
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [journals, setJournals] = useState<Journal[]>(() => {
@@ -962,9 +963,8 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    const scales: Record<string, string> = { small: '0.85', medium: '1', large: '1.15', xlarge: '1.3' };
-    document.documentElement.style.setProperty('--font-scale', scales[fontSize] || '1');
-    localStorage.setItem('app_font_size', fontSize);
+    document.documentElement.style.setProperty('--font-scale', String(fontSize));
+    localStorage.setItem('app_font_size', String(fontSize));
   }, [fontSize]);
 
   const toggleTheme = (newTheme?: string) => {
