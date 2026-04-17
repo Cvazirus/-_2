@@ -237,6 +237,16 @@ export default function App() {
   useEffect(() => {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || (navigator as any).standalone === true;
+
+    if (!isStandalone) {
+      // Auto-request fullscreen on first tap as fallback
+      const requestFS = () => {
+        const el = document.documentElement as any;
+        (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen)?.call(el);
+      };
+      document.addEventListener('touchstart', requestFS, { once: true });
+    }
+
     const dismissed = localStorage.getItem('install_banner_dismissed');
     if (!isStandalone && !dismissed) {
       setShowInstallBanner(true);
