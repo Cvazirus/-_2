@@ -1444,12 +1444,17 @@ export default function App() {
               onSearch={() => openModal('search')}
               {...commonHeaderProps}
             />
-            <OperationsLog 
-              operations={filteredOperations} 
+            <OperationsLog
+              operations={filteredOperations}
               onSelectOperation={(op) => {
                 setSelectedOperation(op);
                 changeView('operation-detail');
-              }} 
+              }}
+              onDeleteOperations={(ids) => {
+                setOperations(prev => prev.filter(op => !ids.includes(op.id)));
+                updateLocalTimestamp();
+                showToast(`Удалено ${ids.length} ${ids.length === 1 ? 'запись' : ids.length < 5 ? 'записи' : 'записей'}`);
+              }}
             />
           </div>
         );
