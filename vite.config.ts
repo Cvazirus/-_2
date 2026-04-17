@@ -12,6 +12,9 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        strategies: 'injectManifest',
+        srcDir: 'public',
+        filename: 'sw-template.js',
         includeAssets: ['icon-192.png', 'icon-512.png'],
         manifest: {
           id: '/',
@@ -31,16 +34,9 @@ export default defineConfig(({mode}) => {
             { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
-        workbox: {
+        injectManifest: {
           globPatterns: ['**/*.{js,css,html,ico,svg}', 'icon-192.png', 'icon-512.png'],
           globIgnores: ['warehouse_src.png'],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/.*$/,
-              handler: 'NetworkFirst',
-              options: { cacheName: 'external-cache' },
-            },
-          ],
         },
       }),
     ],
