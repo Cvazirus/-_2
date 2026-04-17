@@ -235,23 +235,29 @@ export default function App() {
   };
 
   useEffect(() => {
-    const handler = (e: any) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-      // Only show if not already installed (standalone)
-      if (!window.matchMedia('(display-mode: standalone)').matches) {
-        setShowInstallBanner(true);
-      }
-    };
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as any).standalone === true;
+    const dismissed = localStorage.getItem('install_banner_dismissed');
+    if (!isStandalone && !dismissed) {
+      setShowInstallBanner(true);
+    }
+    // Also capture automatic prompt if browser offers it
+    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const handleInstall = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') setShowInstallBanner(false);
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') { setShowInstallBanner(false); }
+    }
+  };
+
+  const dismissInstallBanner = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem('install_banner_dismissed', '1');
   };
 
   useEffect(() => {
@@ -1703,25 +1709,25 @@ export default function App() {
 
       {showInstallBanner && (
         <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="bg-primary-600 text-white px-4 py-3 rounded-2xl shadow-xl flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="font-semibold text-sm">Установить приложение</div>
-              <div className="text-xs opacity-80">Работает без браузера, полный экран</div>
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-white/10">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div className="font-semibold text-sm">📲 Установить без браузера</div>
+              <button onClick={dismissInstallBanner} className="opacity-50 text-lg leading-none shrink-0 -mt-0.5">✕</button>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            {installPrompt ? (
               <button
                 onClick={handleInstall}
-                className="bg-white text-primary-600 font-bold text-sm px-3 py-1.5 rounded-lg active:scale-95"
+                className="w-full bg-primary-600 text-white font-bold text-sm py-2 rounded-xl active:scale-95"
               >
-                Установить
+                Установить приложение
               </button>
-              <button
-                onClick={() => setShowInstallBanner(false)}
-                className="opacity-70 text-white px-1 py-1 active:scale-95 text-lg leading-none"
-              >
-                ✕
-              </button>
-            </div>
+            ) : (
+              <div className="text-xs text-white/70 space-y-1">
+                <div>Нажмите <span className="text-white font-bold">⋮</span> в браузере</div>
+                <div>→ <span className="text-white font-semibold">Добавить на главный экран</span></div>
+                <div>→ откроется без строки браузера</div>
+              </div>
+            )}
           </div>
         </div>
       )}
