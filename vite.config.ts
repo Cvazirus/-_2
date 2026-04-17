@@ -32,7 +32,8 @@ export default defineConfig(({mode}) => {
           ],
         },
         workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          globPatterns: ['**/*.{js,css,html,ico,svg}', 'icon-192.png', 'icon-512.png'],
+          globIgnores: ['warehouse_src.png'],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*$/,
