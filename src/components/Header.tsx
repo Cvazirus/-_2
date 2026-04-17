@@ -1,4 +1,4 @@
-import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Upload, FileSpreadsheet, MessageCircle, LogIn, LogOut, Cloud, RefreshCw, RefreshCcw, User as UserIcon, ArrowUpDown, Wand2, Database, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Upload, FileSpreadsheet, MessageCircle, LogIn, LogOut, Cloud, RefreshCw, RefreshCcw, User as UserIcon, ArrowUpDown, Wand2, Database, ChevronRight, Type } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
 
@@ -25,6 +25,8 @@ interface HeaderProps {
   onSyncSettings?: () => void;
   onShowMissingPrices?: () => void;
   isDark?: boolean;
+  fontSize?: string;
+  onFontSizeChange?: (size: string) => void;
   user?: User | null;
   onLogin?: () => void;
   onLogout?: () => void;
@@ -57,6 +59,8 @@ export default function Header({
   onSyncSettings,
   onShowMissingPrices,
   isDark = false,
+  fontSize = 'medium',
+  onFontSizeChange,
   user,
   onLogin,
   onLogout,
@@ -261,7 +265,35 @@ export default function Header({
                   </div>
                 )}
 
-                <button 
+                <div className="border-t border-card-border my-1"></div>
+
+                <div className="px-4 py-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Type size={16} className="text-muted-foreground" />
+                    <span className="text-foreground font-medium text-sm">Размер шрифта</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {(['small', 'medium', 'large', 'xlarge'] as const).map((size, i) => {
+                      const labels = ['A−', 'A', 'A+', 'A++'];
+                      const isActive = fontSize === size;
+                      return (
+                        <button
+                          key={size}
+                          onClick={(e) => { e.stopPropagation(); onFontSizeChange?.(size); }}
+                          className={`flex-1 py-1.5 rounded-lg text-sm font-semibold transition-colors border ${
+                            isActive
+                              ? 'bg-primary-600 text-white border-primary-600'
+                              : 'bg-card-bg border-card-border text-foreground hover:bg-muted'
+                          }`}
+                        >
+                          {labels[i]}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
                   onClick={() => {
                     if ('serviceWorker' in navigator) {
                       navigator.serviceWorker.getRegistrations().then((registrations) => {
