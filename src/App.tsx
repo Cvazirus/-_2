@@ -1002,6 +1002,19 @@ export default function App() {
     notifyTelegram(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
   };
 
+  const deleteParts = (partIds: string[]) => {
+    const toDelete = parts.filter(p => partIds.includes(p.id));
+    toDelete.forEach(part => {
+      if (part.currentQuantity > 0) {
+        createOperation(part, part.currentQuantity, part.currentQuantity, 'write-off');
+      }
+    });
+    setParts(prev => prev.filter(p => !partIds.includes(p.id)));
+    updateLocalTimestamp();
+    const names = toDelete.map(p => `<code>${p.code}</code> (${p.name})`).join('\n');
+    notifyTelegram(`🗑 <b>Удалены детали (${toDelete.length} шт.)</b>\n${names}`);
+  };
+
   const updatePart = (updatedData: Partial<Part>) => {
     const partToUpdate = selectedPart || parts.find(p => p.id === updatedData.id);
     if (!partToUpdate) return;
@@ -1302,12 +1315,13 @@ export default function App() {
               onShowMissingPrices={() => changeView('parts-without-price')}
               {...commonHeaderProps}
             />
-            <PartsList 
-              parts={filteredParts} 
+            <PartsList
+              parts={filteredParts}
               onSelectPart={(part) => {
                 setSelectedPart(part);
                 changeView('part-detail');
-              }} 
+              }}
+              onDeleteParts={deleteParts}
               scrollPosition={scrollPositions.current['parts-list'] || 0}
               onScrollChange={(pos) => {
                 scrollPositions.current['parts-list'] = pos;
@@ -1355,12 +1369,13 @@ export default function App() {
               showMenu={false}
               {...commonHeaderProps}
             />
-            <PartsList 
-              parts={missingPriceParts} 
+            <PartsList
+              parts={missingPriceParts}
               onSelectPart={(part) => {
                 setSelectedPart(part);
                 changeView('part-detail');
-              }} 
+              }}
+              onDeleteParts={deleteParts}
               scrollPosition={scrollPositions.current['parts-without-price'] || 0}
               onScrollChange={(pos) => {
                 scrollPositions.current['parts-without-price'] = pos;
