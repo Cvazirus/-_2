@@ -1435,8 +1435,8 @@ export default function App() {
             }
             setShowPartForm(false);
             setInitialPartCode(undefined);
-            closeModal();
-          }} 
+            window.history.replaceState({ view, modal: null }, '');
+          }}
           onClose={() => {
             setShowPartForm(false);
             setInitialPartCode(undefined);
