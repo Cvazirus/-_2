@@ -1246,6 +1246,7 @@ export default function App() {
       onSyncSettings: () => openModal('sync'),
       onCsvOperations: () => openModal('journal-select', 'csv'),
       isDark: theme === 'dark',
+      currentTheme: theme,
       fontSize,
       onFontSizeChange: setFontSize,
     };
