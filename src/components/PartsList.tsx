@@ -33,7 +33,7 @@ export default function PartsList({ parts, onSelectPart, onDeleteParts, onAdd, s
     const currentScrollY = e.currentTarget.scrollTop;
     if (onScrollChange) onScrollChange(currentScrollY);
     if (Math.abs(currentScrollY - lastScrollY.current) < 10) return;
-    setShowBottomBar(currentScrollY > lastScrollY.current);
+    setShowBottomBar(currentScrollY < lastScrollY.current);
     lastScrollY.current = currentScrollY;
   };
 
