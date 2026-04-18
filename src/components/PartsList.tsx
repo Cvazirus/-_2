@@ -152,7 +152,7 @@ export default function PartsList({ parts, onSelectPart, onDeleteParts, onAdd, s
 
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 pb-24"
+        className="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-3 pb-24"
         onScroll={handleScroll}
       >
         {parts.map((part) => {
