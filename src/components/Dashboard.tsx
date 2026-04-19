@@ -194,31 +194,31 @@ export default function Dashboard({
       </div>
 
       {viewMode === 'cards' ? (
-        <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-3">
           {cardItems.map(item => (
             <motion.div
               key={item.key}
-              whileTap={{ scale: 0.98 }}
+              whileTap={{ scale: 0.97 }}
               onClick={item.onClick}
-              className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
+              className="bg-card-bg rounded-2xl p-4 flex flex-col cursor-pointer border border-card-border active:bg-muted/30 transition-colors relative aspect-square justify-between"
             >
-              <div className="flex justify-between items-start mb-6">
-                <div className="bg-primary-50 p-4 rounded-2xl">{item.icon}</div>
+              <div className="flex justify-between items-start">
+                <div className="bg-primary-50 p-3 rounded-2xl">{item.iconSm}</div>
                 {item.hasMenu && item.menuType && (
                   <div className="relative">
                     <button
                       onClick={(e) => handleMenuClick(e, item.menuType!)}
-                      className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
+                      className="text-foreground/40 p-1"
                     >
-                      {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
+                      {isXP ? <XPMoreHorizontal size={18} /> : <MoreHorizontal size={18} />}
                     </button>
                     <MenuDropdown isOpen={openMenu === item.menuType} cardType={item.menuType!} />
                   </div>
                 )}
               </div>
-              <div className="mt-auto">
+              <div>
                 {(item.key === 'parts' || item.key === 'operations') && renamingCard === item.key ? (
-                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
                     <input
                       ref={renameInputRef}
                       value={renameValue}
@@ -227,19 +227,19 @@ export default function Dashboard({
                         if (e.key === 'Enter') commitRename(item.key as 'parts' | 'operations');
                         if (e.key === 'Escape') setRenamingCard(null);
                       }}
-                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
+                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-sm font-semibold"
                     />
                     <button onClick={() => commitRename(item.key as 'parts' | 'operations')} className="text-green-500">
-                      {isXP ? <XPCheck size={18} /> : <Check size={18} />}
+                      <Check size={14} />
                     </button>
                     <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                      {isXP ? <XPX size={18} /> : <X size={18} />}
+                      <X size={14} />
                     </button>
                   </div>
                 ) : (
-                  <h2 className="text-foreground text-xl font-semibold">{item.title}</h2>
+                  <div className="text-sm font-semibold text-foreground leading-tight">{item.title}</div>
                 )}
-                <p className="text-foreground/60 text-sm font-medium mt-1">{item.subtitle}</p>
+                <div className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</div>
               </div>
             </motion.div>
           ))}
