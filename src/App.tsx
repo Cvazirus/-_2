@@ -1050,6 +1050,15 @@ export default function App() {
     setSchedules(prev => prev.filter(s => s.id !== id));
     setWorkers(prev => prev.map(w => w.scheduleId === id ? { ...w, scheduleId: null } : w));
   };
+  const markActual = (actual: ShiftActual) => {
+    setShiftActuals(prev => {
+      const idx = prev.findIndex(a => a.id === actual.id);
+      return idx >= 0 ? prev.map(a => a.id === actual.id ? actual : a) : [...prev, actual];
+    });
+  };
+  const deleteActual = (id: string) => {
+    setShiftActuals(prev => prev.filter(a => a.id !== id));
+  };
 
   const handleBack = () => {
     setSearchQuery('');
@@ -1542,6 +1551,8 @@ export default function App() {
               onAddSchedule={addSchedule}
               onUpdateSchedule={updateSchedule}
               onDeleteSchedule={deleteSchedule}
+              onMarkActual={markActual}
+              onDeleteActual={deleteActual}
             />
           </div>
         );

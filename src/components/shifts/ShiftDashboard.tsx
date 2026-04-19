@@ -10,6 +10,7 @@ import {
 } from '../../services/scheduleGenerator';
 import WorkerForm from './WorkerForm';
 import ScheduleConfig from './ScheduleConfig';
+import ShiftCalendar from './ShiftCalendar';
 
 interface ShiftDashboardProps {
   workers: Worker[];
@@ -21,13 +22,17 @@ interface ShiftDashboardProps {
   onAddSchedule: (data: Omit<ShiftSchedule, 'id'>) => void;
   onUpdateSchedule: (id: string, data: Omit<ShiftSchedule, 'id'>) => void;
   onDeleteSchedule: (id: string) => void;
+  onMarkActual: (actual: ShiftActual) => void;
+  onDeleteActual: (id: string) => void;
 }
 
 export default function ShiftDashboard({
   workers, schedules, actuals,
   onAddWorker, onUpdateWorker, onDeleteWorker,
   onAddSchedule, onUpdateSchedule, onDeleteSchedule,
+  onMarkActual, onDeleteActual,
 }: ShiftDashboardProps) {
+  const [calendarWorker, setCalendarWorker] = useState<Worker | null>(null);
   const [month, setMonth] = useState(new Date());
   const [showWorkerForm, setShowWorkerForm] = useState(false);
   const [showScheduleConfig, setShowScheduleConfig] = useState(false);
@@ -57,6 +62,23 @@ export default function ShiftDashboard({
     if (idx === null) return 'bg-muted text-muted-foreground';
     return `${SHIFT_COLORS[idx % SHIFT_COLORS.length]} text-white`;
   };
+
+  // Show calendar if worker selected
+  if (calendarWorker) {
+    const sch = schedules.find(s => s.id === calendarWorker.scheduleId);
+    if (sch) {
+      return (
+        <ShiftCalendar
+          worker={calendarWorker}
+          schedule={sch}
+          actuals={actuals}
+          onMarkActual={onMarkActual}
+          onDeleteActual={onDeleteActual}
+          onBack={() => setCalendarWorker(null)}
+        />
+      );
+    }
+  }
 
   return (
     <div className="bg-background min-h-[calc(100dvh-64px)] relative overflow-hidden">
@@ -234,11 +256,19 @@ export default function ShiftDashboard({
 
                             {/* Actions */}
                             <div className="flex gap-2">
+                              {schedule && (
+                                <button
+                                  onClick={() => setCalendarWorker(worker)}
+                                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium"
+                                >
+                                  <Calendar size={14} /> Календарь
+                                </button>
+                              )}
                               <button
                                 onClick={() => { setEditingWorker(worker); setShowWorkerForm(true); }}
-                                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border border-card-border text-foreground text-sm"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-card-border text-foreground text-sm"
                               >
-                                <Pencil size={14} /> Изменить
+                                <Pencil size={14} />
                               </button>
                               <button
                                 onClick={() => onDeleteWorker(worker.id)}
