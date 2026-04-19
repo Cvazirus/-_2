@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import { Part, Operation, Journal, Worker, ShiftSchedule, ShiftActual } from './types';
+import { Part, Operation, Journal, ShiftSchedule, ShiftActual } from './types';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import PartsList from './components/PartsList';
@@ -96,9 +96,6 @@ export default function App() {
     return [];
   });
   
-  const [workers, setWorkers] = useState<Worker[]>(() => {
-    try { const s = localStorage.getItem('app_workers'); return s ? JSON.parse(s) : []; } catch { return []; }
-  });
   const [schedules, setSchedules] = useState<ShiftSchedule[]>(() => {
     try { const s = localStorage.getItem('app_schedules'); return s ? JSON.parse(s) : []; } catch { return []; }
   });
@@ -1025,20 +1022,9 @@ export default function App() {
     }
   };
 
-  useEffect(() => { localStorage.setItem('app_workers', JSON.stringify(workers)); }, [workers]);
   useEffect(() => { localStorage.setItem('app_schedules', JSON.stringify(schedules)); }, [schedules]);
   useEffect(() => { localStorage.setItem('app_shift_actuals', JSON.stringify(shiftActuals)); }, [shiftActuals]);
 
-  const addWorker = (data: Omit<Worker, 'id'>) => {
-    setWorkers(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
-  };
-  const updateWorker = (id: string, data: Omit<Worker, 'id'>) => {
-    setWorkers(prev => prev.map(w => w.id === id ? { id, ...data } : w));
-  };
-  const deleteWorker = (id: string) => {
-    if (!window.confirm('Удалить сотрудника?')) return;
-    setWorkers(prev => prev.filter(w => w.id !== id));
-  };
   const addSchedule = (data: Omit<ShiftSchedule, 'id'>) => {
     setSchedules(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
   };
@@ -1046,9 +1032,8 @@ export default function App() {
     setSchedules(prev => prev.map(s => s.id === id ? { id, ...data } : s));
   };
   const deleteSchedule = (id: string) => {
-    if (!window.confirm('Удалить график? Сотрудники потеряют привязку.')) return;
+    if (!window.confirm('Удалить график?')) return;
     setSchedules(prev => prev.filter(s => s.id !== id));
-    setWorkers(prev => prev.map(w => w.scheduleId === id ? { ...w, scheduleId: null } : w));
   };
   const markActual = (actual: ShiftActual) => {
     setShiftActuals(prev => {
@@ -1354,7 +1339,7 @@ export default function App() {
             <Dashboard
               partsCount={parts.length}
               operationsCount={operations.length}
-              workersCount={workers.length}
+              workersCount={schedules.length}
               journals={journals}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
@@ -1542,12 +1527,8 @@ export default function App() {
               {...commonHeaderProps}
             />
             <ShiftDashboard
-              workers={workers}
               schedules={schedules}
               actuals={shiftActuals}
-              onAddWorker={addWorker}
-              onUpdateWorker={updateWorker}
-              onDeleteWorker={deleteWorker}
               onAddSchedule={addSchedule}
               onUpdateSchedule={updateSchedule}
               onDeleteSchedule={deleteSchedule}

@@ -252,7 +252,7 @@ export default function Dashboard({
 
         <div className="mt-auto">
           <h2 className="text-foreground text-xl font-semibold">Журнал смен</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">{workersCount} сотрудников</p>
+          <p className="text-foreground/60 text-sm font-medium mt-1">{workersCount > 0 ? `${workersCount} график${workersCount === 1 ? '' : 'ов'}` : 'Мои смены'}</p>
         </div>
       </motion.div>
     </div>
