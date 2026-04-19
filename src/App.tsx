@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import { Part, Operation, Journal } from './types';
+import { Part, Operation, Journal, Worker, ShiftSchedule, ShiftActual } from './types';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import PartsList from './components/PartsList';
@@ -29,8 +29,9 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { differenceInHours } from 'date-fns';
 
 import FinanceJournal from './components/FinanceJournal';
+import ShiftDashboard from './components/shifts/ShiftDashboard';
 
-type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price';
+type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price' | 'shifts';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -95,6 +96,16 @@ export default function App() {
     return [];
   });
   
+  const [workers, setWorkers] = useState<Worker[]>(() => {
+    try { const s = localStorage.getItem('app_workers'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const [schedules, setSchedules] = useState<ShiftSchedule[]>(() => {
+    try { const s = localStorage.getItem('app_schedules'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const [shiftActuals, setShiftActuals] = useState<ShiftActual[]>(() => {
+    try { const s = localStorage.getItem('app_shift_actuals'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -1014,6 +1025,32 @@ export default function App() {
     }
   };
 
+  useEffect(() => { localStorage.setItem('app_workers', JSON.stringify(workers)); }, [workers]);
+  useEffect(() => { localStorage.setItem('app_schedules', JSON.stringify(schedules)); }, [schedules]);
+  useEffect(() => { localStorage.setItem('app_shift_actuals', JSON.stringify(shiftActuals)); }, [shiftActuals]);
+
+  const addWorker = (data: Omit<Worker, 'id'>) => {
+    setWorkers(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
+  };
+  const updateWorker = (id: string, data: Omit<Worker, 'id'>) => {
+    setWorkers(prev => prev.map(w => w.id === id ? { id, ...data } : w));
+  };
+  const deleteWorker = (id: string) => {
+    if (!window.confirm('Удалить сотрудника?')) return;
+    setWorkers(prev => prev.filter(w => w.id !== id));
+  };
+  const addSchedule = (data: Omit<ShiftSchedule, 'id'>) => {
+    setSchedules(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
+  };
+  const updateSchedule = (id: string, data: Omit<ShiftSchedule, 'id'>) => {
+    setSchedules(prev => prev.map(s => s.id === id ? { id, ...data } : s));
+  };
+  const deleteSchedule = (id: string) => {
+    if (!window.confirm('Удалить график? Сотрудники потеряют привязку.')) return;
+    setSchedules(prev => prev.filter(s => s.id !== id));
+    setWorkers(prev => prev.map(w => w.scheduleId === id ? { ...w, scheduleId: null } : w));
+  };
+
   const handleBack = () => {
     setSearchQuery('');
     window.history.back();
@@ -1308,6 +1345,7 @@ export default function App() {
             <Dashboard
               partsCount={parts.length}
               operationsCount={operations.length}
+              workersCount={workers.length}
               journals={journals}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
@@ -1319,6 +1357,7 @@ export default function App() {
                 changeView('operations-log');
               }}
               onViewFinance={() => changeView('finance-journal')}
+              onViewShifts={() => changeView('shifts')}
               onRenameJournal={renameJournal}
               onDeleteJournal={deleteJournal}
               currentTheme={theme}
@@ -1473,14 +1512,37 @@ export default function App() {
       case 'finance-journal':
         return (
           <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Финансовый журнал" 
-              onBack={handleBack} 
+            <Header
+              title="Финансовый журнал"
+              onBack={handleBack}
               showSearch={false}
               showMenu={false}
               {...commonHeaderProps}
             />
             <FinanceJournal operations={operations} />
+          </div>
+        );
+      case 'shifts':
+        return (
+          <div className="bg-background min-h-[100dvh]">
+            <Header
+              title="Журнал смен"
+              onBack={handleBack}
+              showSearch={false}
+              showMenu={false}
+              {...commonHeaderProps}
+            />
+            <ShiftDashboard
+              workers={workers}
+              schedules={schedules}
+              actuals={shiftActuals}
+              onAddWorker={addWorker}
+              onUpdateWorker={updateWorker}
+              onDeleteWorker={deleteWorker}
+              onAddSchedule={addSchedule}
+              onUpdateSchedule={updateSchedule}
+              onDeleteSchedule={deleteSchedule}
+            />
           </div>
         );
       default:

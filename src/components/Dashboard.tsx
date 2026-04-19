@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import { Journal } from '../types';
@@ -7,10 +7,12 @@ import { XPBox, XPClipboardList, XPWallet, XPMoreHorizontal, XPEdit, XPTrash2, X
 interface DashboardProps {
   partsCount: number;
   operationsCount: number;
+  workersCount: number;
   journals: Journal[];
   onOpenParts: () => void;
   onOpenOperations: () => void;
   onViewFinance: () => void;
+  onViewShifts: () => void;
   onRenameJournal: (id: string, newName: string) => void;
   onDeleteJournal: (id: string) => void;
   currentTheme?: string;
@@ -19,10 +21,12 @@ interface DashboardProps {
 export default function Dashboard({
   partsCount,
   operationsCount,
+  workersCount,
   journals,
   onOpenParts,
   onOpenOperations,
   onViewFinance,
+  onViewShifts,
   onRenameJournal,
   onDeleteJournal,
   currentTheme,
@@ -231,6 +235,24 @@ export default function Dashboard({
         <div className="mt-auto">
           <h2 className="text-foreground text-xl font-semibold">Финансовый журнал</h2>
           <p className="text-foreground/60 text-sm font-medium mt-1">Зарплата и аванс</p>
+        </div>
+      </motion.div>
+
+      {/* Shifts card */}
+      <motion.div
+        whileTap={{ scale: 0.98 }}
+        onClick={onViewShifts}
+        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
+      >
+        <div className="flex justify-between items-start mb-6">
+          <div className="bg-primary-50 p-4 rounded-2xl">
+            <Users size={40} strokeWidth={1.5} className="text-primary-600" />
+          </div>
+        </div>
+
+        <div className="mt-auto">
+          <h2 className="text-foreground text-xl font-semibold">Журнал смен</h2>
+          <p className="text-foreground/60 text-sm font-medium mt-1">{workersCount} сотрудников</p>
         </div>
       </motion.div>
     </div>

@@ -44,3 +44,61 @@ export interface Journal {
   type: 'parts' | 'operations';
   color: string;
 }
+
+// ─── Shifts module ────────────────────────────────────────────────────────────
+
+export interface ShiftTime {
+  start: string; // "HH:MM"
+  end: string;   // "HH:MM"
+  label: string;
+}
+
+export type ScheduleType = '8_2' | '8_3' | '12_cycle';
+
+export interface ShiftSchedule {
+  id: string;
+  name: string;
+  type: ScheduleType;
+  startDate: string;       // YYYY-MM-DD — дата, соответствующая позиции 0 цикла
+  shifts: ShiftTime[];
+  nightCoeff: number;      // коэф. ночных часов, по умолчанию 1.2
+  holidayCoeff: number;    // коэф. праздников, по умолчанию 2.0
+  breakMinutes: number;    // перерыв в минутах, по умолчанию 30
+}
+
+export interface Worker {
+  id: string;
+  name: string;
+  rate: number;            // часовая ставка, руб.
+  scheduleId: string | null;
+  color: string;
+}
+
+export interface ShiftActual {
+  id: string;              // workerId + '-' + date
+  workerId: string;
+  date: string;            // YYYY-MM-DD
+  status: 'ok' | 'miss' | 'late' | 'overtime';
+  actualStart?: string;    // HH:MM
+  actualEnd?: string;
+  note?: string;
+  payrollId?: string;
+}
+
+export interface PayrollEntry {
+  id: string;
+  workerId: string;
+  period: string;          // YYYY-MM
+  baseHours: number;
+  nightHours: number;
+  holidayHours: number;
+  base: number;
+  nightBonus: number;
+  holidayBonus: number;
+  deductions: number;
+  total: number;
+  status: 'draft' | 'posted' | 'adjusted';
+  shiftDates: string[];
+  createdAt: string;
+  updatedAt: string;
+}
