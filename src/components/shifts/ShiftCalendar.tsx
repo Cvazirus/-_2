@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Worker, ShiftSchedule, ShiftActual } from '../../types';
+import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
@@ -13,6 +13,7 @@ interface ShiftCalendarProps {
   worker: Worker;
   schedule: ShiftSchedule;
   actuals: ShiftActual[];
+  vacations: VacationPeriod[];
   onMarkActual: (actual: ShiftActual) => void;
   onDeleteActual: (id: string) => void;
   onBack: () => void;
@@ -53,7 +54,9 @@ const WEEK_DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 interface Cell { shift: GeneratedShift; actual?: ShiftActual }
 
-export default function ShiftCalendar({ worker, schedule, actuals, onMarkActual, onDeleteActual, onBack }: ShiftCalendarProps) {
+export default function ShiftCalendar({ worker, schedule, actuals, vacations, onMarkActual, onDeleteActual, onBack }: ShiftCalendarProps) {
+  const isOnVacation = (date: string) =>
+    vacations.some(v => date >= v.startDate && date <= v.endDate);
   const [month, setMonth] = useState(new Date());
   const [tab, setTab] = useState<'calendar' | 'log'>('calendar');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
@@ -78,10 +81,18 @@ export default function ShiftCalendar({ worker, schedule, actuals, onMarkActual,
     return { cells: grid, stats: st };
   }, [month, schedule, actuals, worker.id, year, mon]);
 
-  const vacationCount = actuals.filter(a => a.workerId === worker.id &&
-    a.status === 'vacation' &&
-    a.date >= format(startOfMonth(month), 'yyyy-MM-dd') &&
-    a.date <= format(endOfMonth(month), 'yyyy-MM-dd')).length;
+  const monthStart = format(startOfMonth(month), 'yyyy-MM-dd');
+  const monthEnd = format(endOfMonth(month), 'yyyy-MM-dd');
+
+  const vacationCount = useMemo(() => {
+    let count = 0;
+    for (const cell of cells) {
+      if (cell && isOnVacation(cell.shift.date) &&
+          cell.shift.date >= monthStart && cell.shift.date <= monthEnd) count++;
+    }
+    return count;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cells, vacations, monthStart, monthEnd]);
 
   const markedCount = actuals.filter(a => a.workerId === worker.id &&
     a.date >= format(startOfMonth(month), 'yyyy-MM-dd') &&
@@ -170,7 +181,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, onMarkActual,
               const isToday = shift.date === format(new Date(), 'yyyy-MM-dd');
               const colIdx = shift.shiftIndex;
               const isWeekend = (getDay(new Date(shift.date + 'T00:00:00')) + 6) % 7 >= 5;
-              const isVacation = actual?.status === 'vacation';
+              const isVacation = isOnVacation(shift.date) || actual?.status === 'vacation';
 
               return (
                 <button
@@ -238,14 +249,14 @@ export default function ShiftCalendar({ worker, schedule, actuals, onMarkActual,
 
       {tab === 'log' && (
         <div className="px-4 pb-8 space-y-2">
-          {cells.filter((c): c is Cell => !!c && (!c.shift.isOff || c.actual?.status === 'vacation')).map(({ shift, actual }) => (
+          {cells.filter((c): c is Cell => !!c && (!c.shift.isOff || isOnVacation(c.shift.date) || c.actual?.status === 'vacation')).map(({ shift, actual }) => (
             <button
               key={shift.date}
               onClick={() => setSelectedDay(shift.date)}
               className="w-full bg-card-bg rounded-xl border border-card-border p-3 flex items-center gap-3 active:bg-muted transition-colors text-left"
             >
               <div className={`w-2 self-stretch rounded-full shrink-0 ${
-                actual?.status === 'vacation' ? 'bg-teal-400'
+                isOnVacation(shift.date) || actual?.status === 'vacation' ? 'bg-teal-400'
                 : shift.shiftIndex !== null ? ['bg-blue-500','bg-orange-500','bg-purple-500'][shift.shiftIndex % 3] : 'bg-muted'
               }`} />
 

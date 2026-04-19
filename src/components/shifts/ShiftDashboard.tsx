@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { Worker, ShiftSchedule, ShiftActual } from '../../types';
+import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, ChevronLeft, ChevronRight, Calendar, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth } from 'date-fns';
@@ -10,23 +10,29 @@ import {
 } from '../../services/scheduleGenerator';
 import ScheduleConfig from './ScheduleConfig';
 import ShiftCalendar from './ShiftCalendar';
+import VacationModal from './VacationModal';
 
 const SELF_WORKER: Worker = { id: 'self', name: 'Я', rate: 0, scheduleId: null, color: '#3b82f6' };
 
 interface ShiftDashboardProps {
   schedules: ShiftSchedule[];
   actuals: ShiftActual[];
+  vacations: VacationPeriod[];
   onAddSchedule: (data: Omit<ShiftSchedule, 'id'>) => void;
   onUpdateSchedule: (id: string, data: Omit<ShiftSchedule, 'id'>) => void;
   onDeleteSchedule: (id: string) => void;
   onMarkActual: (actual: ShiftActual) => void;
   onDeleteActual: (id: string) => void;
+  onAddVacation: (data: Omit<VacationPeriod, 'id'>) => void;
+  onUpdateVacation: (id: string, data: Omit<VacationPeriod, 'id'>) => void;
+  onDeleteVacation: (id: string) => void;
 }
 
 export default function ShiftDashboard({
-  schedules, actuals,
+  schedules, actuals, vacations,
   onAddSchedule, onUpdateSchedule, onDeleteSchedule,
   onMarkActual, onDeleteActual,
+  onAddVacation, onUpdateVacation, onDeleteVacation,
 }: ShiftDashboardProps) {
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(() => {
     const saved = localStorage.getItem('shift_active_schedule');
@@ -38,6 +44,8 @@ export default function ShiftDashboard({
   const [showScheduleConfig, setShowScheduleConfig] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<ShiftSchedule | null>(null);
   const [showScheduleList, setShowScheduleList] = useState(false);
+  const [showVacationModal, setShowVacationModal] = useState(false);
+  const [editingVacation, setEditingVacation] = useState<VacationPeriod | null>(null);
 
   const prevScheduleLenRef = useRef(schedules.length);
   useEffect(() => {
@@ -85,6 +93,7 @@ export default function ShiftDashboard({
         worker={{ ...SELF_WORKER, scheduleId: activeSchedule.id }}
         schedule={activeSchedule}
         actuals={actuals}
+        vacations={vacations}
         onMarkActual={onMarkActual}
         onDeleteActual={onDeleteActual}
         onBack={() => setShowCalendar(false)}
@@ -244,6 +253,54 @@ export default function ShiftDashboard({
                 </div>
               </div>
             )}
+
+            {/* Vacations */}
+            <div className="bg-card-bg rounded-2xl border border-card-border p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Отпуска</div>
+                <button
+                  onClick={() => { setEditingVacation(null); setShowVacationModal(true); }}
+                  className="flex items-center gap-1 text-xs text-teal-600 dark:text-teal-400 font-medium"
+                >
+                  <Plus size={13} /> Добавить
+                </button>
+              </div>
+              {vacations.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-3">
+                  Отпуска не добавлены
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {vacations
+                    .slice()
+                    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+                    .map(v => (
+                      <div key={v.id} className="flex items-center gap-3">
+                        <span className="text-base">🏖</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-foreground">
+                            {format(new Date(v.startDate + 'T00:00:00'), 'd MMM', { locale: ru })} — {format(new Date(v.endDate + 'T00:00:00'), 'd MMM yyyy', { locale: ru })}
+                          </div>
+                          {v.label && <div className="text-xs text-muted-foreground truncate">{v.label}</div>}
+                        </div>
+                        <button
+                          onClick={() => { setEditingVacation(v); setShowVacationModal(true); }}
+                          className="p-1.5 rounded-lg text-muted-foreground"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => onDeleteVacation(v.id)}
+                          className="p-1.5 rounded-lg text-red-500"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))
+                  }
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -287,6 +344,23 @@ export default function ShiftDashboard({
             setEditingSchedule(null);
           }}
           onClose={() => { setShowScheduleConfig(false); setEditingSchedule(null); }}
+        />
+      )}
+
+      {showVacationModal && (
+        <VacationModal
+          vacation={editingVacation}
+          onSave={data => {
+            if (editingVacation) {
+              onUpdateVacation(editingVacation.id, data);
+            } else {
+              onAddVacation(data);
+            }
+            setShowVacationModal(false);
+            setEditingVacation(null);
+          }}
+          onDelete={editingVacation ? () => { onDeleteVacation(editingVacation.id); setShowVacationModal(false); setEditingVacation(null); } : undefined}
+          onClose={() => { setShowVacationModal(false); setEditingVacation(null); }}
         />
       )}
     </div>

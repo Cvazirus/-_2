@@ -74,6 +74,13 @@ export interface Worker {
   color: string;
 }
 
+export interface VacationPeriod {
+  id: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+  label?: string;
+}
+
 export interface ShiftActual {
   id: string;              // workerId + '-' + date
   workerId: string;

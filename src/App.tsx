@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import { Part, Operation, Journal, ShiftSchedule, ShiftActual } from './types';
+import { Part, Operation, Journal, ShiftSchedule, ShiftActual, VacationPeriod } from './types';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import PartsList from './components/PartsList';
@@ -101,6 +101,9 @@ export default function App() {
   });
   const [shiftActuals, setShiftActuals] = useState<ShiftActual[]>(() => {
     try { const s = localStorage.getItem('app_shift_actuals'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const [vacations, setVacations] = useState<VacationPeriod[]>(() => {
+    try { const s = localStorage.getItem('app_shift_vacations'); return s ? JSON.parse(s) : []; } catch { return []; }
   });
 
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
@@ -1024,6 +1027,7 @@ export default function App() {
 
   useEffect(() => { localStorage.setItem('app_schedules', JSON.stringify(schedules)); }, [schedules]);
   useEffect(() => { localStorage.setItem('app_shift_actuals', JSON.stringify(shiftActuals)); }, [shiftActuals]);
+  useEffect(() => { localStorage.setItem('app_shift_vacations', JSON.stringify(vacations)); }, [vacations]);
 
   const addSchedule = (data: Omit<ShiftSchedule, 'id'>) => {
     setSchedules(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
@@ -1043,6 +1047,15 @@ export default function App() {
   };
   const deleteActual = (id: string) => {
     setShiftActuals(prev => prev.filter(a => a.id !== id));
+  };
+  const addVacation = (data: Omit<VacationPeriod, 'id'>) => {
+    setVacations(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
+  };
+  const updateVacation = (id: string, data: Omit<VacationPeriod, 'id'>) => {
+    setVacations(prev => prev.map(v => v.id === id ? { id, ...data } : v));
+  };
+  const deleteVacation = (id: string) => {
+    setVacations(prev => prev.filter(v => v.id !== id));
   };
 
   const handleBack = () => {
@@ -1529,11 +1542,15 @@ export default function App() {
             <ShiftDashboard
               schedules={schedules}
               actuals={shiftActuals}
+              vacations={vacations}
               onAddSchedule={addSchedule}
               onUpdateSchedule={updateSchedule}
               onDeleteSchedule={deleteSchedule}
               onMarkActual={markActual}
               onDeleteActual={deleteActual}
+              onAddVacation={addVacation}
+              onUpdateVacation={updateVacation}
+              onDeleteVacation={deleteVacation}
             />
           </div>
         );
