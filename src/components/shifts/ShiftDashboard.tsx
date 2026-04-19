@@ -222,6 +222,14 @@ export default function ShiftDashboard({
               )}
             </AnimatePresence>
 
+            {/* Add another schedule */}
+            <button
+              onClick={() => { setEditingSchedule(null); setShowScheduleConfig(true); }}
+              className="w-full py-2 rounded-xl border border-dashed border-card-border text-muted-foreground text-sm flex items-center justify-center gap-1.5 hover:border-blue-400 hover:text-blue-500 transition-colors"
+            >
+              <Plus size={14} /> Добавить ещё график
+            </button>
+
             {/* Shift types legend */}
             {activeSchedule.shifts.length > 0 && (
               <div className="bg-card-bg rounded-2xl border border-card-border p-4">
@@ -253,16 +261,18 @@ export default function ShiftDashboard({
         )}
       </div>
 
-      {/* FAB */}
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileTap={{ scale: 0.92 }}
-        onClick={() => { setEditingSchedule(null); setShowScheduleConfig(true); }}
-        className="fixed bottom-6 right-4 z-20 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center"
-      >
-        <Plus size={28} strokeWidth={2.5} />
-      </motion.button>
+      {/* FAB — только если нет ни одного графика */}
+      {schedules.length === 0 && (
+        <motion.button
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => { setEditingSchedule(null); setShowScheduleConfig(true); }}
+          className="fixed bottom-6 right-4 z-20 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center"
+        >
+          <Plus size={28} strokeWidth={2.5} />
+        </motion.button>
+      )}
 
       {showScheduleConfig && (
         <ScheduleConfig

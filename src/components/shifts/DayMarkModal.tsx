@@ -18,11 +18,12 @@ interface DayMarkModalProps {
 
 type ActualStatus = ShiftActual['status'];
 
-const STATUSES: { value: ActualStatus; label: string; icon: string; color: string }[] = [
+const STATUSES: { value: ActualStatus; label: string; icon: string; color: string; wide?: boolean }[] = [
   { value: 'ok',       label: 'Вышел',       icon: '✓',  color: 'bg-green-500 text-white' },
   { value: 'late',     label: 'Опоздание',   icon: '⏰', color: 'bg-amber-500 text-white' },
   { value: 'miss',     label: 'Не вышел',    icon: '✕',  color: 'bg-red-500 text-white' },
-  { value: 'overtime', label: 'Переработка', icon: '+',  color: 'bg-blue-700 text-white' },
+  { value: 'overtime', label: 'Переработка', icon: '+',  color: 'bg-indigo-600 text-white' },
+  { value: 'vacation', label: 'Отпуск',      icon: '🏖', color: 'bg-teal-500 text-white', wide: true },
 ];
 
 export default function DayMarkModal({
@@ -102,11 +103,25 @@ export default function DayMarkModal({
           <div className="space-y-2">
             <div className="text-sm font-medium text-muted-foreground">Фактический статус</div>
             <div className="grid grid-cols-2 gap-2">
-              {STATUSES.map(s => (
+              {STATUSES.filter(s => !s.wide).map(s => (
                 <button
                   key={s.value}
                   onClick={() => setStatus(s.value)}
                   className={`py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
+                    status === s.value
+                      ? s.color + ' shadow-sm'
+                      : 'bg-background border border-card-border text-foreground'
+                  }`}
+                >
+                  <span>{s.icon}</span>
+                  <span>{s.label}</span>
+                </button>
+              ))}
+              {STATUSES.filter(s => s.wide).map(s => (
+                <button
+                  key={s.value}
+                  onClick={() => setStatus(s.value)}
+                  className={`col-span-2 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all ${
                     status === s.value
                       ? s.color + ' shadow-sm'
                       : 'bg-background border border-card-border text-foreground'

@@ -78,7 +78,7 @@ export interface ShiftActual {
   id: string;              // workerId + '-' + date
   workerId: string;
   date: string;            // YYYY-MM-DD
-  status: 'ok' | 'miss' | 'late' | 'overtime';
+  status: 'ok' | 'miss' | 'late' | 'overtime' | 'vacation';
   actualStart?: string;    // HH:MM
   actualEnd?: string;
   note?: string;
