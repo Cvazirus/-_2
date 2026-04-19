@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X, Users } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X, Users, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import { Journal } from '../types';
@@ -32,6 +32,14 @@ export default function Dashboard({
   currentTheme,
 }: DashboardProps) {
   const isXP = currentTheme === 'xp-light' || currentTheme === 'xp-dark';
+  const [viewMode, setViewMode] = useState<'cards' | 'list'>(() =>
+    (localStorage.getItem('dashboard_view_mode') as 'cards' | 'list') ?? 'cards'
+  );
+  const toggleViewMode = () => {
+    const next = viewMode === 'cards' ? 'list' : 'cards';
+    setViewMode(next);
+    localStorage.setItem('dashboard_view_mode', next);
+  };
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const [renamingCard, setRenamingCard] = useState<'parts' | 'operations' | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -122,139 +130,172 @@ export default function Dashboard({
   const cardTitle = (cardType: 'parts' | 'operations', fallback: string) =>
     journalForCard(cardType)?.name ?? fallback;
 
+  const cardItems = [
+    {
+      key: 'parts' as const,
+      icon: isXP ? <XPBox size={40} /> : <Box size={40} strokeWidth={1.5} className="text-primary-600" />,
+      iconSm: isXP ? <XPBox size={22} /> : <Box size={22} strokeWidth={1.5} className="text-primary-600" />,
+      title: cardTitle('parts', 'Учёт деталей'),
+      subtitle: `${partsCount} записей`,
+      onClick: renamingCard !== 'parts' ? onOpenParts : undefined,
+      hasMenu: true,
+      menuType: 'parts' as const,
+    },
+    {
+      key: 'operations' as const,
+      icon: isXP ? <XPClipboardList size={40} /> : <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />,
+      iconSm: isXP ? <XPClipboardList size={22} /> : <ClipboardList size={22} strokeWidth={1.5} className="text-primary-600" />,
+      title: cardTitle('operations', 'Журнал списаний'),
+      subtitle: `${operationsCount} записей`,
+      onClick: renamingCard !== 'operations' ? onOpenOperations : undefined,
+      hasMenu: true,
+      menuType: 'operations' as const,
+    },
+    {
+      key: 'finance',
+      icon: isXP ? <XPWallet size={40} /> : <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />,
+      iconSm: isXP ? <XPWallet size={22} /> : <Wallet size={22} strokeWidth={1.5} className="text-primary-600" />,
+      title: 'Финансовый журнал',
+      subtitle: 'Зарплата и аванс',
+      onClick: onViewFinance,
+      hasMenu: false,
+      menuType: null,
+    },
+    {
+      key: 'shifts',
+      icon: <Users size={40} strokeWidth={1.5} className="text-primary-600" />,
+      iconSm: <Users size={22} strokeWidth={1.5} className="text-primary-600" />,
+      title: 'Журнал смен',
+      subtitle: workersCount > 0 ? `${workersCount} график${workersCount === 1 ? '' : 'ов'}` : 'Мои смены',
+      onClick: onViewShifts,
+      hasMenu: false,
+      menuType: null,
+    },
+  ];
+
   return (
-    <div className="p-4 space-y-4 flex flex-col min-h-[calc(100dvh-80px)]" ref={menuRef}>
-      {/* Parts card */}
-      <motion.div
-        whileTap={{ scale: 0.98 }}
-        onClick={renamingCard !== 'parts' ? onOpenParts : undefined}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
-      >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            {isXP ? <XPBox size={40} /> : <Box size={40} strokeWidth={1.5} className="text-primary-600" />}
-          </div>
-          <div className="relative">
-            <button
-              onClick={(e) => handleMenuClick(e, 'parts')}
-              className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
+    <div className="p-4 flex flex-col min-h-[calc(100dvh-80px)]" ref={menuRef}>
+      {/* View toggle */}
+      <div className="flex justify-end mb-3">
+        <div className="flex rounded-xl overflow-hidden border border-card-border bg-card-bg">
+          <button
+            onClick={() => { setViewMode('cards'); localStorage.setItem('dashboard_view_mode', 'cards'); }}
+            className={`p-2 ${viewMode === 'cards' ? 'bg-primary-600 text-white' : 'text-muted-foreground'}`}
+          >
+            <LayoutGrid size={16} />
+          </button>
+          <button
+            onClick={() => { setViewMode('list'); localStorage.setItem('dashboard_view_mode', 'list'); }}
+            className={`p-2 ${viewMode === 'list' ? 'bg-primary-600 text-white' : 'text-muted-foreground'}`}
+          >
+            <List size={16} />
+          </button>
+        </div>
+      </div>
+
+      {viewMode === 'cards' ? (
+        <div className="space-y-4">
+          {cardItems.map(item => (
+            <motion.div
+              key={item.key}
+              whileTap={{ scale: 0.98 }}
+              onClick={item.onClick}
+              className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
             >
-              {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
-            </button>
-            <MenuDropdown isOpen={openMenu === 'parts'} cardType="parts" />
-          </div>
+              <div className="flex justify-between items-start mb-6">
+                <div className="bg-primary-50 p-4 rounded-2xl">{item.icon}</div>
+                {item.hasMenu && item.menuType && (
+                  <div className="relative">
+                    <button
+                      onClick={(e) => handleMenuClick(e, item.menuType!)}
+                      className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
+                    >
+                      {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
+                    </button>
+                    <MenuDropdown isOpen={openMenu === item.menuType} cardType={item.menuType!} />
+                  </div>
+                )}
+              </div>
+              <div className="mt-auto">
+                {(item.key === 'parts' || item.key === 'operations') && renamingCard === item.key ? (
+                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                    <input
+                      ref={renameInputRef}
+                      value={renameValue}
+                      onChange={e => setRenameValue(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') commitRename(item.key as 'parts' | 'operations');
+                        if (e.key === 'Escape') setRenamingCard(null);
+                      }}
+                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
+                    />
+                    <button onClick={() => commitRename(item.key as 'parts' | 'operations')} className="text-green-500">
+                      {isXP ? <XPCheck size={18} /> : <Check size={18} />}
+                    </button>
+                    <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
+                      {isXP ? <XPX size={18} /> : <X size={18} />}
+                    </button>
+                  </div>
+                ) : (
+                  <h2 className="text-foreground text-xl font-semibold">{item.title}</h2>
+                )}
+                <p className="text-foreground/60 text-sm font-medium mt-1">{item.subtitle}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
-
-        <div className="mt-auto">
-          {renamingCard === 'parts' ? (
-            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-              <input
-                ref={renameInputRef}
-                value={renameValue}
-                onChange={e => setRenameValue(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') commitRename('parts');
-                  if (e.key === 'Escape') setRenamingCard(null);
-                }}
-                className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
-              />
-              <button onClick={() => commitRename('parts')} className="text-green-500">
-                {isXP ? <XPCheck size={18} /> : <Check size={18} />}
-              </button>
-              <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                {isXP ? <XPX size={18} /> : <X size={18} />}
-              </button>
-            </div>
-          ) : (
-            <h2 className="text-foreground text-xl font-semibold">{cardTitle('parts', 'Учёт деталей')}</h2>
-          )}
-          <p className="text-foreground/60 text-sm font-medium mt-1">{partsCount} записей</p>
-        </div>
-      </motion.div>
-
-      {/* Operations card */}
-      <motion.div
-        whileTap={{ scale: 0.98 }}
-        onClick={renamingCard !== 'operations' ? onOpenOperations : undefined}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
-      >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            {isXP ? <XPClipboardList size={40} /> : <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />}
-          </div>
-          <div className="relative">
-            <button
-              onClick={(e) => handleMenuClick(e, 'operations')}
-              className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
+      ) : (
+        <div className="space-y-2">
+          {cardItems.map(item => (
+            <motion.div
+              key={item.key}
+              whileTap={{ scale: 0.98 }}
+              onClick={item.onClick}
+              className="bg-card-bg rounded-2xl px-4 py-3.5 flex items-center gap-4 cursor-pointer border border-card-border active:bg-muted/50 transition-colors relative"
             >
-              {isXP ? <XPMoreHorizontal size={20} /> : <MoreHorizontal size={20} />}
-            </button>
-            <MenuDropdown isOpen={openMenu === 'operations'} cardType="operations" />
-          </div>
+              <div className="bg-primary-50 w-11 h-11 flex items-center justify-center rounded-xl shrink-0">
+                {item.iconSm}
+              </div>
+              <div className="flex-1 min-w-0">
+                {(item.key === 'parts' || item.key === 'operations') && renamingCard === item.key ? (
+                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                    <input
+                      ref={renameInputRef}
+                      value={renameValue}
+                      onChange={e => setRenameValue(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') commitRename(item.key as 'parts' | 'operations');
+                        if (e.key === 'Escape') setRenamingCard(null);
+                      }}
+                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground font-semibold"
+                    />
+                    <button onClick={() => commitRename(item.key as 'parts' | 'operations')} className="text-green-500">
+                      <Check size={16} />
+                    </button>
+                    <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
+                      <X size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="font-semibold text-foreground">{item.title}</div>
+                )}
+                <div className="text-sm text-muted-foreground">{item.subtitle}</div>
+              </div>
+              {item.hasMenu && item.menuType && (
+                <div className="relative shrink-0">
+                  <button
+                    onClick={(e) => handleMenuClick(e, item.menuType!)}
+                    className="text-foreground/40 p-1"
+                  >
+                    {isXP ? <XPMoreHorizontal size={18} /> : <MoreHorizontal size={18} />}
+                  </button>
+                  <MenuDropdown isOpen={openMenu === item.menuType} cardType={item.menuType!} />
+                </div>
+              )}
+            </motion.div>
+          ))}
         </div>
-
-        <div className="mt-auto">
-          {renamingCard === 'operations' ? (
-            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-              <input
-                ref={renameInputRef}
-                value={renameValue}
-                onChange={e => setRenameValue(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') commitRename('operations');
-                  if (e.key === 'Escape') setRenamingCard(null);
-                }}
-                className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-xl font-semibold"
-              />
-              <button onClick={() => commitRename('operations')} className="text-green-500">
-                {isXP ? <XPCheck size={18} /> : <Check size={18} />}
-              </button>
-              <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                {isXP ? <XPX size={18} /> : <X size={18} />}
-              </button>
-            </div>
-          ) : (
-            <h2 className="text-foreground text-xl font-semibold">{cardTitle('operations', 'Журнал списаний')}</h2>
-          )}
-          <p className="text-foreground/60 text-sm font-medium mt-1">{operationsCount} записи</p>
-        </div>
-      </motion.div>
-
-      {/* Finance card */}
-      <motion.div
-        whileTap={{ scale: 0.98 }}
-        onClick={onViewFinance}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
-      >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            {isXP ? <XPWallet size={40} /> : <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />}
-          </div>
-        </div>
-
-        <div className="mt-auto">
-          <h2 className="text-foreground text-xl font-semibold">Финансовый журнал</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">Зарплата и аванс</p>
-        </div>
-      </motion.div>
-
-      {/* Shifts card */}
-      <motion.div
-        whileTap={{ scale: 0.98 }}
-        onClick={onViewShifts}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
-      >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            <Users size={40} strokeWidth={1.5} className="text-primary-600" />
-          </div>
-        </div>
-
-        <div className="mt-auto">
-          <h2 className="text-foreground text-xl font-semibold">Журнал смен</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">{workersCount > 0 ? `${workersCount} график${workersCount === 1 ? '' : 'ов'}` : 'Мои смены'}</p>
-        </div>
-      </motion.div>
+      )}
     </div>
   );
 }
