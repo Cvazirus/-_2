@@ -59,8 +59,8 @@ function calcNightHours(shift: ShiftTime, breakMinutes: number): number {
   let end = timeToMinutes(shift.end);
   if (end <= start) end += 1440;
 
-  const NIGHT_START = 22 * 60; // 1320
-  const NIGHT_END = 6 * 60;    // 360
+  const NIGHT_START = 22 * 60;
+  const NIGHT_END = 6 * 60;
 
   let nightMin = 0;
   for (let m = start; m < end; m++) {
@@ -131,7 +131,7 @@ export function generateSchedule(
 export function getMonthStats(
   schedule: ShiftSchedule,
   year: number,
-  month: number, // 1-12
+  month: number,
   holidays: string[] = RUSSIAN_HOLIDAYS,
 ): MonthStats {
   const from = format(new Date(year, month - 1, 1), 'yyyy-MM-dd');

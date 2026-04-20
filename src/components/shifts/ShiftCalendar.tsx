@@ -69,7 +69,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
     const first = startOfMonth(month);
     const last = endOfMonth(month);
     const shifts = generateSchedule(schedule, format(first, 'yyyy-MM-dd'), format(last, 'yyyy-MM-dd'), RUSSIAN_HOLIDAYS);
-    const firstDOW = (getDay(first) + 6) % 7; // 0=Mon
+    const firstDOW = (getDay(first) + 6) % 7;
 
     const grid: (Cell | null)[] = Array(firstDOW).fill(null);
     for (const s of shifts) {
@@ -174,7 +174,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
             else if (dx > 50) setMonth(m => subMonths(m, 1));
           }}
         >
-          {/* Week day headers — Mon first */}
+          {/* Week day headers */}
           <div className="grid grid-cols-7 mb-1">
             {WEEK_DAYS.map((d, i) => (
               <div key={d} className={`text-center text-[15px] font-semibold py-1 ${i >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
