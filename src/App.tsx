@@ -1068,10 +1068,6 @@ export default function App() {
     }
 
     updateLocalTimestamp();
-    if (oldQuantity !== newQuantity) {
-      const diff = newQuantity - oldQuantity;
-      createOperation(updatedPart, Math.abs(diff), oldQuantity, diff > 0 ? 'arrival' : 'write-off');
-    }
   };
 
   const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off') => {
