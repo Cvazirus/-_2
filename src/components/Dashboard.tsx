@@ -10,6 +10,17 @@ interface DashboardProps {
   onViewFinance: () => void;
 }
 
+const FluidCardTexture = () => (
+  <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-[32px]">
+    {/* Soft inner highlights representing 3D organic folds */}
+    <div className="absolute -top-[20%] -left-[10%] w-[80%] h-[80%] bg-neutral-400/[0.08] rounded-full blur-[30px]" />
+    <div className="absolute top-[20%] left-[20%] w-[100%] h-[100%] bg-black/90 rounded-full blur-[35px]" />
+    <div className="absolute -bottom-[20%] right-[0%] w-[80%] h-[80%] bg-neutral-400/[0.05] rounded-full blur-[30px]" />
+    {/* Rich matte film grain for physical texture */}
+    <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+  </div>
+);
+
 export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -98,26 +109,29 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           <motion.div 
             whileTap={{ scale: 0.98 }}
             onClick={onOpenParts}
-            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+            className="bg-[#121212] rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08),_0_20px_40px_rgba(0,0,0,0.8)] border border-[#2a2a2a] transition-all aspect-square relative group"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
-                <Box size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+            <FluidCardTexture />
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.04] flex items-center justify-center">
+                  <Box size={34} strokeWidth={1.5} className="text-[#d4d4d8]" />
+                </div>
+                <div className="relative -mr-2 -mt-2">
+                  <button 
+                    onClick={(e) => handleMenuClick(e, 'parts')}
+                    className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
+                  >
+                    <MoreHorizontal size={20} />
+                  </button>
+                  <MenuDropdown isOpen={openMenu === 'parts'} />
+                </div>
               </div>
-              <div className="relative -mr-2 -mt-2">
-                <button 
-                  onClick={(e) => handleMenuClick(e, 'parts')}
-                  className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
-                >
-                  <MoreHorizontal size={20} />
-                </button>
-                <MenuDropdown isOpen={openMenu === 'parts'} />
+              
+              <div className="mt-auto">
+                <h2 className="text-[#f4f4f5] text-base sm:text-lg font-semibold leading-tight mb-1">Основной</h2>
+                <p className="text-[#a1a1aa] text-xs sm:text-sm font-medium">{partsCount} записей</p>
               </div>
-            </div>
-            
-            <div className="mt-auto">
-              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Основной</h2>
-              <p className="text-[#737373] text-xs sm:text-sm font-medium">{partsCount} записей</p>
             </div>
           </motion.div>
 
@@ -125,26 +139,29 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           <motion.div 
             whileTap={{ scale: 0.98 }}
             onClick={onOpenOperations}
-            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+            className="bg-[#121212] rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08),_0_20px_40px_rgba(0,0,0,0.8)] border border-[#2a2a2a] transition-all aspect-square relative group"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
-                <ClipboardList size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+            <FluidCardTexture />
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.04] flex items-center justify-center">
+                  <ClipboardList size={34} strokeWidth={1.5} className="text-[#d4d4d8]" />
+                </div>
+                <div className="relative -mr-2 -mt-2">
+                  <button 
+                    onClick={(e) => handleMenuClick(e, 'operations')}
+                    className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
+                  >
+                    <MoreHorizontal size={20} />
+                  </button>
+                  <MenuDropdown isOpen={openMenu === 'operations'} />
+                </div>
               </div>
-              <div className="relative -mr-2 -mt-2">
-                <button 
-                  onClick={(e) => handleMenuClick(e, 'operations')}
-                  className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
-                >
-                  <MoreHorizontal size={20} />
-                </button>
-                <MenuDropdown isOpen={openMenu === 'operations'} />
+              
+              <div className="mt-auto">
+                <h2 className="text-[#f4f4f5] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
+                <p className="text-[#a1a1aa] text-xs sm:text-sm font-medium">{operationsCount} записей</p>
               </div>
-            </div>
-            
-            <div className="mt-auto">
-              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
-              <p className="text-[#737373] text-xs sm:text-sm font-medium">{operationsCount} записей</p>
             </div>
           </motion.div>
 
@@ -152,44 +169,55 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           <motion.div 
             whileTap={{ scale: 0.98 }}
             onClick={onViewFinance}
-            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+            className="bg-[#121212] rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_2px_rgba(255,255,255,0.08),_0_20px_40px_rgba(0,0,0,0.8)] border border-[#2a2a2a] transition-all aspect-square relative group"
           >
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
-                <Wallet size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+            <FluidCardTexture />
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(255,255,255,0.05),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.04] flex items-center justify-center">
+                  <Wallet size={34} strokeWidth={1.5} className="text-[#d4d4d8]" />
+                </div>
+                <div className="relative -mr-2 -mt-2">
+                  <button className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full">
+                    <MoreHorizontal size={20} />
+                  </button>
+                </div>
               </div>
-              <div className="relative -mr-2 -mt-2">
-                <button className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full">
-                  <MoreHorizontal size={20} />
-                </button>
+              
+              <div className="mt-auto">
+                <h2 className="text-[#f4f4f5] text-base sm:text-lg font-semibold leading-tight mb-1">Финансовый журнал</h2>
+                <p className="text-[#a1a1aa] text-xs sm:text-sm font-medium">Зарплата и аванс</p>
               </div>
-            </div>
-            
-            <div className="mt-auto">
-              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Финансовый журнал</h2>
-              <p className="text-[#737373] text-xs sm:text-sm font-medium">Зарплата и аванс</p>
             </div>
           </motion.div>
 
           {/* Журнал смен */}
           <motion.div 
             whileTap={{ scale: 0.98 }}
-            className="bg-gradient-to-br from-[#222222]/50 to-[#111111]/50 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-not-allowed shadow-[inset_0_1px_1px_rgba(255,255,255,0.02),_0_10px_30px_rgba(0,0,0,0.5)] border border-transparent transition-all aspect-square relative"
+            className="bg-[#121212]/50 rounded-[32px] p-5 sm:p-6 flex flex-col cursor-not-allowed shadow-[inset_0_1px_2px_rgba(255,255,255,0.03),_0_20px_40px_rgba(0,0,0,0.4)] border border-[#2a2a2a]/50 transition-all aspect-square relative group"
           >
-            <div className="flex justify-between items-start mb-4 opacity-70">
-              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
-                <Users size={34} strokeWidth={1.5} className="text-[#737373]" />
-              </div>
-              <div className="relative -mr-2 -mt-2">
-                <button className="text-white/20 transition-colors p-2 rounded-full cursor-not-allowed">
-                  <MoreHorizontal size={20} />
-                </button>
-              </div>
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden rounded-[32px] opacity-40">
+              <div className="absolute -top-[20%] -left-[10%] w-[80%] h-[80%] bg-neutral-400/[0.08] rounded-full blur-[30px]" />
+              <div className="absolute top-[20%] left-[20%] w-[100%] h-[100%] bg-black/90 rounded-full blur-[35px]" />
+              <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
             </div>
             
-            <div className="mt-auto opacity-70">
-              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал смен</h2>
-              <p className="text-[#737373] text-xs sm:text-sm font-medium opacity-60">1 график</p>
+            <div className="relative z-10 flex flex-col h-full opacity-60">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/60 shadow-[inset_0_1px_3px_rgba(255,255,255,0.02),_0_1px_0_rgba(255,255,255,0.01)] border border-white/[0.02] flex items-center justify-center">
+                  <Users size={34} strokeWidth={1.5} className="text-[#a1a1aa]" />
+                </div>
+                <div className="relative -mr-2 -mt-2">
+                  <button className="text-white/20 transition-colors p-2 rounded-full cursor-not-allowed">
+                    <MoreHorizontal size={20} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-auto">
+                <h2 className="text-[#e4e4e7] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал смен</h2>
+                <p className="text-[#71717a] text-xs sm:text-sm font-medium">1 график</p>
+              </div>
             </div>
           </motion.div>
         </div>
