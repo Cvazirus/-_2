@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users, LayoutGrid, List, Moon, Sun, Download, MessageCircle } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -70,7 +70,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   const cards = [
     {
       key: 'parts' as const,
-      icon: <Box size={52} strokeWidth={1.2} className="text-white" />,
+      icon: <span className="text-[52px] leading-none">📦</span>,
       title: 'Основной',
       sub: `${partsCount} записей`,
       onClick: onOpenParts,
@@ -78,7 +78,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'operations' as const,
-      icon: <ClipboardList size={52} strokeWidth={1.2} className="text-white" />,
+      icon: <span className="text-[52px] leading-none">📤</span>,
       title: 'Журнал\nсписаний',
       sub: `${operationsCount} записей`,
       onClick: onOpenOperations,
@@ -86,7 +86,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'finance',
-      icon: <Wallet size={52} strokeWidth={1.2} className="text-white" />,
+      icon: <span className="text-[52px] leading-none">💰</span>,
       title: 'Финансовый\nжурнал',
       sub: 'Зарплата и аванс',
       onClick: onViewFinance,
@@ -94,7 +94,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'shifts',
-      icon: <Users size={52} strokeWidth={1.2} className="text-white" />,
+      icon: <span className="text-[52px] leading-none">🌗</span>,
       title: 'Журнал\nсмен',
       sub: 'Мои смены',
       onClick: onViewShifts,
