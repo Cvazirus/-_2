@@ -8,9 +8,10 @@ interface DashboardProps {
   onOpenParts: () => void;
   onOpenOperations: () => void;
   onViewFinance: () => void;
+  onViewShifts: () => void;
 }
 
-export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance }: DashboardProps) {
+export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -198,25 +199,21 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           </motion.div>
 
           {/* Журнал смен */}
-          <motion.div 
+          <motion.div
             whileTap={{ scale: 0.98 }}
-            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-not-allowed shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
+            onClick={onViewShifts}
+            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
           >
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[28px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-            
-            <div className="relative z-10 flex flex-col h-full opacity-50">
+
+            <div className="relative z-10 flex flex-col h-full">
               <div className="flex justify-between items-start w-full">
-                <Users size={38} strokeWidth={1.5} className="text-[#8e8e93] ml-1 mt-1" />
-                <div className="relative -mr-2 -mt-2">
-                  <button className="text-[#6c6c70] transition-colors p-2 rounded-full cursor-not-allowed">
-                    <MoreHorizontal size={20} strokeWidth={2} />
-                  </button>
-                </div>
+                <Users size={38} strokeWidth={1.5} className="text-white ml-1 mt-1" />
               </div>
-              
+
               <div className="mt-auto">
-                <h2 className="text-[#8e8e93] text-[17px] font-medium leading-tight mb-1">Журнал<br/>смен</h2>
-                <p className="text-[#5c5c60] text-[13px]">1 график</p>
+                <h2 className="text-white text-[17px] font-medium leading-tight mb-1">Журнал<br/>смен</h2>
+                <p className="text-[#8e8e93] text-[13px]">Мои смены</p>
               </div>
             </div>
           </motion.div>

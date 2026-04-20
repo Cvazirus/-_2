@@ -1238,6 +1238,7 @@ export default function App() {
                 changeView('operations-log');
               }}
               onViewFinance={() => changeView('finance-journal')}
+              onViewShifts={() => changeView('shifts')}
             />
           </div>
         );
