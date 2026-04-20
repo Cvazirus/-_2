@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths } from 'date-fns';
@@ -20,9 +20,9 @@ interface ShiftCalendarProps {
 }
 
 const SHIFT_BG = [
-  'bg-blue-500',
-  'bg-orange-500',
-  'bg-purple-500',
+  'bg-blue-400/75',
+  'bg-amber-500/75',
+  'bg-purple-400/75',
 ];
 const SHIFT_TEXT = [
   'text-white',
@@ -60,6 +60,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
   const [month, setMonth] = useState(new Date());
   const [tab, setTab] = useState<'calendar' | 'log'>('calendar');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const year = month.getFullYear();
   const mon = month.getMonth() + 1;
@@ -162,11 +163,21 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
       </div>
 
       {tab === 'calendar' && (
-        <div className="px-4 pb-8">
+        <div
+          className="px-4 pb-8 select-none"
+          onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            if (touchStartX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            touchStartX.current = null;
+            if (dx < -50) setMonth(m => addMonths(m, 1));
+            else if (dx > 50) setMonth(m => subMonths(m, 1));
+          }}
+        >
           {/* Week day headers — Mon first */}
           <div className="grid grid-cols-7 mb-1">
             {WEEK_DAYS.map((d, i) => (
-              <div key={d} className={`text-center text-[11px] font-semibold py-1 ${i >= 5 ? 'text-red-500' : 'text-muted-foreground'}`}>
+              <div key={d} className={`text-center text-[13px] font-semibold py-1 ${i >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
                 {d}
               </div>
             ))}
@@ -182,6 +193,23 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const colIdx = shift.shiftIndex;
               const isWeekend = (getDay(new Date(shift.date + 'T00:00:00')) + 6) % 7 >= 5;
               const isVacation = isOnVacation(shift.date) || actual?.status === 'vacation';
+              const isNonWorkHoliday = shift.isHoliday && shift.isOff && !isVacation;
+
+              const bgClass = isVacation
+                ? 'bg-teal-400/80'
+                : isNonWorkHoliday
+                  ? 'bg-rose-400/70'
+                  : shift.isOff
+                    ? isWeekend ? 'bg-red-100/60 dark:bg-red-900/15' : 'bg-muted/30'
+                    : colIdx !== null
+                      ? SHIFT_BG[colIdx % SHIFT_BG.length]
+                      : 'bg-muted/30';
+
+              const textClass = isVacation || isNonWorkHoliday
+                ? 'text-white'
+                : shift.isOff
+                  ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
+                  : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground';
 
               return (
                 <button
@@ -189,46 +217,32 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                   onClick={() => setSelectedDay(shift.date)}
                   className={`relative rounded-xl aspect-square flex flex-col items-center justify-center p-0.5 transition-all active:scale-95 ${
                     isToday ? 'ring-2 ring-blue-500' : ''
-                  } ${
-                    isVacation
-                      ? 'bg-teal-400'
-                      : shift.isOff
-                        ? isWeekend ? 'bg-red-50 dark:bg-red-900/10' : 'bg-muted/30'
-                        : colIdx !== null
-                          ? SHIFT_BG[colIdx % SHIFT_BG.length]
-                          : 'bg-muted/30'
-                  }`}
+                  } ${bgClass}`}
                 >
-                  <span className={`text-[11px] font-bold leading-none mb-0.5 ${
-                    isVacation ? 'text-white'
-                      : shift.isOff
-                        ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
-                        : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground'
-                  }`}>
+                  <span className={`text-[14px] font-bold leading-none mb-0.5 ${textClass}`}>
                     {dayNum}
                   </span>
 
                   {isVacation ? (
-                    <span className="text-[9px] leading-none">🏖</span>
+                    <span className="text-[10px] leading-none">🏖</span>
+                  ) : isNonWorkHoliday ? (
+                    <span className="text-[10px] leading-none text-white/90">★</span>
                   ) : !shift.isOff && shift.shift ? (
-                    <span className={`text-[9px] font-semibold leading-none ${
-                      colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground'
-                    }`}>
+                    <span className={`text-[11px] font-semibold leading-none ${textClass}`}>
                       {shift.shift.label.split('-')[0].trim().slice(0, 2)}с
                     </span>
                   ) : null}
 
-                  {/* Status dot (not vacation — it's shown as bg) */}
                   {actual && actual.status !== 'vacation' && (
                     <span className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${STATUS_DOT[actual.status]}`} />
                   )}
 
                   {shift.isHoliday && !shift.isOff && !isVacation && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-300" />
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-rose-400" />
                   )}
 
                   {shift.nightHours > 0 && !isVacation && (
-                    <span className="absolute bottom-0.5 right-0.5 text-[7px] text-white/80">🌙</span>
+                    <span className="absolute bottom-0.5 right-0.5 text-[8px] text-white/80">🌙</span>
                   )}
                 </button>
               );
@@ -236,13 +250,13 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
           </div>
 
           {/* Legend */}
-          <div className="mt-4 flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Вышел</div>
-            <div className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Опоздание</div>
-            <div className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" /> Не вышел</div>
-            <div className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block" /> Переработка</div>
-            <div className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-teal-400 inline-block" /> Отпуск</div>
-            <div className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-red-300 inline-block" /> Праздник</div>
+          <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Вышел</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block" /> Опоздание</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" /> Не вышел</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" /> Переработка</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-teal-400 inline-block" /> Отпуск</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" /> Праздник</div>
           </div>
         </div>
       )}
