@@ -11,8 +11,11 @@ interface DashboardProps {
   onViewShifts: () => void;
 }
 
+const NOISE = 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")';
+
 export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,7 +24,6 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         setOpenMenu(null);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -29,18 +31,6 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   const handleMenuClick = (e: React.MouseEvent, menu: 'parts' | 'operations') => {
     e.stopPropagation();
     setOpenMenu(openMenu === menu ? null : menu);
-  };
-
-  const handleRename = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOpenMenu(null);
-    // TODO: Implement rename
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setOpenMenu(null);
-    // TODO: Implement delete
   };
 
   const MenuDropdown = ({ isOpen }: { isOpen: boolean }) => (
@@ -53,16 +43,16 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           transition={{ duration: 0.15 }}
           className="absolute right-0 top-10 w-48 bg-[#252528] rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-white/[0.05] overflow-hidden z-20"
         >
-          <button 
-            onClick={handleRename}
-            className="w-full px-4 py-3 flex items-center gap-3 text-left text-white hover:bg-white/5 transition-colors relative z-10 font-medium text-sm"
+          <button
+            onClick={(e) => { e.stopPropagation(); setOpenMenu(null); }}
+            className="w-full px-4 py-3 flex items-center gap-3 text-left text-white hover:bg-white/5 transition-colors font-medium text-sm"
           >
             <Edit2 size={16} strokeWidth={1.5} />
             <span>Переименовать</span>
           </button>
-          <button 
-            onClick={handleDelete}
-            className="w-full px-4 py-3 flex items-center gap-3 text-left text-red-400 hover:bg-red-500/10 transition-colors relative z-10 font-medium text-sm border-t border-white/5"
+          <button
+            onClick={(e) => { e.stopPropagation(); setOpenMenu(null); }}
+            className="w-full px-4 py-3 flex items-center gap-3 text-left text-red-400 hover:bg-red-500/10 transition-colors font-medium text-sm border-t border-white/5"
           >
             <Trash2 size={16} strokeWidth={1.5} />
             <span>Удалить</span>
@@ -72,144 +62,158 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     </AnimatePresence>
   );
 
+  const cards = [
+    {
+      key: 'parts' as const,
+      icon: <Box size={32} strokeWidth={1.5} className="text-white" />,
+      title: 'Основной',
+      sub: `${partsCount} записей`,
+      onClick: onOpenParts,
+      hasMenu: true,
+    },
+    {
+      key: 'operations' as const,
+      icon: <ClipboardList size={32} strokeWidth={1.5} className="text-white" />,
+      title: 'Журнал\nсписаний',
+      sub: `${operationsCount} записей`,
+      onClick: onOpenOperations,
+      hasMenu: true,
+    },
+    {
+      key: 'finance',
+      icon: <Wallet size={32} strokeWidth={1.5} className="text-white" />,
+      title: 'Финансовый\nжурнал',
+      sub: 'Зарплата и аванс',
+      onClick: onViewFinance,
+      hasMenu: false,
+    },
+    {
+      key: 'shifts',
+      icon: <Users size={32} strokeWidth={1.5} className="text-white" />,
+      title: 'Журнал\nсмен',
+      sub: 'Мои смены',
+      onClick: onViewShifts,
+      hasMenu: false,
+    },
+  ];
+
   return (
-    <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-[#0A0A0C]" ref={menuRef}>
-      {/* Mechanical Background - using a visually similar dark tech/gear imagery */}
+    <div
+      className="relative h-[100dvh] overflow-hidden bg-[#0A0A0C] flex flex-col"
+      ref={menuRef}
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
+      {/* Background */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80" 
-          alt="Circuit Background" 
+        <img
+          src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80"
+          alt=""
           className="w-full h-full object-cover grayscale opacity-30 contrast-[1.2]"
         />
-        <img 
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80" 
-          alt="Gears overlay" 
+        <img
+          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80"
+          alt=""
           className="absolute inset-0 w-full h-full object-cover grayscale mix-blend-overlay opacity-40 contrast-[1.2]"
         />
-        {/* Adjusted overlay to darken slightly based on feedback */}
         <div className="absolute inset-0 bg-[#0A0A0C]/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-[#0a0a0c]/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent" />
       </div>
 
-      <div className="relative z-10 p-5 w-full max-w-lg mx-auto pt-6 flex flex-col min-h-full">
-        
-        {/* Adjust Toolbar (Grid/List Toggle) */}
-        <div className="flex justify-end mb-4">
-          <div className="flex items-center gap-0.5 bg-[#1F1F21] p-[3px] rounded-2xl border border-white/[0.02] shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-            <button className="bg-[#38383A] text-white p-2 rounded-[14px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),_0_2px_4px_rgba(0,0,0,0.4)]">
-              <LayoutGrid size={18} strokeWidth={1.5} />
+      {/* Blue top bar */}
+      <div
+        className="relative z-10 flex items-center justify-between px-5 bg-[#2563eb]"
+        style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)', paddingBottom: '14px' }}
+      >
+        <h1 className="text-white text-[20px] font-semibold tracking-tight">Учёт</h1>
+        <div className="flex items-center gap-2">
+          {/* Grid/List toggle */}
+          <div className="flex items-center gap-0.5 bg-white/10 p-[3px] rounded-xl">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/50'}`}
+            >
+              <LayoutGrid size={16} strokeWidth={1.5} />
             </button>
-            <button className="text-[#8e8e93] p-2 rounded-[14px] transition-colors hover:text-white">
-              <List size={18} strokeWidth={1.5} />
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/50'}`}
+            >
+              <List size={16} strokeWidth={1.5} />
             </button>
           </div>
+          <button className="bg-white/10 text-white p-2 rounded-full transition-colors hover:bg-white/20">
+            <MoreHorizontal size={20} strokeWidth={2} />
+          </button>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4 content-start">
-          {/* Учёт (Основной) */}
-          <motion.div 
-            whileTap={{ scale: 0.98 }}
-            onClick={onOpenParts}
-            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
-          >
-            {/* Fine grain noise for matte finish */}
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[28px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-            
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="flex justify-between items-start w-full">
-                <Box size={38} strokeWidth={1.5} className="text-white ml-1 mt-1" />
-                <div className="relative -mr-2 -mt-2">
-                  <button 
-                    onClick={(e) => handleMenuClick(e, 'parts')}
-                    className="text-[#6c6c70] hover:text-white transition-colors p-2 rounded-full"
-                  >
-                    <MoreHorizontal size={20} strokeWidth={2} />
-                  </button>
-                  <MenuDropdown isOpen={openMenu === 'parts'} />
+      {/* Cards */}
+      <div className="relative z-10 flex-1 p-4 min-h-0">
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-2 gap-3 h-full">
+            {cards.map(card => (
+              <motion.div
+                key={card.key}
+                whileTap={{ scale: 0.97 }}
+                onClick={card.onClick}
+                className="bg-[#242426] rounded-[24px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] relative"
+              >
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[24px]" style={{ backgroundImage: NOISE }} />
+                <div className="relative z-10 flex flex-col h-full">
+                  <div className="flex justify-between items-start">
+                    {card.icon}
+                    {card.hasMenu && (
+                      <div className="relative -mr-2 -mt-1">
+                        <button
+                          onClick={(e) => handleMenuClick(e, card.key as 'parts' | 'operations')}
+                          className="text-[#6c6c70] hover:text-white transition-colors p-1.5 rounded-full"
+                        >
+                          <MoreHorizontal size={18} strokeWidth={2} />
+                        </button>
+                        <MenuDropdown isOpen={openMenu === card.key} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-auto pt-4">
+                    <h2 className="text-white text-[16px] font-medium leading-tight mb-1 whitespace-pre-line">{card.title}</h2>
+                    <p className="text-[#8e8e93] text-[12px]">{card.sub}</p>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="mt-auto">
-                <h2 className="text-white text-[17px] font-medium leading-tight mb-1">Основной</h2>
-                <p className="text-[#8e8e93] text-[13px]">{partsCount} записей</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Журнал списаний */}
-          <motion.div 
-            whileTap={{ scale: 0.98 }}
-            onClick={onOpenOperations}
-            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
-          >
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[28px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-            
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="flex justify-between items-start w-full">
-                <ClipboardList size={38} strokeWidth={1.5} className="text-white ml-1 mt-1" />
-                <div className="relative -mr-2 -mt-2">
-                  <button 
-                    onClick={(e) => handleMenuClick(e, 'operations')}
-                    className="text-[#6c6c70] hover:text-white transition-colors p-2 rounded-full"
-                  >
-                    <MoreHorizontal size={20} strokeWidth={2} />
-                  </button>
-                  <MenuDropdown isOpen={openMenu === 'operations'} />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 h-full">
+            {cards.map(card => (
+              <motion.div
+                key={card.key}
+                whileTap={{ scale: 0.98 }}
+                onClick={card.onClick}
+                className="bg-[#242426] rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02] relative flex-1"
+              >
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[20px]" style={{ backgroundImage: NOISE }} />
+                <div className="relative z-10 flex items-center gap-4 w-full">
+                  <div className="shrink-0">{card.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-white text-[16px] font-medium leading-tight">{card.title.replace('\n', ' ')}</h2>
+                    <p className="text-[#8e8e93] text-[12px] mt-0.5">{card.sub}</p>
+                  </div>
+                  {card.hasMenu && (
+                    <div className="relative shrink-0">
+                      <button
+                        onClick={(e) => handleMenuClick(e, card.key as 'parts' | 'operations')}
+                        className="text-[#6c6c70] hover:text-white transition-colors p-1.5 rounded-full"
+                      >
+                        <MoreHorizontal size={18} strokeWidth={2} />
+                      </button>
+                      <MenuDropdown isOpen={openMenu === card.key} />
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="mt-auto">
-                <h2 className="text-white text-[17px] font-medium leading-tight mb-1">Журнал<br/>списаний</h2>
-                <p className="text-[#8e8e93] text-[13px]">{operationsCount} записей</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Финансовый журнал */}
-          <motion.div 
-            whileTap={{ scale: 0.98 }}
-            onClick={onViewFinance}
-            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
-          >
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[28px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-            
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="flex justify-between items-start w-full">
-                <Wallet size={38} strokeWidth={1.5} className="text-white ml-1 mt-1" />
-                <div className="relative -mr-2 -mt-2">
-                  <button className="text-[#6c6c70] hover:text-white transition-colors p-2 rounded-full">
-                    <MoreHorizontal size={20} strokeWidth={2} />
-                  </button>
-                </div>
-              </div>
-              
-              <div className="mt-auto">
-                <h2 className="text-white text-[17px] font-medium leading-tight mb-1">Финансовый<br/>журнал</h2>
-                <p className="text-[#8e8e93] text-[13px]">Зарплата и аванс</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Журнал смен */}
-          <motion.div
-            whileTap={{ scale: 0.98 }}
-            onClick={onViewShifts}
-            className="bg-[#242426] rounded-[28px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] transition-all aspect-[4/4.5] relative group"
-          >
-            <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[28px]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="flex justify-between items-start w-full">
-                <Users size={38} strokeWidth={1.5} className="text-white ml-1 mt-1" />
-              </div>
-
-              <div className="mt-auto">
-                <h2 className="text-white text-[17px] font-medium leading-tight mb-1">Журнал<br/>смен</h2>
-                <p className="text-[#8e8e93] text-[13px]">Мои смены</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
