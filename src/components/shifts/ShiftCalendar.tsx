@@ -20,14 +20,14 @@ interface ShiftCalendarProps {
 }
 
 const SHIFT_BG = [
-  'bg-blue-400/75',
-  'bg-amber-500/75',
-  'bg-purple-400/75',
+  'bg-blue-400/40',
+  'bg-amber-500/40',
+  'bg-purple-400/40',
 ];
 const SHIFT_TEXT = [
-  'text-white',
-  'text-white',
-  'text-white',
+  'text-blue-900 dark:text-blue-100',
+  'text-amber-900 dark:text-amber-100',
+  'text-purple-900 dark:text-purple-100',
 ];
 const STATUS_DOT: Record<ShiftActual['status'], string> = {
   ok:       'bg-green-500',
@@ -196,20 +196,22 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const isNonWorkHoliday = shift.isHoliday && shift.isOff && !isVacation;
 
               const bgClass = isVacation
-                ? 'bg-teal-400/80'
+                ? 'bg-teal-400/40'
                 : isNonWorkHoliday
-                  ? 'bg-rose-400/70'
+                  ? 'bg-rose-400/35'
                   : shift.isOff
                     ? isWeekend ? 'bg-red-100/60 dark:bg-red-900/15' : 'bg-muted/30'
                     : colIdx !== null
                       ? SHIFT_BG[colIdx % SHIFT_BG.length]
                       : 'bg-muted/30';
 
-              const textClass = isVacation || isNonWorkHoliday
-                ? 'text-white'
-                : shift.isOff
-                  ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
-                  : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground';
+              const textClass = isVacation
+                ? 'text-teal-900 dark:text-teal-100'
+                : isNonWorkHoliday
+                  ? 'text-rose-900 dark:text-rose-100'
+                  : shift.isOff
+                    ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
+                    : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground';
 
               return (
                 <button
