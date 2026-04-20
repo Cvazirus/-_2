@@ -72,15 +72,15 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   );
 
   return (
-    <div className="p-4 space-y-4 flex flex-col min-h-[calc(100dvh-80px)]" ref={menuRef}>
+    <div className="p-4 grid grid-cols-2 gap-4 content-start min-h-[calc(100dvh-80px)]" ref={menuRef}>
       <motion.div 
         whileTap={{ scale: 0.98 }}
         onClick={onOpenParts}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
+        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all aspect-square relative"
       >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            <Box size={40} strokeWidth={1.5} className="text-primary-600" />
+        <div className="flex justify-between items-start mb-4">
+          <div className="bg-primary-50 p-3 rounded-2xl">
+            <Box size={32} strokeWidth={1.5} className="text-primary-600" />
           </div>
           <div className="relative">
             <button 
@@ -94,19 +94,19 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         </div>
         
         <div className="mt-auto">
-          <h2 className="text-foreground text-xl font-semibold">Учёт деталей</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">{partsCount} записей</p>
+          <h2 className="text-foreground text-base sm:text-lg font-semibold leading-tight mb-1">Учёт деталей</h2>
+          <p className="text-foreground/60 text-xs sm:text-sm font-medium">{partsCount} записей</p>
         </div>
       </motion.div>
 
       <motion.div 
         whileTap={{ scale: 0.98 }}
         onClick={onOpenOperations}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
+        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all aspect-square relative"
       >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />
+        <div className="flex justify-between items-start mb-4">
+          <div className="bg-primary-50 p-3 rounded-2xl">
+            <ClipboardList size={32} strokeWidth={1.5} className="text-primary-600" />
           </div>
           <div className="relative">
             <button 
@@ -120,25 +120,25 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         </div>
         
         <div className="mt-auto">
-          <h2 className="text-foreground text-xl font-semibold">Журнал списаний</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">{operationsCount} записи</p>
+          <h2 className="text-foreground text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
+          <p className="text-foreground/60 text-xs sm:text-sm font-medium">{operationsCount} записи</p>
         </div>
       </motion.div>
 
       <motion.div 
         whileTap={{ scale: 0.98 }}
         onClick={onViewFinance}
-        className="bg-card-bg rounded-2xl p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all h-48 relative"
+        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all col-span-2 min-h-[140px] relative"
       >
-        <div className="flex justify-between items-start mb-6">
-          <div className="bg-primary-50 p-4 rounded-2xl">
-            <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />
+        <div className="flex justify-between items-start mb-4">
+          <div className="bg-primary-50 p-3 rounded-2xl">
+            <Wallet size={32} strokeWidth={1.5} className="text-primary-600" />
           </div>
         </div>
         
         <div className="mt-auto">
-          <h2 className="text-foreground text-xl font-semibold">Финансовый журнал</h2>
-          <p className="text-foreground/60 text-sm font-medium mt-1">Зарплата и аванс</p>
+          <h2 className="text-foreground text-lg sm:text-lg font-semibold mb-1">Финансовый журнал</h2>
+          <p className="text-foreground/60 text-sm font-medium">Зарплата и аванс</p>
         </div>
       </motion.div>
     </div>
