@@ -748,8 +748,40 @@ export default function App() {
 
             newParts.push(newPart);
           }
-          setParts([...parts, ...newParts]);
-          showToast(`Импортировано ${newParts.length} деталей в "${journal.name}"`);
+          let addedCount = 0;
+          let updatedCount = 0;
+          setParts(prev => {
+            const result = [...prev];
+            for (const newPart of newParts) {
+              if (!newPart.code) continue;
+              const existingIdx = result.findIndex(
+                p => p.journalId === journal.id &&
+                     p.code.trim().toLowerCase() === newPart.code.trim().toLowerCase()
+              );
+              if (existingIdx >= 0) {
+                const existing = result[existingIdx];
+                result[existingIdx] = {
+                  ...existing,
+                  name: newPart.name || existing.name,
+                  pricePerUnit: newPart.pricePerUnit > 0 ? newPart.pricePerUnit : existing.pricePerUnit,
+                  currentQuantity: newPart.currentQuantity,
+                  operationNumbers: newPart.operationNumbers.length > 0
+                    ? newPart.operationNumbers
+                    : existing.operationNumbers,
+                  operationPrices: Object.keys(newPart.operationPrices || {}).length > 0
+                    ? newPart.operationPrices
+                    : existing.operationPrices,
+                  lastUpdate: new Date().toISOString(),
+                };
+                updatedCount++;
+              } else {
+                result.push(newPart);
+                addedCount++;
+              }
+            }
+            return result;
+          });
+          showToast(`Добавлено: ${addedCount}, обновлено: ${updatedCount} деталей`);
         } else {
           const newOps: Operation[] = [];
           for (let i = 1; i < rows.length; i++) {
