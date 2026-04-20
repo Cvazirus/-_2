@@ -1,4 +1,4 @@
-import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, MessageCircle } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, MessageCircle, Package, ClipboardList, Banknote, CalendarDays } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -70,7 +70,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   const cards = [
     {
       key: 'parts' as const,
-      icon: <span className="text-[52px] leading-none">📦</span>,
+      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-blue-500/20 flex items-center justify-center"><Package size={30} strokeWidth={1.5} className="text-blue-400" /></div>,
       title: 'Основной',
       sub: `${partsCount} записей`,
       onClick: onOpenParts,
@@ -78,7 +78,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'operations' as const,
-      icon: <span className="text-[52px] leading-none">📤</span>,
+      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-orange-500/20 flex items-center justify-center"><ClipboardList size={30} strokeWidth={1.5} className="text-orange-400" /></div>,
       title: 'Журнал\nсписаний',
       sub: `${operationsCount} записей`,
       onClick: onOpenOperations,
@@ -86,7 +86,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'finance',
-      icon: <span className="text-[52px] leading-none">💰</span>,
+      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-green-500/20 flex items-center justify-center"><Banknote size={30} strokeWidth={1.5} className="text-green-400" /></div>,
       title: 'Финансовый\nжурнал',
       sub: 'Зарплата и аванс',
       onClick: onViewFinance,
@@ -94,7 +94,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'shifts',
-      icon: <span className="text-[52px] leading-none">🌗</span>,
+      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-purple-500/20 flex items-center justify-center"><CalendarDays size={30} strokeWidth={1.5} className="text-purple-400" /></div>,
       title: 'Журнал\nсмен',
       sub: 'Мои смены',
       onClick: onViewShifts,
