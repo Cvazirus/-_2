@@ -177,7 +177,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
           {/* Week day headers — Mon first */}
           <div className="grid grid-cols-7 mb-1">
             {WEEK_DAYS.map((d, i) => (
-              <div key={d} className={`text-center text-[13px] font-semibold py-1 ${i >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
+              <div key={d} className={`text-center text-[15px] font-semibold py-1 ${i >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
                 {d}
               </div>
             ))}
@@ -221,16 +221,16 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                     isToday ? 'ring-2 ring-blue-500' : ''
                   } ${bgClass}`}
                 >
-                  <span className={`text-[14px] font-bold leading-none mb-0.5 ${textClass}`}>
+                  <span className={`text-[18px] font-bold leading-none mb-0.5 ${textClass}`}>
                     {dayNum}
                   </span>
 
                   {isVacation ? (
-                    <span className="text-[10px] leading-none">🏖</span>
+                    <span className="text-[12px] leading-none">🏖</span>
                   ) : isNonWorkHoliday ? (
-                    <span className="text-[10px] leading-none text-white/90">★</span>
+                    <span className="text-[12px] leading-none text-white/90">★</span>
                   ) : !shift.isOff && shift.shift ? (
-                    <span className={`text-[11px] font-semibold leading-none ${textClass}`}>
+                    <span className={`text-[13px] font-semibold leading-none ${textClass}`}>
                       {shift.shift.label.split('-')[0].trim().slice(0, 2)}с
                     </span>
                   ) : null}
