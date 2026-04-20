@@ -8,41 +8,59 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [
-      react(),
+      react(), 
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        strategies: 'injectManifest',
-        srcDir: 'public',
-        filename: 'sw-template.js',
-        includeAssets: ['icon-192.png', 'icon-512.png'],
         manifest: {
-          id: '/',
           name: 'Учёт деталей',
-          short_name: 'Склад',
-          description: 'Учёт деталей на складе',
-          start_url: '/',
-          scope: '/',
-          display: 'standalone',
-          background_color: '#000000',
-          theme_color: '#007AFF',
-          prefer_related_applications: false,
-          icons: [
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          ],
+          short_name: 'Учёт',
+          description: 'Приложение для учёта деталей и операций',
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          display: 'standalone'
         },
-        injectManifest: {
-          globPatterns: ['**/*.{js,css,html,ico,svg}', 'icon-192.png', 'icon-512.png'],
-          globIgnores: ['warehouse_src.png'],
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+          navigateFallback: '/index.html',
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'google-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            },
+            {
+              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'gstatic-fonts-cache',
+                expiration: {
+                  maxEntries: 10,
+                  maxAgeSeconds: 60 * 60 * 24 * 365
+                },
+                cacheableResponse: {
+                  statuses: [0, 200]
+                }
+              }
+            }
+          ]
         },
-      }),
+        devOptions: {
+          enabled: true,
+          type: 'module',
+          navigateFallback: 'index.html',
+        }
+      })
     ],
-    build: {
-      minify: 'esbuild',
-    },
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
     },
@@ -52,6 +70,8 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
+      // HMR is disabled in AI Studio via DISABLE_HMR env var.
+      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };

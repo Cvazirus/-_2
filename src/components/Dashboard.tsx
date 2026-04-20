@@ -1,49 +1,17 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Check, X, Users, LayoutGrid, List } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
-import { Journal } from '../types';
-import { XPBox, XPClipboardList, XPWallet, XPMoreHorizontal, XPEdit, XPTrash2, XPCheck, XPX } from './XPIcons';
 
 interface DashboardProps {
   partsCount: number;
   operationsCount: number;
-  workersCount: number;
-  journals: Journal[];
   onOpenParts: () => void;
   onOpenOperations: () => void;
   onViewFinance: () => void;
-  onViewShifts: () => void;
-  onRenameJournal: (id: string, newName: string) => void;
-  onDeleteJournal: (id: string) => void;
-  currentTheme?: string;
 }
 
-export default function Dashboard({
-  partsCount,
-  operationsCount,
-  workersCount,
-  journals,
-  onOpenParts,
-  onOpenOperations,
-  onViewFinance,
-  onViewShifts,
-  onRenameJournal,
-  onDeleteJournal,
-  currentTheme,
-}: DashboardProps) {
-  const isXP = currentTheme === 'xp-light' || currentTheme === 'xp-dark';
-  const [viewMode, setViewMode] = useState<'cards' | 'list'>(() =>
-    (localStorage.getItem('dashboard_view_mode') as 'cards' | 'list') ?? 'cards'
-  );
-  const toggleViewMode = () => {
-    const next = viewMode === 'cards' ? 'list' : 'cards';
-    setViewMode(next);
-    localStorage.setItem('dashboard_view_mode', next);
-  };
+export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
-  const [renamingCard, setRenamingCard] = useState<'parts' | 'operations' | null>(null);
-  const [renameValue, setRenameValue] = useState('');
-  const renameInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,53 +20,29 @@ export default function Dashboard({
         setOpenMenu(null);
       }
     };
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    if (renamingCard && renameInputRef.current) {
-      renameInputRef.current.focus();
-      renameInputRef.current.select();
-    }
-  }, [renamingCard]);
-
-  const journalForCard = (type: 'parts' | 'operations') =>
-    journals.find(j => j.type === type) ?? null;
 
   const handleMenuClick = (e: React.MouseEvent, menu: 'parts' | 'operations') => {
     e.stopPropagation();
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
-  const handleRename = (e: React.MouseEvent, cardType: 'parts' | 'operations') => {
-    e.stopPropagation();
-    const journal = journalForCard(cardType);
-    if (!journal) return;
-    setRenameValue(journal.name);
-    setRenamingCard(cardType);
-    setOpenMenu(null);
-  };
-
-  const commitRename = (cardType: 'parts' | 'operations') => {
-    const journal = journalForCard(cardType);
-    if (!journal) return;
-    const trimmed = renameValue.trim();
-    if (trimmed && trimmed !== journal.name) {
-      onRenameJournal(journal.id, trimmed);
-    }
-    setRenamingCard(null);
-  };
-
-  const handleDelete = (e: React.MouseEvent, cardType: 'parts' | 'operations') => {
+  const handleRename = (e: React.MouseEvent) => {
     e.stopPropagation();
     setOpenMenu(null);
-    const journal = journalForCard(cardType);
-    if (!journal) return;
-    onDeleteJournal(journal.id);
+    // TODO: Implement rename
   };
 
-  const MenuDropdown = ({ isOpen, cardType }: { isOpen: boolean; cardType: 'parts' | 'operations' }) => (
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenMenu(null);
+    // TODO: Implement delete
+  };
+
+  const MenuDropdown = ({ isOpen }: { isOpen: boolean }) => (
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -106,196 +50,171 @@ export default function Dashboard({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
           transition={{ duration: 0.15 }}
-          className="absolute right-0 top-10 w-48 bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden z-10"
+          className="absolute right-0 top-10 w-48 bg-white/10 backdrop-blur-3xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/20 overflow-hidden z-20"
         >
-          <button
-            onClick={(e) => handleRename(e, cardType)}
-            className="w-full px-4 py-3 flex items-center gap-3 text-left text-foreground hover:bg-primary-50 transition-colors"
+          {/* Noise inside dropdown */}
+          <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+          
+          <button 
+            onClick={handleRename}
+            className="w-full px-4 py-3 flex items-center gap-3 text-left text-white hover:bg-white/10 transition-colors relative z-10 font-light"
           >
-            {isXP ? <XPEdit size={16} /> : <Edit2 size={16} />}
-            <span className="font-medium">Переименовать</span>
+            <Edit2 size={16} strokeWidth={1.5} />
+            <span>Переименовать</span>
           </button>
-          <button
-            onClick={(e) => handleDelete(e, cardType)}
-            className="w-full px-4 py-3 flex items-center gap-3 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+          <button 
+            onClick={handleDelete}
+            className="w-full px-4 py-3 flex items-center gap-3 text-left text-red-300 hover:bg-red-500/20 transition-colors relative z-10 font-light border-t border-white/10"
           >
-            {isXP ? <XPTrash2 size={16} /> : <Trash2 size={16} />}
-            <span className="font-medium">Удалить</span>
+            <Trash2 size={16} strokeWidth={1.5} />
+            <span>Удалить</span>
           </button>
         </motion.div>
       )}
     </AnimatePresence>
   );
 
-  const cardTitle = (cardType: 'parts' | 'operations', fallback: string) =>
-    journalForCard(cardType)?.name ?? fallback;
-
-  const cardItems = [
-    {
-      key: 'parts' as const,
-      icon: isXP ? <XPBox size={40} /> : <Box size={40} strokeWidth={1.5} className="text-primary-600" />,
-      iconSm: isXP ? <XPBox size={22} /> : <Box size={22} strokeWidth={1.5} className="text-primary-600" />,
-      title: cardTitle('parts', 'Учёт деталей'),
-      subtitle: `${partsCount} записей`,
-      onClick: renamingCard !== 'parts' ? onOpenParts : undefined,
-      hasMenu: true,
-      menuType: 'parts' as const,
-    },
-    {
-      key: 'operations' as const,
-      icon: isXP ? <XPClipboardList size={40} /> : <ClipboardList size={40} strokeWidth={1.5} className="text-primary-600" />,
-      iconSm: isXP ? <XPClipboardList size={22} /> : <ClipboardList size={22} strokeWidth={1.5} className="text-primary-600" />,
-      title: cardTitle('operations', 'Журнал списаний'),
-      subtitle: `${operationsCount} записей`,
-      onClick: renamingCard !== 'operations' ? onOpenOperations : undefined,
-      hasMenu: true,
-      menuType: 'operations' as const,
-    },
-    {
-      key: 'finance',
-      icon: isXP ? <XPWallet size={40} /> : <Wallet size={40} strokeWidth={1.5} className="text-primary-600" />,
-      iconSm: isXP ? <XPWallet size={22} /> : <Wallet size={22} strokeWidth={1.5} className="text-primary-600" />,
-      title: 'Финансовый журнал',
-      subtitle: 'Зарплата и аванс',
-      onClick: onViewFinance,
-      hasMenu: false,
-      menuType: null,
-    },
-    {
-      key: 'shifts',
-      icon: <Users size={40} strokeWidth={1.5} className="text-primary-600" />,
-      iconSm: <Users size={22} strokeWidth={1.5} className="text-primary-600" />,
-      title: 'Журнал смен',
-      subtitle: workersCount > 0 ? `${workersCount} график${workersCount === 1 ? '' : 'ов'}` : 'Мои смены',
-      onClick: onViewShifts,
-      hasMenu: false,
-      menuType: null,
-    },
-  ];
-
   return (
-    <div className="p-4 flex flex-col min-h-[calc(100dvh-80px)]" ref={menuRef}>
-      {/* View toggle */}
-      <div className="flex justify-end mb-3">
-        <div className="flex rounded-xl overflow-hidden border border-card-border bg-card-bg">
-          <button
-            onClick={() => { setViewMode('cards'); localStorage.setItem('dashboard_view_mode', 'cards'); }}
-            className={`p-2 ${viewMode === 'cards' ? 'bg-primary-600 text-white' : 'text-muted-foreground'}`}
-          >
-            <LayoutGrid size={16} />
-          </button>
-          <button
-            onClick={() => { setViewMode('list'); localStorage.setItem('dashboard_view_mode', 'list'); }}
-            className={`p-2 ${viewMode === 'list' ? 'bg-primary-600 text-white' : 'text-muted-foreground'}`}
-          >
-            <List size={16} />
-          </button>
-        </div>
+    <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-black" ref={menuRef}>
+      {/* Background with Simple Gradient */}
+      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2A3441] via-[#0F1319] to-[#040506]">
+        {/* Fine Noise Texture over everything */}
+        <div className="absolute inset-0 opacity-[0.2]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
       </div>
 
-      {viewMode === 'cards' ? (
-        <div className="grid grid-cols-2 gap-3">
-          {cardItems.map(item => (
-            <motion.div
-              key={item.key}
-              whileTap={{ scale: 0.97 }}
-              onClick={item.onClick}
-              className="bg-card-bg rounded-2xl p-4 flex flex-col cursor-pointer border border-card-border active:bg-muted/30 transition-colors relative aspect-square justify-between"
-            >
-              <div className="flex justify-between items-start">
-                <div className="bg-primary-50 p-3 rounded-2xl">{item.iconSm}</div>
-                {item.hasMenu && item.menuType && (
-                  <div className="relative">
-                    <button
-                      onClick={(e) => handleMenuClick(e, item.menuType!)}
-                      className="text-foreground/40 p-1"
-                    >
-                      {isXP ? <XPMoreHorizontal size={18} /> : <MoreHorizontal size={18} />}
-                    </button>
-                    <MenuDropdown isOpen={openMenu === item.menuType} cardType={item.menuType!} />
-                  </div>
-                )}
-              </div>
-              <div>
-                {(item.key === 'parts' || item.key === 'operations') && renamingCard === item.key ? (
-                  <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                    <input
-                      ref={renameInputRef}
-                      value={renameValue}
-                      onChange={e => setRenameValue(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') commitRename(item.key as 'parts' | 'operations');
-                        if (e.key === 'Escape') setRenamingCard(null);
-                      }}
-                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground text-sm font-semibold"
-                    />
-                    <button onClick={() => commitRename(item.key as 'parts' | 'operations')} className="text-green-500">
-                      <Check size={14} />
-                    </button>
-                    <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                      <X size={14} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-sm font-semibold text-foreground leading-tight">{item.title}</div>
-                )}
-                <div className="text-xs text-muted-foreground mt-0.5">{item.subtitle}</div>
-              </div>
-            </motion.div>
-          ))}
+      <div className="relative z-10 p-4 w-full max-w-lg mx-auto pt-6">
+        {/* Toggle Grid/List matching the Ice screenshot top right corner */}
+        <div className="flex justify-end mb-6">
+          <div className="flex items-center gap-0.5 bg-white/[0.08] backdrop-blur-md p-[3px] rounded-[14px] border border-white/[0.15] shadow-[0_4px_12px_rgba(0,0,0,0.2)] relative overflow-hidden">
+             {/* Micro-texture noise inside toggle */}
+             <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+            
+            <button className="relative z-10 bg-white/[0.15] text-white p-1.5 rounded-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] backdrop-blur-md">
+              <LayoutGrid size={18} strokeWidth={1.5} />
+            </button>
+            <button className="relative z-10 text-white/40 p-1.5 rounded-xl transition-colors hover:text-white/90">
+              <List size={18} strokeWidth={1.5} />
+            </button>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-2">
-          {cardItems.map(item => (
-            <motion.div
-              key={item.key}
-              whileTap={{ scale: 0.98 }}
-              onClick={item.onClick}
-              className="bg-card-bg rounded-2xl px-4 py-3.5 flex items-center gap-4 cursor-pointer border border-card-border active:bg-muted/50 transition-colors relative"
-            >
-              <div className="bg-primary-50 w-11 h-11 flex items-center justify-center rounded-xl shrink-0">
-                {item.iconSm}
-              </div>
-              <div className="flex-1 min-w-0">
-                {(item.key === 'parts' || item.key === 'operations') && renamingCard === item.key ? (
-                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                    <input
-                      ref={renameInputRef}
-                      value={renameValue}
-                      onChange={e => setRenameValue(e.target.value)}
-                      onKeyDown={e => {
-                        if (e.key === 'Enter') commitRename(item.key as 'parts' | 'operations');
-                        if (e.key === 'Escape') setRenamingCard(null);
-                      }}
-                      className="flex-1 bg-transparent border-b border-primary-400 outline-none text-foreground font-semibold"
-                    />
-                    <button onClick={() => commitRename(item.key as 'parts' | 'operations')} className="text-green-500">
-                      <Check size={16} />
-                    </button>
-                    <button onClick={() => setRenamingCard(null)} className="text-foreground/40">
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="font-semibold text-foreground">{item.title}</div>
-                )}
-                <div className="text-sm text-muted-foreground">{item.subtitle}</div>
-              </div>
-              {item.hasMenu && item.menuType && (
-                <div className="relative shrink-0">
-                  <button
-                    onClick={(e) => handleMenuClick(e, item.menuType!)}
-                    className="text-foreground/40 p-1"
+
+        <div className="grid grid-cols-2 gap-4 content-start">
+          {/* Учёт (Основной) */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onOpenParts}
+            className="bg-white/[0.08] backdrop-blur-2xl rounded-[32px] p-6 flex flex-col cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/[0.15] transition-all aspect-square relative overflow-hidden group"
+          >
+            {/* Ice Texture Noise overlay */}
+            <div className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%221.5%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6 w-full">
+                {/* Floating Icon without dark bounding box */}
+                <Box size={44} strokeWidth={1} className="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+                <div className="relative -mr-3 -mt-3">
+                  <button 
+                    onClick={(e) => handleMenuClick(e, 'parts')}
+                    className="text-white/50 hover:text-white transition-colors p-2 rounded-full drop-shadow-md"
                   >
-                    {isXP ? <XPMoreHorizontal size={18} /> : <MoreHorizontal size={18} />}
+                    <MoreHorizontal size={22} strokeWidth={1.5} />
                   </button>
-                  <MenuDropdown isOpen={openMenu === item.menuType} cardType={item.menuType!} />
+                  <MenuDropdown isOpen={openMenu === 'parts'} />
                 </div>
-              )}
-            </motion.div>
-          ))}
+              </div>
+              
+              <div className="mt-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                <h2 className="text-white text-[17px] font-medium leading-tight mb-1 tracking-wide">Основной</h2>
+                <p className="text-white/60 text-[13px] font-light">{partsCount} записей</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Журнал списаний */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onOpenOperations}
+            className="bg-white/[0.08] backdrop-blur-2xl rounded-[32px] p-6 flex flex-col cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/[0.15] transition-all aspect-square relative overflow-hidden group"
+          >
+            {/* Ice Texture Noise overlay */}
+            <div className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%221.5%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6 w-full">
+                {/* Floating Icon without dark bounding box */}
+                <ClipboardList size={44} strokeWidth={1} className="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+                <div className="relative -mr-3 -mt-3">
+                  <button 
+                    onClick={(e) => handleMenuClick(e, 'operations')}
+                    className="text-white/50 hover:text-white transition-colors p-2 rounded-full drop-shadow-md"
+                  >
+                    <MoreHorizontal size={22} strokeWidth={1.5} />
+                  </button>
+                  <MenuDropdown isOpen={openMenu === 'operations'} />
+                </div>
+              </div>
+              
+              <div className="mt-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                <h2 className="text-white text-[17px] font-medium leading-tight mb-1 tracking-wide">Журнал списаний</h2>
+                <p className="text-white/60 text-[13px] font-light">{operationsCount} записей</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Финансовый журнал */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onViewFinance}
+            className="bg-white/[0.08] backdrop-blur-2xl rounded-[32px] p-6 flex flex-col cursor-pointer shadow-[0_8px_32px_rgba(0,0,0,0.3),inset_0_1px_2px_rgba(255,255,255,0.4)] border border-white/[0.15] transition-all aspect-square relative overflow-hidden group"
+          >
+            {/* Ice Texture Noise overlay */}
+            <div className="absolute inset-0 opacity-[0.06] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%221.5%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6 w-full">
+                {/* Floating Icon without dark bounding box */}
+                <Wallet size={44} strokeWidth={1} className="text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+                <div className="relative -mr-3 -mt-3">
+                  <button className="text-white/50 hover:text-white transition-colors p-2 rounded-full drop-shadow-md">
+                    <MoreHorizontal size={22} strokeWidth={1.5} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                <h2 className="text-white text-[17px] font-medium leading-tight mb-1 tracking-wide">Финансовый журнал</h2>
+                <p className="text-white/60 text-[13px] font-light">Зарплата и аванс</p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Журнал смен */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            className="bg-white/[0.04] backdrop-blur-xl rounded-[32px] p-6 flex flex-col cursor-not-allowed shadow-[0_8px_32px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.15)] border border-white/[0.05] transition-all aspect-square relative overflow-hidden group opacity-70"
+          >
+            {/* Ice Texture Noise overlay */}
+            <div className="absolute inset-0 opacity-[0.04] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%221.5%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex justify-between items-start mb-6 w-full">
+                {/* Floating Icon without dark bounding box */}
+                <Users size={44} strokeWidth={1} className="text-white/60 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]" />
+                <div className="relative -mr-3 -mt-3">
+                  <button className="text-white/20 transition-colors p-2 rounded-full cursor-not-allowed">
+                    <MoreHorizontal size={22} strokeWidth={1.5} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-auto drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">
+                <h2 className="text-white/80 text-[17px] font-medium leading-tight mb-1 tracking-wide">Журнал смен</h2>
+                <p className="text-white/40 text-[13px] font-light">1 график</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

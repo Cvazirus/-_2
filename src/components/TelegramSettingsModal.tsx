@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Send } from 'lucide-react';
-import { sendTelegramMessage } from '../services/telegram';
+import { X, Save } from 'lucide-react';
 
 interface TelegramSettingsModalProps {
   onClose: () => void;
@@ -10,7 +9,6 @@ interface TelegramSettingsModalProps {
 export default function TelegramSettingsModal({ onClose, onSave }: TelegramSettingsModalProps) {
   const [token, setToken] = useState('');
   const [chatId, setChatId] = useState('');
-  const [testStatus, setTestStatus] = useState<'idle' | 'sending' | 'ok' | 'fail'>('idle');
 
   useEffect(() => {
     setToken(localStorage.getItem('tg_bot_token') || '');
@@ -24,15 +22,6 @@ export default function TelegramSettingsModal({ onClose, onSave }: TelegramSetti
     onSave();
   };
 
-  const handleTest = async () => {
-    localStorage.setItem('tg_bot_token', token.trim());
-    localStorage.setItem('tg_chat_id', chatId.trim());
-    setTestStatus('sending');
-    const ok = await sendTelegramMessage('✅ Тест уведомлений работает!');
-    setTestStatus(ok ? 'ok' : 'fail');
-    setTimeout(() => setTestStatus('idle'), 3000);
-  };
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-start justify-center p-4 pt-12 sm:pt-20 overflow-y-auto">
       <div className="bg-card-bg w-full max-w-md rounded-2xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-300 mb-10">
@@ -42,7 +31,7 @@ export default function TelegramSettingsModal({ onClose, onSave }: TelegramSetti
             <X size={20} />
           </button>
         </div>
-
+        
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="space-y-1">
             <label className="text-sm font-medium text-muted-foreground ml-1">Токен бота</label>
@@ -65,16 +54,6 @@ export default function TelegramSettingsModal({ onClose, onSave }: TelegramSetti
               placeholder="-1001234567890"
             />
           </div>
-
-          <button
-            type="button"
-            onClick={handleTest}
-            disabled={!token || !chatId || testStatus === 'sending'}
-            className="w-full py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-foreground font-medium rounded-xl transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <Send size={18} />
-            {testStatus === 'sending' ? 'Отправка...' : testStatus === 'ok' ? '✅ Отправлено!' : testStatus === 'fail' ? '❌ Ошибка' : 'Отправить тест'}
-          </button>
 
           <button
             type="submit"
