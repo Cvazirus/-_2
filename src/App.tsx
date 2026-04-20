@@ -1213,7 +1213,7 @@ export default function App() {
     switch (view) {
       case 'dashboard':
         return (
-          <div className="bg-background min-h-[100dvh]">
+          <div className="bg-[#0A0A0C] min-h-[100dvh]">
             <Dashboard
               partsCount={parts.length}
               operationsCount={operations.length}
@@ -1228,6 +1228,10 @@ export default function App() {
               }}
               onViewFinance={() => changeView('finance-journal')}
               onViewShifts={() => changeView('shifts')}
+              isDark={theme === 'dark'}
+              onThemeToggle={toggleTheme}
+              onExport={handleExport}
+              onTelegramSettings={() => openModal('tg-settings')}
             />
           </div>
         );

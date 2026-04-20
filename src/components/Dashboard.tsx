@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users, LayoutGrid, List } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users, LayoutGrid, List, Moon, Sun, Download, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -9,13 +9,18 @@ interface DashboardProps {
   onOpenOperations: () => void;
   onViewFinance: () => void;
   onViewShifts: () => void;
+  isDark: boolean;
+  onThemeToggle: () => void;
+  onExport: () => void;
+  onTelegramSettings: () => void;
 }
 
 const NOISE = 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")';
 
-export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts }: DashboardProps) {
+export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts, isDark, onThemeToggle, onExport, onTelegramSettings }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showAppMenu, setShowAppMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -119,30 +124,72 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent" />
       </div>
 
-      {/* Sticky top bar — theme color */}
+      {/* Sticky top bar */}
       <div
-        className="sticky top-0 z-20 flex items-center justify-between px-5 bg-primary-600"
+        className="sticky top-0 z-20 bg-primary-600"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)', paddingBottom: '14px' }}
       >
-        <h1 className="text-white text-[20px] font-semibold tracking-tight">Учёт</h1>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-0.5 bg-white/10 p-[3px] rounded-xl">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/50'}`}
-            >
-              <LayoutGrid size={16} strokeWidth={1.5} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/50'}`}
-            >
-              <List size={16} strokeWidth={1.5} />
-            </button>
+        <div className="flex items-center justify-between px-5">
+          <h1 className="text-white text-[20px] font-semibold tracking-tight">Учёт</h1>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-0.5 bg-white/10 p-[3px] rounded-xl">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white/20 text-white' : 'text-white/50'}`}
+              >
+                <LayoutGrid size={16} strokeWidth={1.5} />
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white/20 text-white' : 'text-white/50'}`}
+              >
+                <List size={16} strokeWidth={1.5} />
+              </button>
+            </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowAppMenu(v => !v)}
+                className="bg-white/10 text-white p-2 rounded-full transition-colors hover:bg-white/20"
+              >
+                <MoreHorizontal size={20} strokeWidth={2} />
+              </button>
+              <AnimatePresence>
+                {showAppMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-12 w-52 bg-[#1e1e22] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.08] overflow-hidden z-30"
+                  >
+                    <button
+                      onClick={() => { onThemeToggle(); setShowAppMenu(false); }}
+                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                    >
+                      {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
+                      <span>{isDark ? 'Светлая тема' : 'Тёмная тема'}</span>
+                    </button>
+                    <div className="h-px bg-white/[0.06]" />
+                    <button
+                      onClick={() => { onExport(); setShowAppMenu(false); }}
+                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                    >
+                      <Download size={16} strokeWidth={1.5} />
+                      <span>Экспорт данных</span>
+                    </button>
+                    <div className="h-px bg-white/[0.06]" />
+                    <button
+                      onClick={() => { onTelegramSettings(); setShowAppMenu(false); }}
+                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                    >
+                      <MessageCircle size={16} strokeWidth={1.5} />
+                      <span>Telegram</span>
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-          <button className="bg-white/10 text-white p-2 rounded-full transition-colors hover:bg-white/20">
-            <MoreHorizontal size={20} strokeWidth={2} />
-          </button>
         </div>
       </div>
 
