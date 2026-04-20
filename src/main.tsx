@@ -1,17 +1,26 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
-import ErrorBoundary from './components/ErrorBoundary.tsx';
 import './index.css';
+import { registerSW } from 'virtual:pwa-register';
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js'));
+if (window.location.search.includes('clear=1')) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (const registration of registrations) {
+        registration.unregister();
+      }
+      window.location.href = window.location.pathname;
+    });
+  } else {
+    window.location.href = window.location.pathname;
+  }
+} else {
+  registerSW({ immediate: true });
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>
+    <App />
   </StrictMode>,
 );

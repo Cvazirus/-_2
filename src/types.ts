@@ -1,4 +1,4 @@
-export type OperationType = 'arrival' | 'write-off' | 'return' | 'delete';
+export type OperationType = 'arrival' | 'write-off' | 'return';
 
 export interface HistoryEntry {
   id: string;

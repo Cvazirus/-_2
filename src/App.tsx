@@ -37,10 +37,6 @@ export default function App() {
   const [theme, setTheme] = useState<string>(() => {
     return localStorage.getItem('app_theme') || 'light';
   });
-  const [fontSize, setFontSize] = useState<number>(() => {
-    const stored = parseFloat(localStorage.getItem('app_font_size') || '');
-    return isNaN(stored) || stored < 0.5 ? 1 : stored;
-  });
   const [searchQuery, setSearchQuery] = useState('');
   const [journals, setJournals] = useState<Journal[]>(() => {
     try {
@@ -52,7 +48,7 @@ export default function App() {
     } catch (e) {
       console.error('Error parsing journals', e);
     }
-    return [{ id: 'default', name: 'Основной', type: 'parts' as const, color: '#007AFF' }];
+    return [{ id: 'default', name: 'Основной', description: 'Главный журнал', createdAt: new Date().toISOString() }];
   });
   const [parts, setParts] = useState<Part[]>(() => {
     try {
@@ -85,10 +81,7 @@ export default function App() {
   const [operations, setOperations] = useState<Operation[]>(() => {
     try {
       const saved = localStorage.getItem('app_operations');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      }
+      if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error('Error parsing operations', e);
     }
@@ -113,9 +106,6 @@ export default function App() {
   const [initialPartCode, setInitialPartCode] = useState<string | undefined>(undefined);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
-
   const [user, setUser] = useState<User | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(() => localStorage.getItem('app_last_sync'));
@@ -123,18 +113,6 @@ export default function App() {
 
   const currentViewRef = useRef<View>(view);
   const scrollPositions = useRef<Record<string, number>>({});
-
-  // Refs to read latest state in syncData without re-creating the callback
-  const journalsRef = useRef(journals);
-  const partsRef = useRef(parts);
-  const operationsRef = useRef(operations);
-  const localUpdatedAtRef = useRef(localUpdatedAt);
-  const lastSyncTimeRef = useRef(lastSyncTime);
-  useEffect(() => { journalsRef.current = journals; }, [journals]);
-  useEffect(() => { partsRef.current = parts; }, [parts]);
-  useEffect(() => { operationsRef.current = operations; }, [operations]);
-  useEffect(() => { localUpdatedAtRef.current = localUpdatedAt; }, [localUpdatedAt]);
-  useEffect(() => { lastSyncTimeRef.current = lastSyncTime; }, [lastSyncTime]);
 
   useEffect(() => {
     currentViewRef.current = view;
@@ -211,10 +189,7 @@ export default function App() {
     if (modal === 'sync') setShowSyncModal(true);
     if (modal === 'sort') setShowSortModal(true);
     if (modal === 'csv') setShowCsvModal(true);
-    if (modal === 'journal-select') {
-      const validAction = (action === 'export' || action === 'import' || action === 'csv') ? action : null;
-      setJournalSelectAction(validAction);
-    }
+    if (modal === 'journal-select') setJournalSelectAction(action as any);
   };
 
   const replaceModal = (modal: string, action: string | null = null) => {
@@ -227,47 +202,11 @@ export default function App() {
     setShowSyncModal(modal === 'sync');
     setShowSortModal(modal === 'sort');
     setShowCsvModal(modal === 'csv');
-    setJournalSelectAction(modal === 'journal-select' && (action === 'export' || action === 'import' || action === 'csv') ? action : null);
+    setJournalSelectAction(modal === 'journal-select' ? action as any : null);
   };
 
   const closeModal = () => {
     window.history.back();
-  };
-
-  useEffect(() => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
-      || (navigator as any).standalone === true;
-
-    if (!isStandalone) {
-      // Auto-request fullscreen on first tap as fallback
-      const requestFS = () => {
-        const el = document.documentElement as any;
-        (el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen)?.call(el);
-      };
-      document.addEventListener('touchstart', requestFS, { once: true });
-    }
-
-    const dismissed = localStorage.getItem('install_banner_dismissed');
-    if (!isStandalone && !dismissed) {
-      setShowInstallBanner(true);
-    }
-    // Also capture automatic prompt if browser offers it
-    const handler = (e: any) => { e.preventDefault(); setInstallPrompt(e); };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
-
-  const handleInstall = async () => {
-    if (installPrompt) {
-      installPrompt.prompt();
-      const { outcome } = await installPrompt.userChoice;
-      if (outcome === 'accepted') { setShowInstallBanner(false); }
-    }
-  };
-
-  const dismissInstallBanner = () => {
-    setShowInstallBanner(false);
-    localStorage.setItem('install_banner_dismissed', '1');
   };
 
   useEffect(() => {
@@ -286,11 +225,10 @@ export default function App() {
 
   const syncData = useCallback(async (force = false) => {
     if (!auth.currentUser) return;
-
+    
     const now = new Date();
-    const currentLastSyncTime = lastSyncTimeRef.current;
-    if (!force && currentLastSyncTime) {
-      const hoursSinceSync = differenceInHours(now, new Date(currentLastSyncTime));
+    if (!force && lastSyncTime) {
+      const hoursSinceSync = differenceInHours(now, new Date(lastSyncTime));
       if (hoursSinceSync < 3) return;
     }
 
@@ -308,48 +246,47 @@ export default function App() {
         throw e;
       }
 
-      // Read latest values from refs to avoid stale closures
-      const currentJournals = journalsRef.current;
-      const currentParts = partsRef.current;
-      const currentOperations = operationsRef.current;
-      const currentLocalUpdatedAt = localUpdatedAtRef.current;
-
       const localData = {
-        journals: currentJournals,
-        parts: currentParts,
-        operations: currentOperations,
-        updatedAt: currentLocalUpdatedAt
+        journals,
+        parts,
+        operations,
+        updatedAt: localUpdatedAt
       };
 
       if (docSnap.exists()) {
         const remoteData = docSnap.data();
         const remoteUpdatedAt = remoteData.updatedAt ? new Date(remoteData.updatedAt) : new Date(0);
-        const localUpdatedAtDate = new Date(currentLocalUpdatedAt);
+        const localUpdatedAtDate = new Date(localUpdatedAt);
 
-        const isLocalEmpty = currentParts.length === 0 && currentOperations.length === 0 && currentJournals.length <= 1;
-        const isRemoteEmpty = (!remoteData.parts || remoteData.parts.length === 0) &&
+        // Logic to prevent overwriting cloud with empty local data
+        const isLocalEmpty = parts.length === 0 && operations.length === 0 && journals.length <= 1;
+        const isRemoteEmpty = (!remoteData.parts || remoteData.parts.length === 0) && 
                               (!remoteData.operations || remoteData.operations.length === 0);
 
         if (force) {
+          // In force mode, we just push local to remote (or we could have a separate pull)
           await setDoc(userDocRef, {
             ...localData,
-            updatedAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(), // Update timestamp on push
             syncTimestamp: serverTimestamp()
           }, { merge: true });
           showToast('Данные принудительно сохранены в облако');
         } else if (isLocalEmpty && !isRemoteEmpty) {
-          if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
-          if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
-          if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
+          // Local is empty but remote has data -> Pull from remote
+          if (remoteData.journals) setJournals(remoteData.journals);
+          if (remoteData.parts) setParts(remoteData.parts);
+          if (remoteData.operations) setOperations(remoteData.operations);
           setLocalUpdatedAt(remoteData.updatedAt || new Date().toISOString());
           showToast('Данные восстановлены из облака');
         } else if (remoteUpdatedAt > localUpdatedAtDate) {
-          if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
-          if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
-          if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
+          // Remote is newer -> Pull from remote
+          if (remoteData.journals) setJournals(remoteData.journals);
+          if (remoteData.parts) setParts(remoteData.parts);
+          if (remoteData.operations) setOperations(remoteData.operations);
           setLocalUpdatedAt(remoteData.updatedAt);
           showToast('Данные обновлены из облака');
         } else if (localUpdatedAtDate > remoteUpdatedAt || isRemoteEmpty) {
+          // Local is newer or remote is empty -> Push to remote
           await setDoc(userDocRef, {
             ...localData,
             syncTimestamp: serverTimestamp()
@@ -357,6 +294,7 @@ export default function App() {
           showToast('Данные сохранены в облако');
         }
       } else {
+        // First time sync for this user
         await setDoc(userDocRef, {
           ...localData,
           syncTimestamp: serverTimestamp()
@@ -373,19 +311,14 @@ export default function App() {
     } finally {
       setIsSyncing(false);
     }
-  }, []); // reads latest state via refs — no state deps, no re-creation on data changes
+  }, [journals, parts, operations, lastSyncTime, localUpdatedAt]);
 
-  // Periodic sync + re-sync on reconnect
+  // Periodic sync check
   useEffect(() => {
     if (user) {
       syncData();
       const interval = setInterval(() => syncData(), 60000); // Check every minute
-      const handleOnline = () => syncData();
-      window.addEventListener('online', handleOnline);
-      return () => {
-        clearInterval(interval);
-        window.removeEventListener('online', handleOnline);
-      };
+      return () => clearInterval(interval);
     }
   }, [user, syncData]);
 
@@ -439,19 +372,6 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Wrapper that surfaces Telegram delivery failures in the UI
-  const notifyTelegram = (message: string) => {
-    sendTelegramMessage(message).then(success => {
-      if (!success) {
-        const token = localStorage.getItem('tg_bot_token');
-        const chatId = localStorage.getItem('tg_chat_id');
-        if (token && chatId) {
-          showToast('Не удалось отправить уведомление в Telegram');
-        }
-      }
-    });
-  };
-
   const handleExport = () => {
     const data = { journals, parts, operations };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -492,7 +412,7 @@ export default function App() {
           'ID': o.id,
           'Дата': new Date(o.date).toLocaleString('ru-RU'),
           'Номер детали': o.partCode,
-          'Тип': o.type === 'arrival' ? 'Приход' : o.type === 'write-off' ? 'Списание' : o.type === 'delete' ? 'Удаление' : 'Возврат',
+          'Тип': o.type === 'arrival' ? 'Приход' : o.type === 'write-off' ? 'Списание' : 'Возврат',
           'Количество': o.quantity,
           'Цена за единицу': o.pricePerUnit,
           'Сумма': o.sum
@@ -526,9 +446,9 @@ export default function App() {
       }
       if (docSnap.exists()) {
         const remoteData = docSnap.data();
-        if (remoteData.journals && Array.isArray(remoteData.journals)) setJournals(remoteData.journals);
-        if (remoteData.parts && Array.isArray(remoteData.parts)) setParts(remoteData.parts);
-        if (remoteData.operations && Array.isArray(remoteData.operations)) setOperations(remoteData.operations);
+        if (remoteData.journals) setJournals(remoteData.journals);
+        if (remoteData.parts) setParts(remoteData.parts);
+        if (remoteData.operations) setOperations(remoteData.operations);
         const remoteUpdated = remoteData.updatedAt || new Date().toISOString();
         setLocalUpdatedAt(remoteUpdated);
         localStorage.setItem('app_local_updated_at', remoteUpdated);
@@ -797,7 +717,7 @@ export default function App() {
             const operationNumbers = (opsStr || '').split(',').map(s => s.trim()).filter(Boolean);
 
             const newPart: Part = {
-              id: crypto.randomUUID(),
+              id: Math.random().toString(36).substr(2, 9),
               journalId: journal.id,
               code,
               name,
@@ -826,9 +746,9 @@ export default function App() {
             if (row.length < 3) continue;
             
             newOps.push({
-              id: String(row[0] || crypto.randomUUID()),
+              id: String(row[0] || Math.random().toString(36).substr(2, 9)),
               journalId: journal.id,
-              operationCode: `IMP-${crypto.randomUUID().substring(0, 8).toUpperCase()}`,
+              operationCode: `IMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
               type: row[3] === 'Приход' ? 'arrival' : row[3] === 'Списание' ? 'write-off' : 'return',
               date: new Date().toISOString(), // Fallback
               partId: '',
@@ -890,7 +810,7 @@ export default function App() {
             const operationNumbers = String(row['Номера операций'] || '').split(',').map(s => s.trim()).filter(Boolean);
             const pricePerUnit = Number(row['Цена за единицу']) || 0;
             const newPart: Part = {
-              id: crypto.randomUUID(),
+              id: Math.random().toString(36).substr(2, 9),
               journalId: journal.id,
               code: String(row['Номер детали'] || ''),
               name: String(row['Название'] || ''),
@@ -911,9 +831,9 @@ export default function App() {
           setParts([...parts, ...newParts]);
         } else {
           const newOps: Operation[] = jsonData.map((row: any) => ({
-            id: String(row['ID'] || crypto.randomUUID()),
+            id: String(row['ID'] || Math.random().toString(36).substr(2, 9)),
             journalId: journal.id,
-            operationCode: `IMP-${crypto.randomUUID().substring(0, 8).toUpperCase()}`,
+            operationCode: `IMP-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
             type: row['Тип'] === 'Приход' ? 'arrival' : row['Тип'] === 'Списание' ? 'write-off' : 'return',
             date: new Date().toISOString(), // Fallback, parsing ru-RU dates from Excel is complex
             partId: '',
@@ -1001,11 +921,6 @@ export default function App() {
     localStorage.setItem('app_theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--font-scale', String(fontSize));
-    localStorage.setItem('app_font_size', String(fontSize));
-  }, [fontSize]);
-
   const toggleTheme = (newTheme?: string) => {
     if (newTheme) {
       setTheme(newTheme);
@@ -1021,7 +936,7 @@ export default function App() {
 
   const addPart = (newPartData: Partial<Part>) => {
     const newPart: Part = {
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substr(2, 9),
       journalId: selectedJournal?.id || journals[0].id,
       code: newPartData.code || '',
       name: newPartData.name || '',
@@ -1047,18 +962,7 @@ export default function App() {
     
     updateLocalTimestamp();
     
-    notifyTelegram(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
-  };
-
-  const deleteParts = (partIds: string[]) => {
-    const toDelete = parts.filter(p => partIds.includes(p.id));
-    toDelete.forEach(part => {
-      createOperation(part, part.currentQuantity, part.currentQuantity, 'delete');
-    });
-    setParts(prev => prev.filter(p => !partIds.includes(p.id)));
-    updateLocalTimestamp();
-    const names = toDelete.map(p => `<code>${p.code}</code> (${p.name})`).join('\n');
-    notifyTelegram(`🗑 <b>Удалены детали (${toDelete.length} шт.)</b>\n${names}`);
+    sendTelegramMessage(`📦 <b>Новая деталь заведена</b>\nНомер: <code>${newPart.code}</code>\nНазвание: ${newPart.name}\nЦена: ${newPart.pricePerUnit} ₽\nНачальное кол-во: ${newPart.currentQuantity} шт.`);
   };
 
   const updatePart = (updatedData: Partial<Part>) => {
@@ -1094,9 +998,9 @@ export default function App() {
     }
   };
 
-  const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off' | 'delete') => {
+  const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off') => {
     const opJournal = journals.find(j => j.type === 'operations') || journals[0];
-    const becameQuantity = type === 'arrival' ? wasQuantity + quantity : 0;
+    const becameQuantity = wasQuantity + (type === 'arrival' ? quantity : -quantity);
     
     // Generate MMDD-NNNN format
     const now = new Date();
@@ -1112,7 +1016,7 @@ export default function App() {
     const operationCode = `${mmdd}-${nextNum}`;
     
     const newOp: Operation = {
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substr(2, 9),
       journalId: opJournal.id,
       operationCode,
       type,
@@ -1149,8 +1053,8 @@ export default function App() {
       } : null);
     }
 
-    const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : type === 'delete' ? '🗑 Удаление' : '🟡 Возврат';
-    notifyTelegram(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
+    const typeStr = type === 'arrival' ? '🟢 Приход' : type === 'write-off' ? '🔴 Списание' : '🟡 Возврат';
+    sendTelegramMessage(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
   };
 
   const handleManualWriteOff = (partId: string, writeOffQty: number, includedOperations: string[]) => {
@@ -1171,14 +1075,10 @@ export default function App() {
     const opJournal = journals.find(j => j.type === 'operations') || journals[0];
     const now = new Date();
     const mmdd = `${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}`;
-    const todayOpsCount = operations.filter(op => {
-      const d = new Date(op.date);
-      return d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
-    }).length;
-    const opCode = `${mmdd}-${(todayOpsCount + 1).toString().padStart(4, '0')}`;
+    const opCode = `${mmdd}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
 
     const newOp: Operation = {
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substr(2, 9),
       journalId: opJournal.id,
       operationCode: opCode,
       type: 'write-off',
@@ -1209,7 +1109,7 @@ export default function App() {
     }
     updateLocalTimestamp();
     
-    notifyTelegram(`🔴 <b>Ручное списание</b>\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${writeOffQty} шт.\nОстаток: ${newQuantity} шт.\nОперации: ${includedOperations.length > 0 ? includedOperations.join(', ') : 'нет'}`);
+    sendTelegramMessage(`🔴 <b>Ручное списание</b>\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${writeOffQty} шт.\nОстаток: ${newQuantity} шт.\nОперации: ${includedOperations.length > 0 ? includedOperations.join(', ') : 'нет'}`);
   };
 
   const cancelOperation = (operationId: string) => {
@@ -1239,7 +1139,7 @@ export default function App() {
 
   const addJournal = (data: Partial<Journal>) => {
     const newJournal: Journal = {
-      id: crypto.randomUUID(),
+      id: Math.random().toString(36).substr(2, 9),
       name: data.name || 'Новый журнал',
       type: data.type || 'parts',
       color: data.color || '#007AFF',
@@ -1247,27 +1147,6 @@ export default function App() {
     setJournals([...journals, newJournal]);
     updateLocalTimestamp();
     closeModal();
-  };
-
-  const renameJournal = (id: string, newName: string) => {
-    setJournals(prev => prev.map(j => j.id === id ? { ...j, name: newName } : j));
-    updateLocalTimestamp();
-  };
-
-  const deleteJournal = (id: string) => {
-    const journal = journals.find(j => j.id === id);
-    if (!journal) return;
-    const partCount = parts.filter(p => p.journalId === id).length;
-    const opCount = operations.filter(o => o.journalId === id).length;
-    const label = partCount + opCount > 0
-      ? ` и ${partCount + opCount} связанных записей`
-      : '';
-    if (!window.confirm(`Удалить журнал "${journal.name}"${label}? Это действие нельзя отменить.`)) return;
-    setJournals(prev => prev.filter(j => j.id !== id));
-    setParts(prev => prev.filter(p => p.journalId !== id));
-    setOperations(prev => prev.filter(o => o.journalId !== id));
-    updateLocalTimestamp();
-    showToast(`Журнал "${journal.name}" удалён`);
   };
 
   const renderView = () => {
@@ -1284,10 +1163,7 @@ export default function App() {
       onThemeToggle: toggleTheme,
       onSyncSettings: () => openModal('sync'),
       onCsvOperations: () => openModal('journal-select', 'csv'),
-      isDark: theme === 'dark',
-      currentTheme: theme,
-      fontSize,
-      onFontSizeChange: setFontSize,
+      isDark: theme === 'dark'
     };
 
     switch (view) {
@@ -1305,10 +1181,9 @@ export default function App() {
               onTelegramSettings={() => openModal('tg-settings')}
               {...commonHeaderProps}
             />
-            <Dashboard
-              partsCount={parts.length}
+            <Dashboard 
+              partsCount={parts.length} 
               operationsCount={operations.length}
-              journals={journals}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
                 changeView('parts-list');
@@ -1319,8 +1194,6 @@ export default function App() {
                 changeView('operations-log');
               }}
               onViewFinance={() => changeView('finance-journal')}
-              onRenameJournal={renameJournal}
-              onDeleteJournal={deleteJournal}
             />
           </div>
         );
@@ -1364,13 +1237,12 @@ export default function App() {
               onShowMissingPrices={() => changeView('parts-without-price')}
               {...commonHeaderProps}
             />
-            <PartsList
-              parts={filteredParts}
+            <PartsList 
+              parts={filteredParts} 
               onSelectPart={(part) => {
                 setSelectedPart(part);
                 changeView('part-detail');
-              }}
-              onDeleteParts={deleteParts}
+              }} 
               scrollPosition={scrollPositions.current['parts-list'] || 0}
               onScrollChange={(pos) => {
                 scrollPositions.current['parts-list'] = pos;
@@ -1418,13 +1290,12 @@ export default function App() {
               showMenu={false}
               {...commonHeaderProps}
             />
-            <PartsList
-              parts={missingPriceParts}
+            <PartsList 
+              parts={missingPriceParts} 
               onSelectPart={(part) => {
                 setSelectedPart(part);
                 changeView('part-detail');
-              }}
-              onDeleteParts={deleteParts}
+              }} 
               scrollPosition={scrollPositions.current['parts-without-price'] || 0}
               onScrollChange={(pos) => {
                 scrollPositions.current['parts-without-price'] = pos;
@@ -1499,8 +1370,8 @@ export default function App() {
             }
             setShowPartForm(false);
             setInitialPartCode(undefined);
-            window.history.replaceState({ view, modal: null }, '');
-          }}
+            closeModal();
+          }} 
           onClose={() => {
             setShowPartForm(false);
             setInitialPartCode(undefined);
@@ -1715,31 +1586,6 @@ export default function App() {
             handleImportCsvForJournal(selectedCsvJournal, typeOverride);
           }}
         />
-      )}
-
-      {showInstallBanner && (
-        <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
-          <div className="bg-gray-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-white/10">
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="font-semibold text-sm">📲 Установить без браузера</div>
-              <button onClick={dismissInstallBanner} className="opacity-50 text-lg leading-none shrink-0 -mt-0.5">✕</button>
-            </div>
-            {installPrompt ? (
-              <button
-                onClick={handleInstall}
-                className="w-full bg-primary-600 text-white font-bold text-sm py-2 rounded-xl active:scale-95"
-              >
-                Установить приложение
-              </button>
-            ) : (
-              <div className="text-xs text-white/70 space-y-1">
-                <div>Нажмите <span className="text-white font-bold">⋮</span> в браузере</div>
-                <div>→ <span className="text-white font-semibold">Добавить на главный экран</span></div>
-                <div>→ откроется без строки браузера</div>
-              </div>
-            )}
-          </div>
-        </div>
       )}
 
       {toastMessage && (

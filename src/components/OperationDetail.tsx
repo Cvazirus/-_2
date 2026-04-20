@@ -20,8 +20,8 @@ export default function OperationDetail({ operation, onCancel }: OperationDetail
       <div className="bg-card-bg rounded-2xl p-4 shadow-sm border border-card-border">
         <InfoRow 
           label="Тип операции" 
-          value={operation.type === 'arrival' ? 'Приход' : operation.type === 'write-off' ? 'Списание' : operation.type === 'delete' ? 'Удаление' : 'Возврат'}
-          colorClass={operation.type === 'arrival' ? 'text-green-600 dark:text-green-500' : operation.type === 'delete' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-500'}
+          value={operation.type === 'arrival' ? 'Приход' : operation.type === 'write-off' ? 'Списание' : 'Возврат'} 
+          colorClass={operation.type === 'arrival' ? 'text-green-600 dark:text-green-500' : 'text-yellow-600 dark:text-yellow-500'}
         />
         <InfoRow label="Дата" value={format(new Date(operation.date), 'd MMMM yyyy г.', { locale: ru })} />
         <InfoRow label="Номер детали" value={`${operation.partCode} ${operation.partName}`} />
