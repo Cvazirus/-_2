@@ -93,14 +93,6 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
 
       <div className="relative z-10 p-5 w-full max-w-lg mx-auto pt-6 flex flex-col min-h-full">
         
-        {/* Header Area */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-white text-[28px] font-semibold tracking-tight">Учёт</h1>
-          <button className="bg-[#2C2C2E] text-[#8e8e93] hover:text-white p-2 rounded-full transition-colors border border-white/[0.05] shadow-[0_4px_12px_rgba(0,0,0,0.5)]">
-            <MoreHorizontal size={22} strokeWidth={2} />
-          </button>
-        </div>
-
         {/* Adjust Toolbar (Grid/List Toggle) */}
         <div className="flex justify-end mb-4">
           <div className="flex items-center gap-0.5 bg-[#1F1F21] p-[3px] rounded-2xl border border-white/[0.02] shadow-[0_4px_12px_rgba(0,0,0,0.5)]">

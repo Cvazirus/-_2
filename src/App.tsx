@@ -1214,19 +1214,8 @@ export default function App() {
       case 'dashboard':
         return (
           <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Учёт" 
-              showSearch={false} 
-              showMenu={true} 
-              onExport={handleExport}
-              onExportExcel={() => openModal('journal-select', 'export')}
-              onImport={handleImport}
-              onImportExcel={() => openModal('journal-select', 'import')}
-              onTelegramSettings={() => openModal('tg-settings')}
-              {...commonHeaderProps}
-            />
-            <Dashboard 
-              partsCount={parts.length} 
+            <Dashboard
+              partsCount={parts.length}
               operationsCount={operations.length}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
