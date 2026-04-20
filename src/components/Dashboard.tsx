@@ -76,17 +76,10 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
 
   return (
     <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-black" ref={menuRef}>
-      {/* Background with macro details image and dark overlay */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1628126235206-5260b9ea6441?auto=format&fit=crop&w=1000&q=80" 
-          alt="Macro mechanics" 
-          className="w-full h-full object-cover mix-blend-luminosity opacity-40 md:opacity-50 blur-[2px]"
-        />
+      {/* Background with Simple Gradient */}
+      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2A3441] via-[#0F1319] to-[#040506]">
         {/* Fine Noise Texture over everything */}
         <div className="absolute inset-0 opacity-[0.2]" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
-        {/* Soft edge gradients */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/20" />
       </div>
 
       <div className="relative z-10 p-4 w-full max-w-lg mx-auto pt-6">
