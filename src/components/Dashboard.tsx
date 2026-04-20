@@ -65,7 +65,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   const cards = [
     {
       key: 'parts' as const,
-      icon: <Box size={32} strokeWidth={1.5} className="text-white" />,
+      icon: <Box size={52} strokeWidth={1.2} className="text-white" />,
       title: 'Основной',
       sub: `${partsCount} записей`,
       onClick: onOpenParts,
@@ -73,7 +73,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'operations' as const,
-      icon: <ClipboardList size={32} strokeWidth={1.5} className="text-white" />,
+      icon: <ClipboardList size={52} strokeWidth={1.2} className="text-white" />,
       title: 'Журнал\nсписаний',
       sub: `${operationsCount} записей`,
       onClick: onOpenOperations,
@@ -81,7 +81,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'finance',
-      icon: <Wallet size={32} strokeWidth={1.5} className="text-white" />,
+      icon: <Wallet size={52} strokeWidth={1.2} className="text-white" />,
       title: 'Финансовый\nжурнал',
       sub: 'Зарплата и аванс',
       onClick: onViewFinance,
@@ -89,7 +89,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'shifts',
-      icon: <Users size={32} strokeWidth={1.5} className="text-white" />,
+      icon: <Users size={52} strokeWidth={1.2} className="text-white" />,
       title: 'Журнал\nсмен',
       sub: 'Мои смены',
       onClick: onViewShifts,
@@ -99,12 +99,12 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
 
   return (
     <div
-      className="relative h-[100dvh] overflow-hidden bg-[#0A0A0C] flex flex-col"
+      className="relative min-h-[100dvh] bg-[#0A0A0C] flex flex-col"
       ref={menuRef}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      {/* Background */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      {/* Background — fixed so it stays behind everything */}
+      <div className="fixed inset-0 pointer-events-none z-0">
         <img
           src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80"
           alt=""
@@ -119,14 +119,13 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent" />
       </div>
 
-      {/* Blue top bar */}
+      {/* Sticky top bar — theme color */}
       <div
-        className="relative z-10 flex items-center justify-between px-5 bg-[#2563eb]"
+        className="sticky top-0 z-20 flex items-center justify-between px-5 bg-primary-600"
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)', paddingBottom: '14px' }}
       >
         <h1 className="text-white text-[20px] font-semibold tracking-tight">Учёт</h1>
         <div className="flex items-center gap-2">
-          {/* Grid/List toggle */}
           <div className="flex items-center gap-0.5 bg-white/10 p-[3px] rounded-xl">
             <button
               onClick={() => setViewMode('grid')}
@@ -148,15 +147,15 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
       </div>
 
       {/* Cards */}
-      <div className="relative z-10 flex-1 p-4 min-h-0">
+      <div className="relative z-10 p-4">
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 gap-3 h-full">
+          <div className="grid grid-cols-2 gap-3">
             {cards.map(card => (
               <motion.div
                 key={card.key}
                 whileTap={{ scale: 0.97 }}
                 onClick={card.onClick}
-                className="bg-[#242426] rounded-[24px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] relative"
+                className="bg-[#242426] rounded-[24px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] relative aspect-square"
               >
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[24px]" style={{ backgroundImage: NOISE }} />
                 <div className="relative z-10 flex flex-col h-full">
@@ -183,13 +182,13 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-3 h-full">
+          <div className="flex flex-col gap-3">
             {cards.map(card => (
               <motion.div
                 key={card.key}
                 whileTap={{ scale: 0.98 }}
                 onClick={card.onClick}
-                className="bg-[#242426] rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02] relative flex-1"
+                className="bg-[#242426] rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02] relative"
               >
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[20px]" style={{ backgroundImage: NOISE }} />
                 <div className="relative z-10 flex items-center gap-4 w-full">
