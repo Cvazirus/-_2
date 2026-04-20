@@ -328,7 +328,7 @@ export default function App() {
   useEffect(() => {
     if (user) {
       syncData();
-      const interval = setInterval(() => syncData(), 60000); // Check every minute
+      const interval = setInterval(() => syncData(), 600000); // Check every 10 minutes
       return () => clearInterval(interval);
     }
   }, [user, syncData]);
