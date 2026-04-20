@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users, LayoutGrid, List } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -72,113 +72,127 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   );
 
   return (
-    <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-[#0d111a]" ref={menuRef}>
-      {/* Immersive Dark Fluid Background */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
-        <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-[#1a2f55] rounded-full blur-[100px] mix-blend-screen" />
-        <div className="absolute bottom-[-10%] right-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] bg-[#172545] rounded-full blur-[120px] mix-blend-screen" />
-        <div className="absolute top-[30%] left-[20%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-[#223555] rounded-full blur-[80px] mix-blend-screen" />
+    <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-[#050505]" ref={menuRef}>
+      {/* Immersive Dark Fluid Background - Grayscale */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-50">
+        <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-[#2a2a2a] rounded-full blur-[100px] mix-blend-screen" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] bg-[#1a1a1a] rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute top-[30%] left-[20%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-[#333333] rounded-full blur-[80px] mix-blend-screen" />
       </div>
 
-      <div className="relative z-10 p-4 grid grid-cols-2 gap-3 sm:gap-4 content-start">
-        {/* Учёт (Основной) */}
-        <motion.div 
-          whileTap={{ scale: 0.98 }}
-          onClick={onOpenParts}
-          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
-              <Box size={24} strokeWidth={1.5} className="text-[#5dade2]" />
-            </div>
-            <div className="relative">
-              <button 
-                onClick={(e) => handleMenuClick(e, 'parts')}
-                className="text-white/30 hover:text-white/70 transition-colors p-1"
-              >
-                <MoreHorizontal size={20} />
-              </button>
-              <MenuDropdown isOpen={openMenu === 'parts'} />
-            </div>
+      <div className="relative z-10 p-4 w-full max-w-lg mx-auto">
+        {/* Toggle Grid/List matching the screenshot top right corner */}
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center gap-1 bg-[#161616]/80 backdrop-blur-md p-1 rounded-xl border border-white/5">
+            <button className="bg-[#333333] text-white p-1 rounded-[8px] shadow-sm">
+              <LayoutGrid size={16} />
+            </button>
+            <button className="text-white/40 p-1 rounded-[8px] px-1.5 transition-colors hover:text-white/70">
+              <List size={16} />
+            </button>
           </div>
-          
-          <div className="mt-auto">
-            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Основной</h2>
-            <p className="text-white/40 text-xs sm:text-sm font-medium">{partsCount} записей</p>
-          </div>
-        </motion.div>
+        </div>
 
-        {/* Журнал списаний */}
-        <motion.div 
-          whileTap={{ scale: 0.98 }}
-          onClick={onOpenOperations}
-          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
-              <ClipboardList size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 content-start">
+          {/* Учёт (Основной) */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onOpenParts}
+            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
+                <Box size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+              </div>
+              <div className="relative -mr-2 -mt-2">
+                <button 
+                  onClick={(e) => handleMenuClick(e, 'parts')}
+                  className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
+                >
+                  <MoreHorizontal size={20} />
+                </button>
+                <MenuDropdown isOpen={openMenu === 'parts'} />
+              </div>
             </div>
-            <div className="relative">
-              <button 
-                onClick={(e) => handleMenuClick(e, 'operations')}
-                className="text-white/30 hover:text-white/70 transition-colors p-1"
-              >
-                <MoreHorizontal size={20} />
-              </button>
-              <MenuDropdown isOpen={openMenu === 'operations'} />
+            
+            <div className="mt-auto">
+              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Основной</h2>
+              <p className="text-[#737373] text-xs sm:text-sm font-medium">{partsCount} записей</p>
             </div>
-          </div>
-          
-          <div className="mt-auto">
-            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
-            <p className="text-white/40 text-xs sm:text-sm font-medium">{operationsCount} записей</p>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Финансовый журнал */}
-        <motion.div 
-          whileTap={{ scale: 0.98 }}
-          onClick={onViewFinance}
-          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
-        >
-          <div className="flex justify-between items-start mb-4">
-            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
-              <Wallet size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+          {/* Журнал списаний */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onOpenOperations}
+            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
+                <ClipboardList size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+              </div>
+              <div className="relative -mr-2 -mt-2">
+                <button 
+                  onClick={(e) => handleMenuClick(e, 'operations')}
+                  className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full"
+                >
+                  <MoreHorizontal size={20} />
+                </button>
+                <MenuDropdown isOpen={openMenu === 'operations'} />
+              </div>
             </div>
-            <div className="relative">
-              <button className="text-white/30 hover:text-white/70 transition-colors p-1">
-                <MoreHorizontal size={20} />
-              </button>
+            
+            <div className="mt-auto">
+              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
+              <p className="text-[#737373] text-xs sm:text-sm font-medium">{operationsCount} записей</p>
             </div>
-          </div>
-          
-          <div className="mt-auto">
-            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Финансовый журнал</h2>
-            <p className="text-white/40 text-xs sm:text-sm font-medium">Зарплата и аванс</p>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Журнал смен */}
-        <motion.div 
-          whileTap={{ scale: 0.98 }}
-          className="bg-[#1e2536]/50 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-not-allowed shadow-[inset_0_1px_1px_rgba(255,255,255,0.03),_0_10px_30px_rgba(0,0,0,0.3)] border border-white/5 transition-all aspect-square relative"
-        >
-          <div className="flex justify-between items-start mb-4 opacity-70">
-            <div className="bg-[#141b2a]/60 shadow-inner border border-white/5 p-3 rounded-2xl">
-              <Users size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+          {/* Финансовый журнал */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            onClick={onViewFinance}
+            className="bg-gradient-to-br from-[#222222]/80 to-[#111111]/80 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.8)] border border-transparent transition-all aspect-square relative"
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/90 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
+                <Wallet size={34} strokeWidth={1.5} className="text-[#a3a3a3]" />
+              </div>
+              <div className="relative -mr-2 -mt-2">
+                <button className="text-white/30 hover:text-white/70 transition-colors p-2 rounded-full">
+                  <MoreHorizontal size={20} />
+                </button>
+              </div>
             </div>
-            <div className="relative">
-              <button className="text-white/20 transition-colors p-1">
-                <MoreHorizontal size={20} />
-              </button>
+            
+            <div className="mt-auto">
+              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Финансовый журнал</h2>
+              <p className="text-[#737373] text-xs sm:text-sm font-medium">Зарплата и аванс</p>
             </div>
-          </div>
-          
-          <div className="mt-auto opacity-70">
-            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Журнал смен</h2>
-            <p className="text-white/30 text-xs sm:text-sm font-medium">В разработке</p>
-          </div>
-        </motion.div>
+          </motion.div>
+
+          {/* Журнал смен */}
+          <motion.div 
+            whileTap={{ scale: 0.98 }}
+            className="bg-gradient-to-br from-[#222222]/50 to-[#111111]/50 backdrop-blur-3xl rounded-[32px] p-5 sm:p-6 flex flex-col cursor-not-allowed shadow-[inset_0_1px_1px_rgba(255,255,255,0.02),_0_10px_30px_rgba(0,0,0,0.5)] border border-transparent transition-all aspect-square relative"
+          >
+            <div className="flex justify-between items-start mb-4 opacity-70">
+              <div className="w-14 h-14 rounded-[20px] bg-[#0a0a0a]/60 shadow-[inset_0_1px_3px_rgba(0,0,0,0.8),_0_1px_0_rgba(255,255,255,0.03)] border border-white/[0.02] flex items-center justify-center">
+                <Users size={34} strokeWidth={1.5} className="text-[#737373]" />
+              </div>
+              <div className="relative -mr-2 -mt-2">
+                <button className="text-white/20 transition-colors p-2 rounded-full cursor-not-allowed">
+                  <MoreHorizontal size={20} />
+                </button>
+              </div>
+            </div>
+            
+            <div className="mt-auto opacity-70">
+              <h2 className="text-[#e2e8f0] text-base sm:text-lg font-semibold leading-tight mb-1">Журнал смен</h2>
+              <p className="text-[#737373] text-xs sm:text-sm font-medium opacity-60">1 график</p>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
