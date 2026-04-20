@@ -78,16 +78,16 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
         <img 
           src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80" 
           alt="Circuit Background" 
-          className="w-full h-full object-cover grayscale opacity-20 contrast-[1.2]"
+          className="w-full h-full object-cover grayscale opacity-30 contrast-[1.2]"
         />
         <img 
           src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80" 
           alt="Gears overlay" 
-          className="absolute inset-0 w-full h-full object-cover grayscale mix-blend-overlay opacity-30 contrast-[1.5]"
+          className="absolute inset-0 w-full h-full object-cover grayscale mix-blend-overlay opacity-40 contrast-[1.2]"
         />
-        {/* Deep dark gradient overlay to make things readable */}
-        <div className="absolute inset-0 bg-[#0A0A0C]/80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-[#0a0a0c]/80" />
+        {/* Adjusted overlay to darken slightly based on feedback */}
+        <div className="absolute inset-0 bg-[#0A0A0C]/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-[#0a0a0c]/10" />
       </div>
 
       <div className="relative z-10 p-5 w-full max-w-lg mx-auto pt-6 flex flex-col min-h-full">
