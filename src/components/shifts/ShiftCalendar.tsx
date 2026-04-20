@@ -221,7 +221,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                     isToday ? 'ring-2 ring-blue-500' : ''
                   } ${bgClass}`}
                 >
-                  <span className={`text-[18px] font-bold leading-none mb-0.5 ${textClass}`}>
+                  <span className={`text-[25px] font-bold leading-none mb-0.5 ${textClass}`}>
                     {dayNum}
                   </span>
 
