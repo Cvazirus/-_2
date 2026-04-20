@@ -1,4 +1,4 @@
-import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet } from 'lucide-react';
+import { Box, ClipboardList, MoreHorizontal, Edit2, Trash2, Wallet, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -72,75 +72,114 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
   );
 
   return (
-    <div className="p-4 grid grid-cols-2 gap-4 content-start min-h-[calc(100dvh-80px)]" ref={menuRef}>
-      <motion.div 
-        whileTap={{ scale: 0.98 }}
-        onClick={onOpenParts}
-        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all aspect-square relative"
-      >
-        <div className="flex justify-between items-start mb-4">
-          <div className="bg-primary-50 p-3 rounded-2xl">
-            <Box size={32} strokeWidth={1.5} className="text-primary-600" />
-          </div>
-          <div className="relative">
-            <button 
-              onClick={(e) => handleMenuClick(e, 'parts')}
-              className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
-            >
-              <MoreHorizontal size={20} />
-            </button>
-            <MenuDropdown isOpen={openMenu === 'parts'} />
-          </div>
-        </div>
-        
-        <div className="mt-auto">
-          <h2 className="text-foreground text-base sm:text-lg font-semibold leading-tight mb-1">Учёт деталей</h2>
-          <p className="text-foreground/60 text-xs sm:text-sm font-medium">{partsCount} записей</p>
-        </div>
-      </motion.div>
+    <div className="relative min-h-[calc(100dvh-80px)] overflow-hidden bg-[#0d111a]" ref={menuRef}>
+      {/* Immersive Dark Fluid Background */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-60">
+        <div className="absolute top-[-20%] left-[-10%] w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-[#1a2f55] rounded-full blur-[100px] mix-blend-screen" />
+        <div className="absolute bottom-[-10%] right-[-20%] w-[90vw] h-[90vw] max-w-[900px] max-h-[900px] bg-[#172545] rounded-full blur-[120px] mix-blend-screen" />
+        <div className="absolute top-[30%] left-[20%] w-[60vw] h-[60vw] max-w-[600px] max-h-[600px] bg-[#223555] rounded-full blur-[80px] mix-blend-screen" />
+      </div>
 
-      <motion.div 
-        whileTap={{ scale: 0.98 }}
-        onClick={onOpenOperations}
-        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all aspect-square relative"
-      >
-        <div className="flex justify-between items-start mb-4">
-          <div className="bg-primary-50 p-3 rounded-2xl">
-            <ClipboardList size={32} strokeWidth={1.5} className="text-primary-600" />
+      <div className="relative z-10 p-4 grid grid-cols-2 gap-3 sm:gap-4 content-start">
+        {/* Учёт (Основной) */}
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          onClick={onOpenParts}
+          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
+              <Box size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+            </div>
+            <div className="relative">
+              <button 
+                onClick={(e) => handleMenuClick(e, 'parts')}
+                className="text-white/30 hover:text-white/70 transition-colors p-1"
+              >
+                <MoreHorizontal size={20} />
+              </button>
+              <MenuDropdown isOpen={openMenu === 'parts'} />
+            </div>
           </div>
-          <div className="relative">
-            <button 
-              onClick={(e) => handleMenuClick(e, 'operations')}
-              className="text-foreground/40 hover:text-foreground/70 transition-colors p-1"
-            >
-              <MoreHorizontal size={20} />
-            </button>
-            <MenuDropdown isOpen={openMenu === 'operations'} />
+          
+          <div className="mt-auto">
+            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Основной</h2>
+            <p className="text-white/40 text-xs sm:text-sm font-medium">{partsCount} записей</p>
           </div>
-        </div>
-        
-        <div className="mt-auto">
-          <h2 className="text-foreground text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
-          <p className="text-foreground/60 text-xs sm:text-sm font-medium">{operationsCount} записи</p>
-        </div>
-      </motion.div>
+        </motion.div>
 
-      <motion.div 
-        whileTap={{ scale: 0.98 }}
-        onClick={onViewFinance}
-        className="bg-card-bg rounded-3xl p-4 sm:p-5 flex flex-col cursor-pointer shadow-sm border border-card-border hover:shadow-md transition-all col-span-2 min-h-[140px] relative"
-      >
-        <div className="flex justify-between items-start mb-4">
-          <div className="bg-primary-50 p-3 rounded-2xl">
-            <Wallet size={32} strokeWidth={1.5} className="text-primary-600" />
+        {/* Журнал списаний */}
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          onClick={onOpenOperations}
+          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
+              <ClipboardList size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+            </div>
+            <div className="relative">
+              <button 
+                onClick={(e) => handleMenuClick(e, 'operations')}
+                className="text-white/30 hover:text-white/70 transition-colors p-1"
+              >
+                <MoreHorizontal size={20} />
+              </button>
+              <MenuDropdown isOpen={openMenu === 'operations'} />
+            </div>
           </div>
-        </div>
-        
-        <div className="mt-auto">
-          <h2 className="text-foreground text-lg sm:text-lg font-semibold mb-1">Финансовый журнал</h2>
-          <p className="text-foreground/60 text-sm font-medium">Зарплата и аванс</p>
-        </div>
-      </motion.div>
+          
+          <div className="mt-auto">
+            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Журнал списаний</h2>
+            <p className="text-white/40 text-xs sm:text-sm font-medium">{operationsCount} записей</p>
+          </div>
+        </motion.div>
+
+        {/* Финансовый журнал */}
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          onClick={onViewFinance}
+          className="bg-[#1e2536]/80 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-pointer shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),_0_10px_30px_rgba(0,0,0,0.5)] border border-white/5 transition-all aspect-square relative"
+        >
+          <div className="flex justify-between items-start mb-4">
+            <div className="bg-[#141b2a]/80 shadow-inner border border-white/5 p-3 rounded-2xl">
+              <Wallet size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+            </div>
+            <div className="relative">
+              <button className="text-white/30 hover:text-white/70 transition-colors p-1">
+                <MoreHorizontal size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="mt-auto">
+            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Финансовый журнал</h2>
+            <p className="text-white/40 text-xs sm:text-sm font-medium">Зарплата и аванс</p>
+          </div>
+        </motion.div>
+
+        {/* Журнал смен */}
+        <motion.div 
+          whileTap={{ scale: 0.98 }}
+          className="bg-[#1e2536]/50 backdrop-blur-3xl rounded-[28px] p-4 sm:p-5 flex flex-col cursor-not-allowed shadow-[inset_0_1px_1px_rgba(255,255,255,0.03),_0_10px_30px_rgba(0,0,0,0.3)] border border-white/5 transition-all aspect-square relative"
+        >
+          <div className="flex justify-between items-start mb-4 opacity-70">
+            <div className="bg-[#141b2a]/60 shadow-inner border border-white/5 p-3 rounded-2xl">
+              <Users size={24} strokeWidth={1.5} className="text-[#5dade2]" />
+            </div>
+            <div className="relative">
+              <button className="text-white/20 transition-colors p-1">
+                <MoreHorizontal size={20} />
+              </button>
+            </div>
+          </div>
+          
+          <div className="mt-auto opacity-70">
+            <h2 className="text-white text-base sm:text-lg font-semibold leading-tight mb-1">Журнал смен</h2>
+            <p className="text-white/30 text-xs sm:text-sm font-medium">В разработке</p>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
