@@ -198,7 +198,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const bgClass = isVacation
                 ? 'bg-teal-400/40'
                 : isNonWorkHoliday
-                  ? 'bg-rose-400/35'
+                  ? 'bg-green-400/40'
                   : shift.isOff
                     ? isWeekend ? 'bg-red-100/60 dark:bg-red-900/15' : 'bg-muted/30'
                     : colIdx !== null
@@ -208,7 +208,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const textClass = isVacation
                 ? 'text-teal-900 dark:text-teal-100'
                 : isNonWorkHoliday
-                  ? 'text-rose-900 dark:text-rose-100'
+                  ? 'text-green-900 dark:text-green-100'
                   : shift.isOff
                     ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
                     : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground';
@@ -228,7 +228,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                   {isVacation ? (
                     <span className="text-[12px] leading-none">🏖</span>
                   ) : isNonWorkHoliday ? (
-                    <span className="text-[12px] leading-none text-white/90">★</span>
+                    <span className="text-[12px] leading-none">🎉</span>
                   ) : !shift.isOff && shift.shift ? (
                     <span className={`text-[13px] font-semibold leading-none ${textClass}`}>
                       {shift.shift.label.split('-')[0].trim().slice(0, 2)}с
@@ -258,7 +258,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
             <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" /> Не вышел</div>
             <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block" /> Переработка</div>
             <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-teal-400 inline-block" /> Отпуск</div>
-            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" /> Праздник</div>
+            <div className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" /> Праздник</div>
           </div>
         </div>
       )}

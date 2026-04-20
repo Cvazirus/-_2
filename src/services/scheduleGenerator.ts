@@ -36,7 +36,7 @@ export const RUSSIAN_HOLIDAYS: string[] = [
   '2026-01-06','2026-01-07','2026-01-08','2026-01-09',
   '2026-02-23',
   '2026-03-09',
-  '2026-05-01','2026-05-11',
+  '2026-05-01','2026-05-09','2026-05-11',
   '2026-06-12',
   '2026-11-04',
 ];
@@ -110,7 +110,7 @@ export function generateSchedule(
     const { shiftIndex, shift } = getShiftForDate(schedule, dateStr);
     const isHoliday = holidays.includes(dateStr);
 
-    if (!shift) {
+    if (!shift || isHoliday) {
       results.push({ date: dateStr, shiftIndex: null, shift: null, hours: 0, nightHours: 0, isHoliday, isOff: true });
     } else {
       results.push({
