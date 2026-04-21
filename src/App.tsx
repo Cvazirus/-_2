@@ -649,7 +649,9 @@ export default function App() {
           const headerRow = rows[0].map(h => h.toLowerCase().trim());
           
           let codeIdx = headerRow.findIndex(h => h.includes('номер детали') || h.includes('код') || h.includes('артикул'));
-          let nameIdx = headerRow.findIndex(h => h.includes('название') || h.includes('наименование') || h.includes('номенклатура') || h.includes('деталь') || h.includes('товар'));
+          let nameIdx = headerRow.findIndex(h => h.includes('название') || h.includes('наименование') || h.includes('номенклатура') || h.includes('товар'));
+          if (nameIdx === -1) nameIdx = headerRow.findIndex((h, i) => i !== codeIdx && h.includes('деталь'));
+          if (nameIdx === codeIdx) nameIdx = -1;
           let priceIdx = headerRow.findIndex(h => h.includes('цена'));
           let qtyIdx = headerRow.findIndex(h => h.includes('количество') || h.includes('кол-во') || h.includes('остаток'));
           let opsIdx = headerRow.findIndex(h => h.includes('операци'));
