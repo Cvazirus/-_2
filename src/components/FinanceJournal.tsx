@@ -305,20 +305,49 @@ export default function FinanceJournal({ operations }: FinanceJournalProps) {
         </button>
       </div>
 
-      {/* Current Balance Summary Card */}
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-800 p-6 rounded-3xl shadow-md text-white">
-        <div className="flex items-center gap-3 mb-4 opacity-90">
-          <Wallet size={24} />
-          <h3 className="text-lg font-medium">Текущий баланс за {monthName}</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-blue-100 text-sm mb-1">Начислено (грязными)</p>
-            <p className="text-2xl font-bold">{formatMoney(totalGross)}</p>
+      {/* Current Balance Summary Card — МИР */}
+      <div
+        className="relative overflow-hidden rounded-3xl shadow-2xl text-white select-none"
+        style={{ background: 'linear-gradient(135deg, #0d5c2e 0%, #1a8a47 45%, #22a855 100%)', minHeight: 190 }}
+      >
+        {/* Декоративные круги */}
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full opacity-20" style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }} />
+        <div className="absolute -bottom-12 -left-8 w-40 h-40 rounded-full opacity-10" style={{ background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 p-5 flex flex-col h-full" style={{ minHeight: 190 }}>
+          {/* Верхняя строка: чип + МИР */}
+          <div className="flex items-center justify-between mb-4">
+            {/* Чип */}
+            <div className="w-10 h-7 rounded-md flex items-center justify-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #d4a843 0%, #f0d060 40%, #c8922a 100%)' }}>
+              <svg width="32" height="24" viewBox="0 0 32 24">
+                <rect x="0" y="8" width="32" height="8" fill="rgba(0,0,0,0.15)" />
+                <rect x="12" y="0" width="8" height="24" fill="rgba(0,0,0,0.15)" />
+                <rect x="6" y="4" width="20" height="16" rx="2" fill="none" stroke="rgba(0,0,0,0.2)" strokeWidth="0.5" />
+              </svg>
+            </div>
+            {/* Логотип МИР */}
+            <div className="flex items-center gap-1">
+              <span className="text-white font-black tracking-widest text-xl" style={{ fontFamily: 'sans-serif', letterSpacing: '0.15em' }}>МИР</span>
+              <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center ml-1">
+                <div className="w-3 h-3 rounded-full bg-white/60" />
+              </div>
+            </div>
           </div>
-          <div>
-            <p className="text-blue-100 text-sm mb-1">К выплате за месяц</p>
-            <p className="text-3xl font-bold">{formatMoney(totalNet)}</p>
+
+          {/* Баланс */}
+          <div className="mt-auto">
+            <p className="text-green-200 text-xs mb-1 uppercase tracking-wide">К выплате за {monthName}</p>
+            <p className="text-4xl font-black tracking-tight mb-3">{formatMoney(totalNet)}</p>
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-green-300 text-[11px] uppercase tracking-wide">Начислено</p>
+                <p className="text-lg font-bold">{formatMoney(totalGross)}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-green-300 text-[11px] uppercase tracking-wide">Период</p>
+                <p className="text-sm font-semibold opacity-90">{monthName}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
