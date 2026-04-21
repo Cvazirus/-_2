@@ -1339,6 +1339,9 @@ export default function App() {
                 keys.forEach(k => localStorage.removeItem(k));
                 window.location.reload();
               }}
+              user={user}
+              onLogin={handleLogin}
+              onLogout={handleLogout}
             />
           </div>
         );
