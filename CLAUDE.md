@@ -1,5 +1,8 @@
 # Project Instructions
 
+## Language
+All responses and internal reasoning/thinking must be in Russian.
+
 ## Deploy command
 At the end of every response, always show the Termux deploy command:
 
