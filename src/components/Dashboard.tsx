@@ -104,29 +104,31 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
 
   return (
     <div
-      className="relative min-h-[100dvh] bg-[#0A0A0C] flex flex-col"
+      className={`relative min-h-[100dvh] flex flex-col ${isDark ? 'bg-[#0A0A0C]' : 'bg-gray-100'}`}
       ref={menuRef}
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      {/* Background — fixed so it stays behind everything */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <img
-          src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80"
-          alt=""
-          className="w-full h-full object-cover grayscale opacity-30 contrast-[1.2]"
-        />
-        <img
-          src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover grayscale mix-blend-overlay opacity-40 contrast-[1.2]"
-        />
-        <div className="absolute inset-0 bg-[#0A0A0C]/60" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent" />
-      </div>
+      {/* Background — only in dark mode */}
+      {isDark && (
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <img
+            src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80"
+            alt=""
+            className="w-full h-full object-cover grayscale opacity-30 contrast-[1.2]"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1000&q=80"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover grayscale mix-blend-overlay opacity-40 contrast-[1.2]"
+          />
+          <div className="absolute inset-0 bg-[#0A0A0C]/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/40 to-transparent" />
+        </div>
+      )}
 
       {/* Sticky top bar */}
       <div
-        className="sticky top-0 z-20 bg-primary-600"
+        className={`sticky top-0 z-20 ${isDark ? 'bg-[#111113]' : 'bg-primary-600'}`}
         style={{ paddingTop: 'max(env(safe-area-inset-top, 0px), 14px)', paddingBottom: '14px' }}
       >
         <div className="flex items-center justify-between px-5">
@@ -160,27 +162,27 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-12 w-52 bg-[#1e1e22] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.08] overflow-hidden z-30"
+                    className={`absolute right-0 top-12 w-52 rounded-2xl overflow-hidden z-30 ${isDark ? 'bg-[#1e1e22] shadow-[0_12px_40px_rgba(0,0,0,0.8)] border border-white/[0.08]' : 'bg-white shadow-xl border border-gray-200'}`}
                   >
                     <button
                       onClick={() => { onThemeToggle(); setShowAppMenu(false); }}
-                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                      className={`w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-sm font-medium ${isDark ? 'text-white hover:bg-white/5' : 'text-gray-800 hover:bg-gray-50'}`}
                     >
                       {isDark ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
                       <span>{isDark ? 'Светлая тема' : 'Тёмная тема'}</span>
                     </button>
-                    <div className="h-px bg-white/[0.06]" />
+                    <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-100'}`} />
                     <button
                       onClick={() => { onExport(); setShowAppMenu(false); }}
-                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                      className={`w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-sm font-medium ${isDark ? 'text-white hover:bg-white/5' : 'text-gray-800 hover:bg-gray-50'}`}
                     >
                       <Download size={16} strokeWidth={1.5} />
                       <span>Экспорт данных</span>
                     </button>
-                    <div className="h-px bg-white/[0.06]" />
+                    <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-100'}`} />
                     <button
                       onClick={() => { onTelegramSettings(); setShowAppMenu(false); }}
-                      className="w-full px-4 py-3.5 flex items-center gap-3 text-white hover:bg-white/5 transition-colors text-sm font-medium"
+                      className={`w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-sm font-medium ${isDark ? 'text-white hover:bg-white/5' : 'text-gray-800 hover:bg-gray-50'}`}
                     >
                       <MessageCircle size={16} strokeWidth={1.5} />
                       <span>Telegram</span>
@@ -202,9 +204,9 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                 key={card.key}
                 whileTap={{ scale: 0.97 }}
                 onClick={card.onClick}
-                className="bg-[#242426] rounded-[24px] p-5 flex flex-col cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02] relative aspect-square"
+                className={`rounded-[24px] p-5 flex flex-col cursor-pointer relative aspect-square ${isDark ? 'bg-[#242426] shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02]' : 'bg-white shadow-md border border-gray-100'}`}
               >
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[24px]" style={{ backgroundImage: NOISE }} />
+                {isDark && <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[24px]" style={{ backgroundImage: NOISE }} />}
                 <div className="relative z-10 flex flex-col h-full">
                   <div className="flex justify-between items-start">
                     {card.icon}
@@ -212,7 +214,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                       <div className="relative -mr-2 -mt-1">
                         <button
                           onClick={(e) => handleMenuClick(e, card.key as 'parts' | 'operations')}
-                          className="text-[#6c6c70] hover:text-white transition-colors p-1.5 rounded-full"
+                          className={`transition-colors p-1.5 rounded-full ${isDark ? 'text-[#6c6c70] hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}
                         >
                           <MoreHorizontal size={18} strokeWidth={2} />
                         </button>
@@ -221,8 +223,8 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                     )}
                   </div>
                   <div className="mt-auto pt-4">
-                    <h2 className="text-white text-[16px] font-medium leading-tight mb-1 whitespace-pre-line">{card.title}</h2>
-                    <p className="text-[#8e8e93] text-[12px]">{card.sub}</p>
+                    <h2 className={`text-[16px] font-medium leading-tight mb-1 whitespace-pre-line ${isDark ? 'text-white' : 'text-gray-900'}`}>{card.title}</h2>
+                    <p className={`text-[12px] ${isDark ? 'text-[#8e8e93]' : 'text-gray-500'}`}>{card.sub}</p>
                   </div>
                 </div>
               </motion.div>
@@ -235,20 +237,20 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                 key={card.key}
                 whileTap={{ scale: 0.98 }}
                 onClick={card.onClick}
-                className="bg-[#242426] rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02] relative"
+                className={`rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer relative ${isDark ? 'bg-[#242426] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02]' : 'bg-white shadow-md border border-gray-100'}`}
               >
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[20px]" style={{ backgroundImage: NOISE }} />
+                {isDark && <div className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-[20px]" style={{ backgroundImage: NOISE }} />}
                 <div className="relative z-10 flex items-center gap-4 w-full">
                   <div className="shrink-0">{card.icon}</div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="text-white text-[16px] font-medium leading-tight">{card.title.replace('\n', ' ')}</h2>
-                    <p className="text-[#8e8e93] text-[12px] mt-0.5">{card.sub}</p>
+                    <h2 className={`text-[16px] font-medium leading-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>{card.title.replace('\n', ' ')}</h2>
+                    <p className={`text-[12px] mt-0.5 ${isDark ? 'text-[#8e8e93]' : 'text-gray-500'}`}>{card.sub}</p>
                   </div>
                   {card.hasMenu && (
                     <div className="relative shrink-0">
                       <button
                         onClick={(e) => handleMenuClick(e, card.key as 'parts' | 'operations')}
-                        className="text-[#6c6c70] hover:text-white transition-colors p-1.5 rounded-full"
+                        className={`transition-colors p-1.5 rounded-full ${isDark ? 'text-[#6c6c70] hover:text-white' : 'text-gray-400 hover:text-gray-700'}`}
                       >
                         <MoreHorizontal size={18} strokeWidth={2} />
                       </button>
