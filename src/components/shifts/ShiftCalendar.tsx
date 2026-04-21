@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
@@ -58,9 +59,15 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
   const isOnVacation = (date: string) =>
     vacations.some(v => date >= v.startDate && date <= v.endDate);
   const [month, setMonth] = useState(new Date());
+  const [direction, setDirection] = useState<1 | -1>(1);
   const [tab, setTab] = useState<'calendar' | 'log'>('calendar');
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const touchStartX = useRef<number | null>(null);
+
+  const changeMonth = (dir: 1 | -1) => {
+    setDirection(dir);
+    setMonth(m => dir === 1 ? addMonths(m, 1) : subMonths(m, 1));
+  };
 
   const year = month.getFullYear();
   const mon = month.getMonth() + 1;
@@ -121,13 +128,22 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
 
       {/* Month nav */}
       <div className="flex items-center justify-between px-4 py-2.5">
-        <button onClick={() => setMonth(m => subMonths(m, 1))} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
+        <button onClick={() => changeMonth(-1)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
           <ChevronLeft size={18} className="text-foreground" />
         </button>
-        <span className="font-bold text-foreground capitalize">
-          {format(month, 'LLLL yyyy', { locale: ru })}
-        </span>
-        <button onClick={() => setMonth(m => addMonths(m, 1))} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={format(month, 'yyyy-MM')}
+            initial={{ opacity: 0, x: direction * 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -20 }}
+            transition={{ duration: 0.2 }}
+            className="font-bold text-foreground capitalize"
+          >
+            {format(month, 'LLLL yyyy', { locale: ru })}
+          </motion.span>
+        </AnimatePresence>
+        <button onClick={() => changeMonth(1)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
           <ChevronRight size={18} className="text-foreground" />
         </button>
       </div>
@@ -170,8 +186,8 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
             if (touchStartX.current === null) return;
             const dx = e.changedTouches[0].clientX - touchStartX.current;
             touchStartX.current = null;
-            if (dx < -50) setMonth(m => addMonths(m, 1));
-            else if (dx > 50) setMonth(m => subMonths(m, 1));
+            if (dx < -50) changeMonth(1);
+            else if (dx > 50) changeMonth(-1);
           }}
         >
           {/* Week day headers */}
@@ -183,8 +199,16 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
             ))}
           </div>
 
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7 gap-1">
+          {/* Calendar grid — анимация слайда */}
+          <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={format(month, 'yyyy-MM')}
+            initial={{ opacity: 0, x: direction * 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction * -60 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className="grid grid-cols-7 gap-1"
+          >
             {cells.map((cell, i) => {
               if (!cell) return <div key={`empty-${i}`} />;
               const { shift, actual } = cell;
@@ -249,7 +273,8 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                 </button>
               );
             })}
-          </div>
+          </motion.div>
+          </AnimatePresence>
 
           {/* Legend */}
           <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">

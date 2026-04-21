@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ShiftSchedule, ShiftTime, ScheduleType } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { SCHEDULE_TYPE_LABELS, defaultShifts } from '../../services/scheduleGenerator';
 
@@ -46,15 +46,18 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
     if (startShiftIndex >= i && startShiftIndex > 0) setStartShiftIndex(s => s - 1);
   };
 
-  const moveShift = (i: number, dir: -1 | 1) => {
-    const j = i + dir;
+  // cycleOrder[pos] = shiftIndex — какая смена стоит на позиции pos в цикле
+  const cycleOrder = shifts.map((_, i) => i);
+
+  const setCyclePosition = (pos: number, newShiftIdx: number) => {
+    const oldShiftIdx = pos; // текущая смена на этой позиции
     setShifts(prev => {
       const next = [...prev];
-      [next[i], next[j]] = [next[j], next[i]];
+      [next[pos], next[newShiftIdx]] = [next[newShiftIdx], next[pos]];
       return next;
     });
     setStartShiftIndex(prev =>
-      prev === i ? j : prev === j ? i : prev
+      prev === oldShiftIdx ? newShiftIdx : prev === newShiftIdx ? oldShiftIdx : prev
     );
   };
 
@@ -141,27 +144,29 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
             />
           </div>
 
-          {/* Start shift index */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground">
-              Первая смена на дату старта
-            </label>
-            <div className="flex gap-2">
-              {shifts.map((s, i) => (
-                <button
-                  key={i}
-                  onClick={() => setStartShiftIndex(i)}
-                  className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
-                    startShiftIndex === i
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                      : 'border-card-border text-foreground'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+          {/* Порядок смен в цикле */}
+          {shifts.length > 1 && (
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground">Порядок смен в цикле</label>
+              <div className="space-y-2">
+                {cycleOrder.map((shiftIdx, pos) => (
+                  <div key={pos} className="flex items-center gap-3">
+                    <span className="text-xs text-muted-foreground w-16 shrink-0">{pos + 1}-я очередь</span>
+                    <select
+                      value={shiftIdx}
+                      onChange={e => setCyclePosition(pos, Number(e.target.value))}
+                      className="flex-1 px-3 py-2.5 rounded-xl border border-card-border bg-background text-foreground text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {shifts.map((s, i) => (
+                        <option key={i} value={i}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">Дата старта соответствует 1-й очереди</p>
             </div>
-          </div>
+          )}
 
           {/* Shift times */}
           <div className="space-y-3">
@@ -169,22 +174,6 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
             {shifts.map((s, i) => (
               <div key={i} className="bg-background rounded-xl border border-card-border p-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-0.5">
-                    <button
-                      onClick={() => moveShift(i, -1)}
-                      disabled={i === 0}
-                      className="text-muted-foreground disabled:opacity-20 active:text-foreground"
-                    >
-                      <ChevronUp size={16} />
-                    </button>
-                    <button
-                      onClick={() => moveShift(i, 1)}
-                      disabled={i === shifts.length - 1}
-                      className="text-muted-foreground disabled:opacity-20 active:text-foreground"
-                    >
-                      <ChevronDown size={16} />
-                    </button>
-                  </div>
                   <input
                     value={s.label}
                     onChange={e => updateShift(i, 'label', e.target.value)}

@@ -96,15 +96,18 @@ export default function PartsList({ parts, onSelectPart, scrollPosition = 0, onS
         className="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-3 pb-24"
         onScroll={handleScroll}
       >
-        {parts.map((part) => {
+        {parts.map((part, idx) => {
           const partTotalCost = part.currentQuantity * part.pricePerUnit;
           const { r, g, b } = getNeonColor(partTotalCost);
           const color = `rgba(${r}, ${g}, ${b}, 0.25)`;
           const borderColor = `rgba(${r}, ${g}, ${b}, 0.3)`;
-          
+
           return (
             <motion.div
               key={part.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, delay: Math.min(idx * 0.04, 0.4), ease: 'easeOut' }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectPart(part)}
               style={{ 

@@ -260,10 +260,13 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
       <div className="relative z-10 p-4">
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-2 gap-3">
-            {cards.map(card => (
+            {cards.map((card, idx) => (
               <motion.div
                 key={card.key}
-                whileTap={{ scale: 0.97 }}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: idx * 0.07, ease: 'easeOut' }}
+                whileTap={{ scale: 0.95 }}
                 onClick={card.onClick}
                 className={`rounded-[24px] p-5 flex flex-col cursor-pointer relative aspect-square ${isDark ? 'bg-[#242426] shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)] border border-white/[0.02]' : 'bg-white shadow-md border border-gray-100'}`}
               >
@@ -293,9 +296,12 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {cards.map(card => (
+            {cards.map((card, idx) => (
               <motion.div
                 key={card.key}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.25, delay: idx * 0.06, ease: 'easeOut' }}
                 whileTap={{ scale: 0.98 }}
                 onClick={card.onClick}
                 className={`rounded-[20px] px-5 py-4 flex items-center gap-4 cursor-pointer relative ${isDark ? 'bg-[#242426] shadow-[0_4px_16px_rgba(0,0,0,0.5)] border border-white/[0.02]' : 'bg-white shadow-md border border-gray-100'}`}
