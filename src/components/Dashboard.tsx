@@ -162,6 +162,12 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
               >
                 <MoreHorizontal size={20} strokeWidth={2} />
               </button>
+              {showAppMenu && (
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setShowAppMenu(false)}
+                />
+              )}
               <AnimatePresence>
                 {showAppMenu && (
                   <motion.div
