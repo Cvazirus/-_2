@@ -1267,6 +1267,7 @@ export default function App() {
               isDark={theme === 'dark'}
               onThemeToggle={toggleTheme}
               onExport={handleExport}
+              onImport={handleImport}
               onTelegramSettings={() => openModal('tg-settings')}
               onUpdateApp={() => {
                 if ('serviceWorker' in navigator) {
