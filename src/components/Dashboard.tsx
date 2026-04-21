@@ -1,4 +1,4 @@
-import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, Upload, FileSpreadsheet, MessageCircle, Package, ClipboardList, Banknote, CalendarDays, RefreshCw, Trash } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, Upload, FileSpreadsheet, MessageCircle, Package, ClipboardList, Banknote, CalendarDays, RefreshCw, Trash, Box, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -74,10 +74,16 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     </AnimatePresence>
   );
 
+  const AppIcon = ({ gradient, children }: { gradient: string; children: React.ReactNode }) => (
+    <div className="w-[60px] h-[60px] rounded-2xl flex items-center justify-center shadow-lg" style={{ background: gradient }}>
+      {children}
+    </div>
+  );
+
   const cards = [
     {
       key: 'parts' as const,
-      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-blue-500/20 flex items-center justify-center"><Package size={30} strokeWidth={1.5} className="text-blue-400" /></div>,
+      icon: <AppIcon gradient="linear-gradient(145deg,#1a3a8f,#2563eb)"><Box size={28} strokeWidth={1.5} className="text-white" /></AppIcon>,
       title: 'Основной',
       sub: `${partsCount} записей`,
       onClick: onOpenParts,
@@ -85,7 +91,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'operations' as const,
-      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-orange-500/20 flex items-center justify-center"><ClipboardList size={30} strokeWidth={1.5} className="text-orange-400" /></div>,
+      icon: <AppIcon gradient="linear-gradient(145deg,#7c2d12,#ea580c)"><ClipboardList size={28} strokeWidth={1.5} className="text-white" /></AppIcon>,
       title: 'Журнал\nсписаний',
       sub: `${operationsCount} записей`,
       onClick: onOpenOperations,
@@ -93,7 +99,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'finance',
-      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-green-500/20 flex items-center justify-center"><Banknote size={30} strokeWidth={1.5} className="text-green-400" /></div>,
+      icon: <AppIcon gradient="linear-gradient(145deg,#065f46,#10b981)"><Wallet size={28} strokeWidth={1.5} className="text-white" /></AppIcon>,
       title: 'Финансовый\nжурнал',
       sub: 'Зарплата и аванс',
       onClick: onViewFinance,
@@ -101,7 +107,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     },
     {
       key: 'shifts',
-      icon: <div className="w-[60px] h-[60px] rounded-2xl bg-purple-500/20 flex items-center justify-center"><CalendarDays size={30} strokeWidth={1.5} className="text-purple-400" /></div>,
+      icon: <AppIcon gradient="linear-gradient(145deg,#4c1d95,#7c3aed)"><CalendarDays size={28} strokeWidth={1.5} className="text-white" /></AppIcon>,
       title: 'Журнал\nсмен',
       sub: 'Мои смены',
       onClick: onViewShifts,
@@ -156,12 +162,14 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
               </button>
             </div>
             <div className="relative">
-              <button
-                onClick={() => setShowAppMenu(v => !v)}
-                className="bg-white/10 text-white p-2 rounded-full transition-colors hover:bg-white/20"
-              >
-                <MoreHorizontal size={20} strokeWidth={2} />
-              </button>
+              <div className="flex items-center bg-white/10 p-[3px] rounded-xl">
+                <button
+                  onClick={() => setShowAppMenu(v => !v)}
+                  className={`p-1.5 rounded-lg transition-colors ${showAppMenu ? 'bg-white/20 text-white' : 'text-white/70'}`}
+                >
+                  <MoreHorizontal size={16} strokeWidth={1.5} />
+                </button>
+              </div>
               {showAppMenu && (
                 <div
                   className="fixed inset-0 z-20"
@@ -257,7 +265,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
       </div>
 
       {/* Cards */}
-      <div className="relative z-10 p-4">
+      <div className={`relative z-10 ${viewMode === 'grid' ? 'p-4' : 'px-3 py-4'}`}>
         {viewMode === 'grid' ? (
           <div className="grid grid-cols-2 gap-3">
             {cards.map((card, idx) => (
