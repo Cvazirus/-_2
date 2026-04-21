@@ -1268,6 +1268,9 @@ export default function App() {
               onThemeToggle={toggleTheme}
               onExport={handleExport}
               onImport={handleImport}
+              onExportExcel={() => openModal('journal-select', 'export')}
+              onImportExcel={() => openModal('journal-select', 'import')}
+              onCsv={() => openModal('journal-select', 'csv')}
               onTelegramSettings={() => openModal('tg-settings')}
               onUpdateApp={() => {
                 if ('serviceWorker' in navigator) {
