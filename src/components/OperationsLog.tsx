@@ -1,7 +1,7 @@
 import { Operation } from '../types';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, ArrowDownToLine, ArrowUpFromLine, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -68,10 +68,17 @@ export default function OperationsLog({ operations, onSelectOperation }: Operati
                         onClick={() => onSelectOperation(op)}
                         className="p-4 rounded-xl border border-card-border bg-background flex items-center gap-4 cursor-pointer active:bg-muted transition-colors"
                       >
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 ${
-                          op.type === 'arrival' ? 'bg-green-500' : 'bg-yellow-500'
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                          op.type === 'arrival'   ? 'bg-green-500/15'  :
+                          op.type === 'write-off' ? 'bg-amber-500/15'  :
+                                                    'bg-blue-500/15'
                         }`}>
-                          {op.type === 'arrival' ? 'П' : 'С'}
+                          {op.type === 'arrival'
+                            ? <ArrowDownToLine size={18} strokeWidth={1.5} className="text-green-400" />
+                            : op.type === 'return'
+                              ? <RotateCcw size={18} strokeWidth={1.5} className="text-blue-400" />
+                              : <ArrowUpFromLine size={18} strokeWidth={1.5} className="text-amber-400" />
+                          }
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-foreground font-medium truncate">

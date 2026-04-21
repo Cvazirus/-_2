@@ -1,6 +1,6 @@
 import { Part } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus } from 'lucide-react';
+import { Plus, Package } from 'lucide-react';
 import React, { useState, useRef, UIEvent } from 'react';
 
 interface PartsListProps {
@@ -43,25 +43,24 @@ export default function PartsList({ parts, onSelectPart, scrollPosition = 0, onS
   };
 
   const getPartIcon = (code: string) => {
-    const firstFour = code.substring(0, 4);
-    const colors = [
-      'bg-cyan-500', 'bg-pink-500', 'bg-purple-500', 
-      'bg-orange-500', 'bg-blue-500', 'bg-indigo-500',
-      'bg-teal-500', 'bg-rose-500', 'bg-emerald-500'
+    const palettes = [
+      { bg: 'bg-blue-500/15',    icon: 'text-blue-400'    },
+      { bg: 'bg-violet-500/15',  icon: 'text-violet-400'  },
+      { bg: 'bg-cyan-500/15',    icon: 'text-cyan-400'    },
+      { bg: 'bg-orange-500/15',  icon: 'text-orange-400'  },
+      { bg: 'bg-rose-500/15',    icon: 'text-rose-400'    },
+      { bg: 'bg-emerald-500/15', icon: 'text-emerald-400' },
+      { bg: 'bg-amber-500/15',   icon: 'text-amber-400'   },
+      { bg: 'bg-indigo-500/15',  icon: 'text-indigo-400'  },
     ];
-    
-    // Simple hash
     let hash = 0;
-    for (let i = 0; i < firstFour.length; i++) {
-      hash = firstFour.charCodeAt(i) + ((hash << 5) - hash);
+    for (let i = 0; i < Math.min(code.length, 4); i++) {
+      hash = code.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
-    const color = colors[Math.abs(hash) % colors.length];
-    const displayChars = firstFour.toUpperCase() || 'PART';
-    
+    const { bg, icon } = palettes[Math.abs(hash) % palettes.length];
     return (
-      <div className={`w-[52px] h-[52px] shrink-0 ${color} rounded-full flex items-center justify-center mr-4 text-white font-medium text-[15px]`}>
-        {displayChars}
+      <div className={`w-[48px] h-[48px] shrink-0 ${bg} rounded-2xl flex items-center justify-center mr-3`}>
+        <Package size={22} strokeWidth={1.5} className={icon} />
       </div>
     );
   };
