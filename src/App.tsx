@@ -692,7 +692,16 @@ export default function App() {
             if (code && isDate(code)) {
               code = '';
             }
-            
+
+            // Split "4516.12.05.141 Балка" → code="4516.12.05.141", name="Балка"
+            if (code && !name) {
+              const spaceIdx = code.search(/\s+[А-ЯЁA-Za-zа-яё]/);
+              if (spaceIdx > 0) {
+                name = code.slice(spaceIdx).trim();
+                code = code.slice(0, spaceIdx).trim();
+              }
+            }
+
             if (!code && name) {
               const match = name.match(/^(.*?)\s+([A-ZА-ЯЁ][a-zа-яё].*)$/);
               if (match) {
