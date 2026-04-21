@@ -12,51 +12,51 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        includeAssets: ['app-icon-v3-192.png', 'app-icon-v3-512.png', 'icon.svg'],
         manifest: {
           name: 'Учёт деталей',
           short_name: 'Учёт',
           description: 'Приложение для учёта деталей и операций',
-          theme_color: '#ffffff',
+          theme_color: '#2563eb',
           background_color: '#ffffff',
-          display: 'standalone'
-        },
-        workbox: {
-          globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
-          navigateFallback: '/index.html',
-          runtimeCaching: [
+          display: 'standalone',
+          display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+          start_url: '/?app_v=3',
+          id: '/?app_v=3',
+          orientation: 'portrait-primary',
+          lang: 'ru',
+          icons: [
             {
-              urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'google-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
+              src: 'app-icon-v3-192.png',
+              sizes: '192x192',
+              type: 'image/png'
             },
             {
-              urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-              handler: 'CacheFirst',
-              options: {
-                cacheName: 'gstatic-fonts-cache',
-                expiration: {
-                  maxEntries: 10,
-                  maxAgeSeconds: 60 * 60 * 24 * 365
-                },
-                cacheableResponse: {
-                  statuses: [0, 200]
-                }
-              }
+              src: 'app-icon-v3-512.png',
+              sizes: '512x512',
+              type: 'image/png'
+            },
+            {
+              src: 'app-icon-v3-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'any'
+            },
+            {
+              src: 'app-icon-v3-512.png',
+              sizes: '512x512',
+              type: 'image/png',
+              purpose: 'maskable'
             }
           ]
         },
+        workbox: {
+          globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+        },
         devOptions: {
           enabled: true,
-          type: 'module',
+          type: 'classic',
           navigateFallback: 'index.html',
         }
       })

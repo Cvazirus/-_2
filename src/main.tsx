@@ -10,10 +10,11 @@ if (window.location.search.includes('clear=1')) {
       for (const registration of registrations) {
         registration.unregister();
       }
-      window.location.href = window.location.pathname;
+      // Redirect to the new version to ensure manifest is re-evaluated
+      window.location.href = window.location.pathname + '?app_v=3';
     });
   } else {
-    window.location.href = window.location.pathname;
+    window.location.href = window.location.pathname + '?app_v=3';
   }
 } else {
   registerSW({ immediate: true });
