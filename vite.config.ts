@@ -16,19 +16,11 @@ export default defineConfig(({mode}) => {
           name: 'Учёт деталей',
           short_name: 'Учёт',
           description: 'Приложение для учёта деталей и операций',
-          theme_color: '#111113',
-          background_color: '#111113',
-          display: 'standalone',
-          prefer_related_applications: false,
-          icons: [
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-            { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-          ]
+          theme_color: '#ffffff',
+          background_color: '#ffffff',
+          display: 'standalone'
         },
         workbox: {
-          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
           navigateFallback: '/index.html',
           runtimeCaching: [
@@ -78,6 +70,8 @@ export default defineConfig(({mode}) => {
       },
     },
     server: {
+      // HMR is disabled in AI Studio via DISABLE_HMR env var.
+      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
     },
   };
