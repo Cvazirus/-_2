@@ -121,6 +121,29 @@ export default function Header({
             
             {isMenuOpen && (
               <div className="absolute right-0 mt-1 w-48 bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden z-50 py-1">
+                {/* Auth */}
+                {user ? (
+                  <button
+                    onClick={() => { onLogout?.(); setIsMenuOpen(false); }}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
+                  >
+                    <LogOut size={20} className="text-muted-foreground" />
+                    <div className="min-w-0">
+                      <div className="text-foreground font-medium">Выйти</div>
+                      <div className="text-muted-foreground text-xs truncate">{user.email}</div>
+                    </div>
+                  </button>
+                ) : (onLogin && (
+                  <button
+                    onClick={() => { onLogin(); setIsMenuOpen(false); }}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
+                  >
+                    <LogIn size={20} className="text-muted-foreground" />
+                    <span className="text-foreground font-medium">Войти</span>
+                  </button>
+                ))}
+                {(user || onLogin) && <div className="border-t border-card-border my-1"></div>}
+
                 {showSearch && (
                   <button 
                     onClick={() => { onSearch?.(); setIsMenuOpen(false); }}
