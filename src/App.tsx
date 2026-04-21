@@ -21,10 +21,11 @@ import SyncModal from './components/SyncModal';
 import JournalSelectModal from './components/JournalSelectModal';
 import CsvOperationsModal from './components/CsvOperationsModal';
 import SortModal, { SortConfig } from './components/SortModal';
+import LoginModal from './components/LoginModal';
 import { sendTelegramMessage } from './services/telegram';
 import { Sun, Moon, Cloud, LogIn, LogOut, RefreshCw } from 'lucide-react';
 import { auth, db, googleProvider } from './firebase';
-import { onAuthStateChanged, signInWithPopup, signOut, User } from 'firebase/auth';
+import { onAuthStateChanged, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { differenceInHours } from 'date-fns';
 
@@ -111,6 +112,7 @@ export default function App() {
   const [showTgSettings, setShowTgSettings] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [selectedCsvJournal, setSelectedCsvJournal] = useState<Journal | null>(null);
   const [journalSelectAction, setJournalSelectAction] = useState<'export' | 'import' | 'csv' | null>(null);
@@ -333,13 +335,55 @@ export default function App() {
     }
   }, [user, syncData]);
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleLoginGoogle = async (): Promise<void> => {
     try {
       await signInWithPopup(auth, googleProvider);
+      setShowLoginModal(false);
       showToast('Вход выполнен');
     } catch (error) {
-      console.error('Login error:', error);
-      showToast('Ошибка входа');
+      console.error('Google login error:', error);
+      showToast('Ошибка входа через Google');
+    }
+  };
+
+  const getEmailAuthError = (code: string): string => {
+    const map: Record<string, string> = {
+      'auth/user-not-found': 'Пользователь не найден',
+      'auth/wrong-password': 'Неверный пароль',
+      'auth/invalid-credential': 'Неверный email или пароль',
+      'auth/invalid-email': 'Неверный формат email',
+      'auth/email-already-in-use': 'Email уже используется',
+      'auth/weak-password': 'Пароль слишком слабый (минимум 6 символов)',
+      'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже',
+    };
+    return map[code] || 'Ошибка авторизации';
+  };
+
+  const handleLoginEmail = async (email: string, password: string): Promise<string | null> => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setShowLoginModal(false);
+      showToast('Вход выполнен');
+      return null;
+    } catch (error: unknown) {
+      const code = (error as { code?: string }).code ?? '';
+      return getEmailAuthError(code);
+    }
+  };
+
+  const handleRegisterEmail = async (email: string, password: string): Promise<string | null> => {
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      setShowLoginModal(false);
+      showToast('Аккаунт создан');
+      return null;
+    } catch (error: unknown) {
+      const code = (error as { code?: string }).code ?? '';
+      return getEmailAuthError(code);
     }
   };
 
@@ -1711,6 +1755,15 @@ export default function App() {
           onImport={(typeOverride) => {
             handleImportCsvForJournal(selectedCsvJournal, typeOverride);
           }}
+        />
+      )}
+
+      {showLoginModal && (
+        <LoginModal
+          onLoginGoogle={handleLoginGoogle}
+          onLoginEmail={handleLoginEmail}
+          onRegisterEmail={handleRegisterEmail}
+          onClose={() => setShowLoginModal(false)}
         />
       )}
 
