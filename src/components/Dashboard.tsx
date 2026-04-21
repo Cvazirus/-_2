@@ -1,4 +1,4 @@
-import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, MessageCircle, Package, ClipboardList, Banknote, CalendarDays } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, MessageCircle, Package, ClipboardList, Banknote, CalendarDays, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -13,11 +13,12 @@ interface DashboardProps {
   onThemeToggle: () => void;
   onExport: () => void;
   onTelegramSettings: () => void;
+  onUpdateApp: () => void;
 }
 
 const NOISE = 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")';
 
-export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts, isDark, onThemeToggle, onExport, onTelegramSettings }: DashboardProps) {
+export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts, isDark, onThemeToggle, onExport, onTelegramSettings, onUpdateApp }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showAppMenu, setShowAppMenu] = useState(false);
@@ -186,6 +187,14 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                     >
                       <MessageCircle size={16} strokeWidth={1.5} />
                       <span>Telegram</span>
+                    </button>
+                    <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-100'}`} />
+                    <button
+                      onClick={() => { onUpdateApp(); setShowAppMenu(false); }}
+                      className={`w-full px-4 py-3.5 flex items-center gap-3 transition-colors text-sm font-medium ${isDark ? 'text-white hover:bg-white/5' : 'text-gray-800 hover:bg-gray-50'}`}
+                    >
+                      <RefreshCw size={16} strokeWidth={1.5} />
+                      <span>Обновить приложение</span>
                     </button>
                   </motion.div>
                 )}

@@ -1268,6 +1268,12 @@ export default function App() {
               onThemeToggle={toggleTheme}
               onExport={handleExport}
               onTelegramSettings={() => openModal('tg-settings')}
+              onUpdateApp={() => {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.ready.then(reg => reg.update());
+                }
+                window.location.reload();
+              }}
             />
           </div>
         );
