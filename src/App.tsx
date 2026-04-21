@@ -1280,6 +1280,12 @@ export default function App() {
                 }
                 window.location.reload();
               }}
+              onClearData={() => {
+                if (!window.confirm('Удалить все данные? Это действие необратимо.')) return;
+                const keys = ['app_journals','app_parts','app_operations','app_schedules','app_shift_actuals','app_shift_vacations','app_finance_data','app_last_sync','app_local_updated_at','app_cleaned_history_v1'];
+                keys.forEach(k => localStorage.removeItem(k));
+                window.location.reload();
+              }}
             />
           </div>
         );

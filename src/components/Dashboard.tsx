@@ -1,4 +1,4 @@
-import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, Upload, FileSpreadsheet, MessageCircle, Package, ClipboardList, Banknote, CalendarDays, RefreshCw } from 'lucide-react';
+import { MoreHorizontal, Edit2, Trash2, LayoutGrid, List, Moon, Sun, Download, Upload, FileSpreadsheet, MessageCircle, Package, ClipboardList, Banknote, CalendarDays, RefreshCw, Trash } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import React, { useState, useRef, useEffect } from 'react';
 
@@ -18,11 +18,12 @@ interface DashboardProps {
   onCsv: () => void;
   onTelegramSettings: () => void;
   onUpdateApp: () => void;
+  onClearData: () => void;
 }
 
 const NOISE = 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")';
 
-export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts, isDark, onThemeToggle, onExport, onImport, onExportExcel, onImportExcel, onCsv, onTelegramSettings, onUpdateApp }: DashboardProps) {
+export default function Dashboard({ partsCount, operationsCount, onOpenParts, onOpenOperations, onViewFinance, onViewShifts, isDark, onThemeToggle, onExport, onImport, onExportExcel, onImportExcel, onCsv, onTelegramSettings, onUpdateApp, onClearData }: DashboardProps) {
   const [openMenu, setOpenMenu] = useState<'parts' | 'operations' | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showAppMenu, setShowAppMenu] = useState(false);
@@ -231,6 +232,14 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
                     >
                       <RefreshCw size={16} strokeWidth={1.5} />
                       <span>Обновить приложение</span>
+                    </button>
+                    <div className={`h-px ${isDark ? 'bg-white/[0.06]' : 'bg-gray-100'}`} />
+                    <button
+                      onClick={() => { onClearData(); setShowAppMenu(false); }}
+                      className="w-full px-4 py-3.5 flex items-center gap-3 text-left text-red-400 hover:bg-red-500/10 transition-colors text-sm font-medium"
+                    >
+                      <Trash size={16} strokeWidth={1.5} />
+                      <span>Очистить данные</span>
                     </button>
                   </motion.div>
                 )}
