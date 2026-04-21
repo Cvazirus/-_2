@@ -962,6 +962,14 @@ export default function App() {
       document.documentElement.setAttribute('data-theme', theme);
     }
     localStorage.setItem('app_theme', theme);
+    const themeColor = theme === 'dark' ? '#111113' : '#2563eb';
+    let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    meta.content = themeColor;
   }, [theme]);
 
   const toggleTheme = (newTheme?: string) => {
