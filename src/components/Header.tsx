@@ -268,38 +268,8 @@ export default function Header({
                 )}
                 
                 <div className="border-t border-card-border my-1"></div>
-                
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setActiveSubmenu(activeSubmenu === 'theme' ? null : 'theme'); }}
-                  className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-muted transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {isDark ? <Moon size={20} className="text-gray-400" /> : <Sun size={20} className="text-muted-foreground" />}
-                    <span className="text-foreground font-medium">Тема</span>
-                  </div>
-                  <span className="text-gray-400 text-xs">{activeSubmenu === 'theme' ? '▲' : '▼'}</span>
-                </button>
-                {activeSubmenu === 'theme' && (
-                  <div className="bg-muted py-2 px-4 grid grid-cols-1 gap-2 max-h-64 overflow-y-auto">
-                    <button onClick={() => { onThemeToggle?.('light'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-card-bg border border-card-border text-foreground">Светлая тема</button>
-                    <button onClick={() => { onThemeToggle?.('mystic'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#2d1b4e] text-[#e6d5b8] border border-[#4a3b69]">Mystic Theme</button>
-                    <button onClick={() => { onThemeToggle?.('cyberpunk'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#0a0a0a] text-[#00ffcc] border border-[#ff00ff]">Cyberpunk Theme</button>
-                    <button onClick={() => { onThemeToggle?.('nordic'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-white text-[#2c3e50] border border-[#cbd5e1]">Nordic Theme</button>
-                    <button onClick={() => { onThemeToggle?.('sunset'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#5c2a08] text-[#ffd8a8] border border-[#8a3f0c]">Sunset Theme</button>
-                    
-                    <button onClick={() => { onThemeToggle?.('windows'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#ffffff] text-[#111827] border border-[#d1d5db]">Windows Style</button>
-                    <button onClick={() => { onThemeToggle?.('apple'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#2c2c2e] text-[#f2f2f7] border border-[#3a3a3c]">Apple Style</button>
-                    <button onClick={() => { onThemeToggle?.('graphite'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#1e1e1e] text-[#e0e0e0] border border-[#333333]">Темный графит (Dark Graphite)</button>
-                    <button onClick={() => { onThemeToggle?.('linux'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#3c3f41] text-[#f8f8f2] border border-[#4b4d4f]">Linux Style</button>
-                    
-                    <button onClick={() => { onThemeToggle?.('classic'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#ffffff] text-[#212529] border border-[#dee2e6]">Светлая классика (Light Classic)</button>
-                    <button onClick={() => { onThemeToggle?.('business'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#334155] text-[#f8fafc] border border-[#475569]">Деловой синий (Business Blue)</button>
-                    <button onClick={() => { onThemeToggle?.('beige'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#f5f0e6] text-[#4a3f35] border border-[#e6dfd3]">Светло-бежевая (Light Beige)</button>
-                    <button onClick={() => { onThemeToggle?.('walnut'); setIsMenuOpen(false); setActiveSubmenu(null); }} className="px-3 py-2 text-sm font-medium rounded-lg bg-[#3d2b1f] text-[#e8dcc7] border border-[#5c4033]">Темный орех</button>
-                  </div>
-                )}
 
-                <button 
+                <button
                   onClick={() => {
                     if ('serviceWorker' in navigator) {
                       navigator.serviceWorker.getRegistrations().then((registrations) => {
