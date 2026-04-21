@@ -74,7 +74,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
       title: 'Основной',
       sub: `${partsCount} записей`,
       onClick: onOpenParts,
-      hasMenu: true,
+      hasMenu: false,
     },
     {
       key: 'operations' as const,
@@ -82,7 +82,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
       title: 'Журнал\nсписаний',
       sub: `${operationsCount} записей`,
       onClick: onOpenOperations,
-      hasMenu: true,
+      hasMenu: false,
     },
     {
       key: 'finance',
