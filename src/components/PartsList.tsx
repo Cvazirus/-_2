@@ -93,7 +93,7 @@ export default function PartsList({ parts, onSelectPart, scrollPosition = 0, onS
     <div className="flex flex-col h-[calc(100dvh-64px)] bg-background relative overflow-hidden">
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-3 pb-24"
+        className="flex-1 overflow-y-auto overscroll-y-contain p-4 space-y-3 pb-24"
         onScroll={handleScroll}
       >
         {parts.map((part) => {

@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as XLSX from 'xlsx';
-import { Part, Operation, Journal } from './types';
+import { Part, Operation, Journal, ShiftSchedule, ShiftActual, VacationPeriod } from './types';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import PartsList from './components/PartsList';
@@ -29,8 +29,9 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { differenceInHours } from 'date-fns';
 
 import FinanceJournal from './components/FinanceJournal';
+import ShiftDashboard from './components/shifts/ShiftDashboard';
 
-type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price';
+type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price' | 'shifts';
 
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
@@ -88,6 +89,16 @@ export default function App() {
     return [];
   });
   
+  const [schedules, setSchedules] = useState<ShiftSchedule[]>(() => {
+    try { const s = localStorage.getItem('app_schedules'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const [shiftActuals, setShiftActuals] = useState<ShiftActual[]>(() => {
+    try { const s = localStorage.getItem('app_shift_actuals'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+  const [vacations, setVacations] = useState<VacationPeriod[]>(() => {
+    try { const s = localStorage.getItem('app_shift_vacations'); return s ? JSON.parse(s) : []; } catch { return []; }
+  });
+
   const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
@@ -317,7 +328,7 @@ export default function App() {
   useEffect(() => {
     if (user) {
       syncData();
-      const interval = setInterval(() => syncData(), 60000); // Check every minute
+      const interval = setInterval(() => syncData(), 600000); // Check every 10 minutes
       return () => clearInterval(interval);
     }
   }, [user, syncData]);
@@ -638,7 +649,9 @@ export default function App() {
           const headerRow = rows[0].map(h => h.toLowerCase().trim());
           
           let codeIdx = headerRow.findIndex(h => h.includes('номер детали') || h.includes('код') || h.includes('артикул'));
-          let nameIdx = headerRow.findIndex(h => h.includes('название') || h.includes('наименование') || h.includes('номенклатура') || h.includes('деталь') || h.includes('товар'));
+          let nameIdx = headerRow.findIndex(h => h.includes('название') || h.includes('наименование') || h.includes('номенклатура') || h.includes('товар'));
+          if (nameIdx === -1) nameIdx = headerRow.findIndex((h, i) => i !== codeIdx && h.includes('деталь'));
+          if (nameIdx === codeIdx) nameIdx = -1;
           let priceIdx = headerRow.findIndex(h => h.includes('цена'));
           let qtyIdx = headerRow.findIndex(h => h.includes('количество') || h.includes('кол-во') || h.includes('остаток'));
           let opsIdx = headerRow.findIndex(h => h.includes('операци'));
@@ -679,7 +692,16 @@ export default function App() {
             if (code && isDate(code)) {
               code = '';
             }
-            
+
+            // Split "4516.12.05.141 Балка" → code="4516.12.05.141", name="Балка"
+            if (code && !name) {
+              const spaceIdx = code.search(/\s+[А-ЯЁA-Za-zа-яё]/);
+              if (spaceIdx > 0) {
+                name = code.slice(spaceIdx).trim();
+                code = code.slice(0, spaceIdx).trim();
+              }
+            }
+
             if (!code && name) {
               const match = name.match(/^(.*?)\s+([A-ZА-ЯЁ][a-zа-яё].*)$/);
               if (match) {
@@ -737,8 +759,40 @@ export default function App() {
 
             newParts.push(newPart);
           }
-          setParts([...parts, ...newParts]);
-          showToast(`Импортировано ${newParts.length} деталей в "${journal.name}"`);
+          let addedCount = 0;
+          let updatedCount = 0;
+          setParts(prev => {
+            const result = [...prev];
+            for (const newPart of newParts) {
+              if (!newPart.code) continue;
+              const existingIdx = result.findIndex(
+                p => p.journalId === journal.id &&
+                     p.code.trim().toLowerCase() === newPart.code.trim().toLowerCase()
+              );
+              if (existingIdx >= 0) {
+                const existing = result[existingIdx];
+                result[existingIdx] = {
+                  ...existing,
+                  name: newPart.name || existing.name,
+                  pricePerUnit: newPart.pricePerUnit > 0 ? newPart.pricePerUnit : existing.pricePerUnit,
+                  currentQuantity: newPart.currentQuantity,
+                  operationNumbers: newPart.operationNumbers.length > 0
+                    ? newPart.operationNumbers
+                    : existing.operationNumbers,
+                  operationPrices: Object.keys(newPart.operationPrices || {}).length > 0
+                    ? newPart.operationPrices
+                    : existing.operationPrices,
+                  lastUpdate: new Date().toISOString(),
+                };
+                updatedCount++;
+              } else {
+                result.push(newPart);
+                addedCount++;
+              }
+            }
+            return result;
+          });
+          showToast(`Добавлено: ${addedCount}, обновлено: ${updatedCount} деталей`);
         } else {
           const newOps: Operation[] = [];
           for (let i = 1; i < rows.length; i++) {
@@ -919,6 +973,14 @@ export default function App() {
       document.documentElement.setAttribute('data-theme', theme);
     }
     localStorage.setItem('app_theme', theme);
+    const themeColor = theme === 'dark' ? '#111113' : '#2563eb';
+    let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
+    meta.content = themeColor;
   }, [theme]);
 
   const toggleTheme = (newTheme?: string) => {
@@ -927,6 +989,39 @@ export default function App() {
     } else {
       setTheme(prev => prev === 'light' ? 'dark' : 'light');
     }
+  };
+
+  useEffect(() => { localStorage.setItem('app_schedules', JSON.stringify(schedules)); }, [schedules]);
+  useEffect(() => { localStorage.setItem('app_shift_actuals', JSON.stringify(shiftActuals)); }, [shiftActuals]);
+  useEffect(() => { localStorage.setItem('app_shift_vacations', JSON.stringify(vacations)); }, [vacations]);
+
+  const addSchedule = (data: Omit<ShiftSchedule, 'id'>) => {
+    setSchedules(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
+  };
+  const updateSchedule = (id: string, data: Omit<ShiftSchedule, 'id'>) => {
+    setSchedules(prev => prev.map(s => s.id === id ? { id, ...data } : s));
+  };
+  const deleteSchedule = (id: string) => {
+    if (!window.confirm('Удалить график?')) return;
+    setSchedules(prev => prev.filter(s => s.id !== id));
+  };
+  const markActual = (actual: ShiftActual) => {
+    setShiftActuals(prev => {
+      const idx = prev.findIndex(a => a.id === actual.id);
+      return idx >= 0 ? prev.map(a => a.id === actual.id ? actual : a) : [...prev, actual];
+    });
+  };
+  const deleteActual = (id: string) => {
+    setShiftActuals(prev => prev.filter(a => a.id !== id));
+  };
+  const addVacation = (data: Omit<VacationPeriod, 'id'>) => {
+    setVacations(prev => [...prev, { id: crypto.randomUUID(), ...data }]);
+  };
+  const updateVacation = (id: string, data: Omit<VacationPeriod, 'id'>) => {
+    setVacations(prev => prev.map(v => v.id === id ? { id, ...data } : v));
+  };
+  const deleteVacation = (id: string) => {
+    setVacations(prev => prev.filter(v => v.id !== id));
   };
 
   const handleBack = () => {
@@ -992,10 +1087,6 @@ export default function App() {
     }
 
     updateLocalTimestamp();
-    if (oldQuantity !== newQuantity) {
-      const diff = newQuantity - oldQuantity;
-      createOperation(updatedPart, Math.abs(diff), oldQuantity, diff > 0 ? 'arrival' : 'write-off');
-    }
   };
 
   const createOperation = (part: Part, quantity: number, wasQuantity: number, type: 'arrival' | 'write-off') => {
@@ -1169,20 +1260,9 @@ export default function App() {
     switch (view) {
       case 'dashboard':
         return (
-          <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Учёт" 
-              showSearch={false} 
-              showMenu={true} 
-              onExport={handleExport}
-              onExportExcel={() => openModal('journal-select', 'export')}
-              onImport={handleImport}
-              onImportExcel={() => openModal('journal-select', 'import')}
-              onTelegramSettings={() => openModal('tg-settings')}
-              {...commonHeaderProps}
-            />
-            <Dashboard 
-              partsCount={parts.length} 
+          <div className="bg-[#0A0A0C] min-h-[100dvh]">
+            <Dashboard
+              partsCount={parts.length}
               operationsCount={operations.length}
               onOpenParts={() => {
                 setSelectedJournal(journals.find(j => j.type === 'parts') || null);
@@ -1194,6 +1274,27 @@ export default function App() {
                 changeView('operations-log');
               }}
               onViewFinance={() => changeView('finance-journal')}
+              onViewShifts={() => changeView('shifts')}
+              isDark={theme === 'dark'}
+              onThemeToggle={toggleTheme}
+              onExport={handleExport}
+              onImport={handleImport}
+              onExportExcel={() => openModal('journal-select', 'export')}
+              onImportExcel={() => openModal('journal-select', 'import')}
+              onCsv={() => openModal('journal-select', 'csv')}
+              onTelegramSettings={() => openModal('tg-settings')}
+              onUpdateApp={() => {
+                if ('serviceWorker' in navigator) {
+                  navigator.serviceWorker.ready.then(reg => reg.update());
+                }
+                window.location.reload();
+              }}
+              onClearData={() => {
+                if (!window.confirm('Удалить все данные? Это действие необратимо.')) return;
+                const keys = ['app_journals','app_parts','app_operations','app_schedules','app_shift_actuals','app_shift_vacations','app_finance_data','app_last_sync','app_local_updated_at','app_cleaned_history_v1'];
+                keys.forEach(k => localStorage.removeItem(k));
+                window.location.reload();
+              }}
             />
           </div>
         );
@@ -1220,14 +1321,9 @@ export default function App() {
         }
         return (
           <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Карточки деталей" 
-              onBack={handleBack} 
-              showAdd={true} 
-              onAdd={() => {
-                setSelectedPart(null);
-                openModal('part-form');
-              }} 
+            <Header
+              title="Карточки деталей"
+              onBack={handleBack}
               showSearch={true}
               onSearch={() => openModal('search')}
               showSort={true}
@@ -1314,12 +1410,17 @@ export default function App() {
               onSearch={() => openModal('search')}
               {...commonHeaderProps}
             />
-            <OperationsLog 
-              operations={filteredOperations} 
+            <OperationsLog
+              operations={filteredOperations}
               onSelectOperation={(op) => {
                 setSelectedOperation(op);
                 changeView('operation-detail');
-              }} 
+              }}
+              onDeleteOperations={(ids) => {
+                setOperations(prev => prev.filter(op => !ids.includes(op.id)));
+                updateLocalTimestamp();
+                showToast(`Удалено ${ids.length} ${ids.length === 1 ? 'запись' : ids.length < 5 ? 'записи' : 'записей'}`);
+              }}
             />
           </div>
         );
@@ -1339,14 +1440,39 @@ export default function App() {
       case 'finance-journal':
         return (
           <div className="bg-background min-h-[100dvh]">
-            <Header 
-              title="Финансовый журнал" 
-              onBack={handleBack} 
+            <Header
+              title="Финансовый журнал"
+              onBack={handleBack}
               showSearch={false}
               showMenu={false}
               {...commonHeaderProps}
             />
             <FinanceJournal operations={operations} />
+          </div>
+        );
+      case 'shifts':
+        return (
+          <div className="bg-background min-h-[100dvh]">
+            <Header
+              title="Журнал смен"
+              onBack={handleBack}
+              showSearch={false}
+              showMenu={false}
+              {...commonHeaderProps}
+            />
+            <ShiftDashboard
+              schedules={schedules}
+              actuals={shiftActuals}
+              vacations={vacations}
+              onAddSchedule={addSchedule}
+              onUpdateSchedule={updateSchedule}
+              onDeleteSchedule={deleteSchedule}
+              onMarkActual={markActual}
+              onDeleteActual={deleteActual}
+              onAddVacation={addVacation}
+              onUpdateVacation={updateVacation}
+              onDeleteVacation={deleteVacation}
+            />
           </div>
         );
       default:

@@ -17,6 +17,10 @@
 }
 
 @layer base {
+  html, body {
+    overscroll-behavior: none;
+  }
+
   :root {
     --background: #F2F2F7;
     --foreground: #000000;
