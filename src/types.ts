@@ -60,6 +60,7 @@ export interface ShiftSchedule {
   name: string;
   type: ScheduleType;
   startDate: string;       // YYYY-MM-DD — дата, соответствующая позиции 0 цикла
+  startShiftIndex?: number; // с какой смены начинать цикл (0, 1, 2), по умолчанию 0
   shifts: ShiftTime[];
   nightCoeff: number;      // коэф. ночных часов, по умолчанию 1.2
   holidayCoeff: number;    // коэф. праздников, по умолчанию 2.0

@@ -21,6 +21,7 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
   const [name, setName] = useState(schedule?.name ?? '');
   const [type, setType] = useState<ScheduleType>(schedule?.type ?? '12_cycle');
   const [startDate, setStartDate] = useState(schedule?.startDate ?? format(new Date(), 'yyyy-MM-dd'));
+  const [startShiftIndex, setStartShiftIndex] = useState(schedule?.startShiftIndex ?? 0);
   const [shifts, setShifts] = useState<ShiftTime[]>(schedule?.shifts ?? defaultShifts('12_cycle'));
   const [nightCoeff, setNightCoeff] = useState(String(schedule?.nightCoeff ?? '1.2'));
   const [holidayCoeff, setHolidayCoeff] = useState(String(schedule?.holidayCoeff ?? '2.0'));
@@ -29,6 +30,7 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
   const handleTypeChange = (t: ScheduleType) => {
     setType(t);
     setShifts(defaultShifts(t));
+    setStartShiftIndex(0);
   };
 
   const updateShift = (i: number, field: keyof ShiftTime, value: string) => {
@@ -49,6 +51,7 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
       name: name.trim(),
       type,
       startDate,
+      startShiftIndex,
       shifts,
       nightCoeff: parseFloat(nightCoeff) || 1.2,
       holidayCoeff: parseFloat(holidayCoeff) || 2.0,
@@ -123,6 +126,28 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
               onChange={e => setStartDate(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-card-border bg-background text-foreground outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/* Start shift index */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-muted-foreground">
+              Первая смена на дату старта
+            </label>
+            <div className="flex gap-2">
+              {shifts.map((s, i) => (
+                <button
+                  key={i}
+                  onClick={() => setStartShiftIndex(i)}
+                  className={`flex-1 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+                    startShiftIndex === i
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                      : 'border-card-border text-foreground'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Shift times */}

@@ -33,6 +33,7 @@ export default function Dashboard({ partsCount, operationsCount, onOpenParts, on
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpenMenu(null);
+        setShowAppMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);

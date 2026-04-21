@@ -221,17 +221,17 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                     isToday ? 'ring-2 ring-blue-500' : ''
                   } ${bgClass}`}
                 >
-                  <span className={`text-[25px] font-bold leading-none mb-0.5 ${textClass}`}>
+                  <span className={`text-[18px] font-bold leading-none mb-0.5 ${textClass}`}>
                     {dayNum}
                   </span>
 
                   {isVacation ? (
-                    <span className="text-[12px] leading-none">🏖</span>
+                    <span className="text-[10px] leading-none">🏖</span>
                   ) : isNonWorkHoliday ? (
-                    <span className="text-[12px] leading-none">🎉</span>
+                    <span className="text-[10px] leading-none">🎉</span>
                   ) : !shift.isOff && shift.shift ? (
-                    <span className={`text-[13px] font-semibold leading-none ${textClass}`}>
-                      {shift.shift.label.split('-')[0].trim().slice(0, 2)}с
+                    <span className={`text-[9px] font-semibold leading-none text-center ${textClass}`}>
+                      {shift.shift.label}
                     </span>
                   ) : null}
 

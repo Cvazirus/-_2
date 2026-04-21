@@ -88,8 +88,11 @@ export function getShiftForDate(
   date: string,
 ): { shiftIndex: number | null; shift: ShiftTime | null } {
   const pattern = cyclePattern(schedule.type);
+  const startShiftIdx = schedule.startShiftIndex ?? 0;
+  const basePos = pattern.findIndex(p => p === startShiftIdx);
+  const offset = basePos >= 0 ? basePos : 0;
   const days = differenceInDays(parseISO(date), parseISO(schedule.startDate));
-  const pos = ((days % pattern.length) + pattern.length) % pattern.length;
+  const pos = (((days + offset) % pattern.length) + pattern.length) % pattern.length;
   const idx = pattern[pos];
   if (idx === null || idx >= schedule.shifts.length) return { shiftIndex: null, shift: null };
   return { shiftIndex: idx, shift: schedule.shifts[idx] };
