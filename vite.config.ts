@@ -16,8 +16,8 @@ export default defineConfig(({mode}) => {
           name: 'Учёт деталей',
           short_name: 'Учёт',
           description: 'Приложение для учёта деталей и операций',
-          theme_color: '#ffffff',
-          background_color: '#ffffff',
+          theme_color: '#111113',
+          background_color: '#111113',
           display: 'standalone'
         },
         workbox: {
