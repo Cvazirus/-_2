@@ -18,7 +18,11 @@ export default defineConfig(({mode}) => {
           description: 'Приложение для учёта деталей и операций',
           theme_color: '#111113',
           background_color: '#111113',
-          display: 'standalone'
+          display: 'standalone',
+          icons: [
+            { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+          ]
         },
         workbox: {
           maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
