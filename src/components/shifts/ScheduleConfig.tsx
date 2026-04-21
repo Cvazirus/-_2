@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ShiftSchedule, ShiftTime, ScheduleType } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { X, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { SCHEDULE_TYPE_LABELS, defaultShifts } from '../../services/scheduleGenerator';
 
@@ -43,6 +43,19 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
 
   const removeShift = (i: number) => {
     setShifts(prev => prev.filter((_, idx) => idx !== i));
+    if (startShiftIndex >= i && startShiftIndex > 0) setStartShiftIndex(s => s - 1);
+  };
+
+  const moveShift = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    setShifts(prev => {
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+    setStartShiftIndex(prev =>
+      prev === i ? j : prev === j ? i : prev
+    );
   };
 
   const handleSave = () => {
@@ -156,6 +169,22 @@ export default function ScheduleConfig({ schedule, onSave, onClose }: ScheduleCo
             {shifts.map((s, i) => (
               <div key={i} className="bg-background rounded-xl border border-card-border p-3 space-y-2">
                 <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => moveShift(i, -1)}
+                      disabled={i === 0}
+                      className="text-muted-foreground disabled:opacity-20 active:text-foreground"
+                    >
+                      <ChevronUp size={16} />
+                    </button>
+                    <button
+                      onClick={() => moveShift(i, 1)}
+                      disabled={i === shifts.length - 1}
+                      className="text-muted-foreground disabled:opacity-20 active:text-foreground"
+                    >
+                      <ChevronDown size={16} />
+                    </button>
+                  </div>
                   <input
                     value={s.label}
                     onChange={e => updateShift(i, 'label', e.target.value)}
