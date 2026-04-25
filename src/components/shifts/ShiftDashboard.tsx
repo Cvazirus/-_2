@@ -1,12 +1,11 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, ChevronLeft, ChevronRight, Calendar, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth } from 'date-fns';
+import { Plus, Calendar, Pencil, Trash2, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  getMonthStats, SCHEDULE_TYPE_LABELS,
-  RUSSIAN_HOLIDAYS,
+  SCHEDULE_TYPE_LABELS,
 } from '../../services/scheduleGenerator';
 import ScheduleConfig from './ScheduleConfig';
 import ShiftCalendar from './ShiftCalendar';
@@ -39,7 +38,6 @@ export default function ShiftDashboard({
     if (saved && schedules.find(s => s.id === saved)) return saved;
     return schedules[0]?.id ?? null;
   });
-  const [month, setMonth] = useState(new Date());
   const [showScheduleConfig, setShowScheduleConfig] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<ShiftSchedule | null>(null);
   const [showScheduleList, setShowScheduleList] = useState(false);
@@ -64,21 +62,7 @@ export default function ShiftDashboard({
     }
   }, [schedules, activeScheduleId]);
 
-  const year = month.getFullYear();
-  const mon = month.getMonth() + 1;
-
   const activeSchedule = schedules.find(s => s.id === activeScheduleId) ?? null;
-
-  const stats = useMemo(() => {
-    if (!activeSchedule) return null;
-    return getMonthStats(activeSchedule, year, mon, RUSSIAN_HOLIDAYS);
-  }, [activeSchedule, year, mon]);
-
-  const markedCount = actuals.filter(a =>
-    a.workerId === 'self' &&
-    a.date >= format(startOfMonth(month), 'yyyy-MM-dd') &&
-    a.date <= format(endOfMonth(month), 'yyyy-MM-dd')
-  ).length;
 
   const handleSetActiveSchedule = (id: string) => {
     setActiveScheduleId(id);
@@ -88,25 +72,6 @@ export default function ShiftDashboard({
 
   return (
     <div className="bg-background min-h-[calc(100dvh-64px)] relative">
-      {/* Month Navigator */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <button
-          onClick={() => setMonth(m => subMonths(m, 1))}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-        >
-          <ChevronLeft size={20} className="text-foreground" />
-        </button>
-        <span className="text-lg font-bold text-foreground capitalize">
-          {format(month, 'LLLL yyyy', { locale: ru })}
-        </span>
-        <button
-          onClick={() => setMonth(m => addMonths(m, 1))}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
-        >
-          <ChevronRight size={20} className="text-foreground" />
-        </button>
-      </div>
-
       <div className="px-4 space-y-3 pb-28">
         {activeSchedule ? (
           <>
@@ -136,22 +101,6 @@ export default function ShiftDashboard({
                   )}
                 </div>
               </div>
-
-              {stats && (
-                <div className="grid grid-cols-4 gap-2 mb-3">
-                  {[
-                    { label: 'смен',     value: stats.workDays,    color: 'text-blue-600 dark:text-blue-400' },
-                    { label: 'часов',    value: stats.totalHours,  color: 'text-foreground' },
-                    { label: 'ночных',   value: stats.nightHours,  color: 'text-purple-600 dark:text-purple-400' },
-                    { label: 'отмечено', value: markedCount,       color: 'text-green-600 dark:text-green-400' },
-                  ].map(({ label, value, color }) => (
-                    <div key={label} className="bg-background rounded-xl p-2 text-center">
-                      <div className={`text-base font-bold ${color}`}>{value}</div>
-                      <div className="text-[10px] text-muted-foreground">{label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
 
             </div>
 
