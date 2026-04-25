@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Calendar, Pencil, Trash2, CheckCircle2, MoreHorizontal } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
   SCHEDULE_TYPE_LABELS,
+  generateSchedule,
+  RUSSIAN_HOLIDAYS,
 } from '../../services/scheduleGenerator';
 import ScheduleConfig from './ScheduleConfig';
 import ShiftCalendar from './ShiftCalendar';
@@ -81,6 +83,42 @@ export default function ShiftDashboard({
       setShowScheduleConfig(true);
     }
   }, [addTrigger]);
+
+  // Автопометка прошедших смен без отметки как "Вышел"
+  useEffect(() => {
+    if (!activeSchedule) return;
+
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const nowTime = format(new Date(), 'HH:mm');
+
+    const cutoff = format(addDays(new Date(), -90), 'yyyy-MM-dd');
+    const fromDate = activeSchedule.startDate > cutoff ? activeSchedule.startDate : cutoff;
+    if (fromDate > today) return;
+
+    const shifts = generateSchedule(activeSchedule, fromDate, today, RUSSIAN_HOLIDAYS);
+
+    for (const shift of shifts) {
+      if (shift.isOff || !shift.shift) continue;
+
+      if (shift.date === today) {
+        const [endH] = shift.shift.end.split(':').map(Number);
+        const [startH] = shift.shift.start.split(':').map(Number);
+        if (endH < startH) continue; // ночная смена — заканчивается завтра
+        if (nowTime < shift.shift.end) continue; // смена ещё не закончилась
+      }
+
+      if (actuals.some(a => a.workerId === 'self' && a.date === shift.date)) continue;
+      if (vacations.some(v => shift.date >= v.startDate && shift.date <= v.endDate)) continue;
+
+      onMarkActual({
+        id: `self-${shift.date}`,
+        workerId: 'self',
+        date: shift.date,
+        status: 'ok',
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSchedule?.id]);
 
   const handleSetActiveSchedule = (id: string) => {
     setActiveScheduleId(id);
