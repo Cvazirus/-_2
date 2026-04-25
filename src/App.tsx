@@ -1506,8 +1506,7 @@ export default function App() {
               onBack={handleBack}
               showSearch={false}
               showMenu={false}
-              showEdit={schedules.length > 0}
-              onEdit={() => setShiftEditTrigger(v => v + 1)}
+              showEdit={false}
               {...commonHeaderProps}
             />
             <ShiftDashboard

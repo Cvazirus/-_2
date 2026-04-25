@@ -166,21 +166,23 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
       </div>
 
       {/* Tabs */}
-      <div className="mx-4 mb-3 flex rounded-xl overflow-hidden border border-card-border bg-card-bg">
-        {(['calendar', 'log'] as const).map(t => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-1 py-2 text-sm font-medium transition-colors ${
-              tab === t ? 'bg-blue-600 text-white' : 'text-muted-foreground'
-            }`}
-          >
-            {t === 'calendar' ? 'Календарь' : 'Список'}
-          </button>
-        ))}
-      </div>
+      {!embedded && (
+        <div className="mx-4 mb-3 flex rounded-xl overflow-hidden border border-card-border bg-card-bg">
+          {(['calendar', 'log'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                tab === t ? 'bg-blue-600 text-white' : 'text-muted-foreground'
+              }`}
+            >
+              {t === 'calendar' ? 'Календарь' : 'Список'}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {tab === 'calendar' && (
+      {(embedded || tab === 'calendar') && (
         <div
           className="px-4 pb-8 select-none"
           onTouchStart={e => { touchStartX.current = e.touches[0].clientX; }}
