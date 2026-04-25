@@ -197,7 +197,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
           {/* Week day headers */}
           <div className="grid grid-cols-7 mb-1">
             {WEEK_DAYS.map((d, i) => (
-              <div key={d} className={`text-center text-[15px] font-semibold py-1 ${i >= 5 ? 'text-red-400' : 'text-muted-foreground'}`}>
+              <div key={d} className={`text-center text-[15px] font-semibold py-1 ${i >= 5 ? 'text-green-500' : 'text-muted-foreground'}`}>
                 {d}
               </div>
             ))}
@@ -228,7 +228,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                 : isNonWorkHoliday
                   ? 'bg-green-400/40'
                   : shift.isOff
-                    ? isWeekend ? 'bg-red-100/60 dark:bg-red-900/15' : 'bg-muted/30'
+                    ? isWeekend ? 'bg-green-100/60 dark:bg-green-900/20' : 'bg-muted/30'
                     : colIdx !== null
                       ? SHIFT_BG[colIdx % SHIFT_BG.length]
                       : 'bg-muted/30';
@@ -238,7 +238,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                 : isNonWorkHoliday
                   ? 'text-green-900 dark:text-green-100'
                   : shift.isOff
-                    ? isWeekend ? 'text-red-400' : 'text-muted-foreground'
+                    ? isWeekend ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'
                     : colIdx !== null ? SHIFT_TEXT[colIdx % SHIFT_TEXT.length] : 'text-muted-foreground';
 
               return (
