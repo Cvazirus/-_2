@@ -1,6 +1,7 @@
 import { ArrowLeft, Search, MoreHorizontal, Plus, Sun, Moon, Edit2, Download, Upload, FileSpreadsheet, MessageCircle, LogIn, LogOut, Cloud, RefreshCw, RefreshCcw, User as UserIcon, ArrowUpDown, Wand2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { User } from 'firebase/auth';
+import React from 'react';
 
 interface HeaderProps {
   title: string;
@@ -13,6 +14,7 @@ interface HeaderProps {
   onAdd?: () => void;
   onEdit?: () => void;
   onSearch?: () => void;
+  customRightButton?: React.ReactNode;
   onSort?: () => void;
   onAutoWriteOff?: () => void;
   onThemeToggle?: (newTheme?: string) => void;
@@ -63,7 +65,8 @@ export default function Header({
   onSync,
   onPull,
   isSyncing = false,
-  lastSync
+  lastSync,
+  customRightButton
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<'export' | 'import' | null>(null);
@@ -100,6 +103,7 @@ export default function Header({
       </div>
       
       <div className="flex items-center gap-2">
+        {customRightButton}
         {onAutoWriteOff && (
           <button onClick={onAutoWriteOff} className="flex items-center justify-center w-10 h-10 bg-card-bg text-foreground rounded-full hover:bg-muted transition-all active:scale-95 shadow-sm border border-card-border" title="Авто-списание">
             <Wand2 size={20} />

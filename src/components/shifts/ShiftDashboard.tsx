@@ -26,6 +26,7 @@ interface ShiftDashboardProps {
   onUpdateVacation: (id: string, data: Omit<VacationPeriod, 'id'>) => void;
   onDeleteVacation: (id: string) => void;
   editTrigger?: number;
+  addTrigger?: number;
 }
 
 export default function ShiftDashboard({
@@ -33,7 +34,7 @@ export default function ShiftDashboard({
   onAddSchedule, onUpdateSchedule, onDeleteSchedule,
   onMarkActual, onDeleteActual,
   onAddVacation, onUpdateVacation, onDeleteVacation,
-  editTrigger,
+  editTrigger, addTrigger,
 }: ShiftDashboardProps) {
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(() => {
     const saved = localStorage.getItem('shift_active_schedule');
@@ -74,6 +75,13 @@ export default function ShiftDashboard({
     }
   }, [editTrigger]);
 
+  useEffect(() => {
+    if (addTrigger && addTrigger > 0) {
+      setEditingSchedule(null);
+      setShowScheduleConfig(true);
+    }
+  }, [addTrigger]);
+
   const handleSetActiveSchedule = (id: string) => {
     setActiveScheduleId(id);
     localStorage.setItem('shift_active_schedule', id);
@@ -85,58 +93,6 @@ export default function ShiftDashboard({
       <div className="px-4 space-y-3 pb-28">
         {activeSchedule ? (
           <>
-            {/* Три точки — меню */}
-            <div className="flex justify-end relative">
-              <button
-                onClick={() => setShowDotMenu(v => !v)}
-                className="w-9 h-9 flex items-center justify-center rounded-xl border border-card-border text-muted-foreground bg-card-bg"
-              >
-                <MoreHorizontal size={18} />
-              </button>
-              <AnimatePresence>
-                {showDotMenu && (
-                  <>
-                    <div className="fixed inset-0 z-20" onClick={() => setShowDotMenu(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -8 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -8 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 top-10 w-48 bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden z-30"
-                    >
-                      <button
-                        onClick={() => { setEditingSchedule(activeSchedule); setShowScheduleConfig(true); setShowDotMenu(false); }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-muted transition-colors"
-                      >
-                        <Pencil size={16} className="text-muted-foreground" />
-                        <span className="text-foreground font-medium text-sm">Редактировать</span>
-                      </button>
-                      {schedules.length > 1 && (
-                        <>
-                          <div className="border-t border-card-border" />
-                          <button
-                            onClick={() => { setShowScheduleList(v => !v); setShowDotMenu(false); }}
-                            className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-muted transition-colors"
-                          >
-                            <CheckCircle2 size={16} className="text-muted-foreground" />
-                            <span className="text-foreground font-medium text-sm">Сменить график</span>
-                          </button>
-                        </>
-                      )}
-                      <div className="border-t border-card-border" />
-                      <button
-                        onClick={() => { setEditingSchedule(null); setShowScheduleConfig(true); setShowDotMenu(false); }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-muted transition-colors"
-                      >
-                        <Plus size={16} className="text-muted-foreground" />
-                        <span className="text-foreground font-medium text-sm">Добавить график</span>
-                      </button>
-                    </motion.div>
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
-
             {/* Встроенный календарь */}
             <ShiftCalendar
               embedded

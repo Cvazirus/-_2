@@ -34,6 +34,42 @@ import ShiftDashboard from './components/shifts/ShiftDashboard';
 
 type View = 'dashboard' | 'parts-list' | 'part-detail' | 'operations-log' | 'operation-detail' | 'finance-journal' | 'parts-without-price' | 'shifts';
 
+function ShiftHeaderMenu({ schedules, onEdit, onAdd }: { schedules: { id: string; name: string }[]; onEdit: () => void; onAdd: () => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center justify-center w-10 h-10 bg-card-bg text-foreground rounded-full hover:bg-muted transition-all active:scale-95 shadow-sm border border-card-border"
+      >
+        <MoreHorizontal size={20} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 mt-1 w-52 bg-card-bg rounded-xl shadow-lg border border-card-border overflow-hidden z-50 py-1">
+            <button
+              onClick={() => { onEdit(); setOpen(false); }}
+              className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
+            >
+              <Edit2 size={18} className="text-muted-foreground" />
+              <span className="text-foreground font-medium">Редактировать</span>
+            </button>
+            <div className="border-t border-card-border my-1" />
+            <button
+              onClick={() => { onAdd(); setOpen(false); }}
+              className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-muted transition-colors"
+            >
+              <Plus size={18} className="text-muted-foreground" />
+              <span className="text-foreground font-medium">Добавить график</span>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
   const [theme, setTheme] = useState<string>(() => {
@@ -111,6 +147,7 @@ export default function App() {
   const [showAutoWriteOffModal, setShowAutoWriteOffModal] = useState(false);
   const [showTgSettings, setShowTgSettings] = useState(false);
   const [shiftEditTrigger, setShiftEditTrigger] = useState(0);
+  const [shiftAddTrigger, setShiftAddTrigger] = useState(0);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -1507,6 +1544,15 @@ export default function App() {
               showSearch={false}
               showMenu={false}
               showEdit={false}
+              customRightButton={
+                schedules.length > 0
+                  ? <ShiftHeaderMenu
+                      schedules={schedules}
+                      onEdit={() => setShiftEditTrigger(v => v + 1)}
+                      onAdd={() => setShiftAddTrigger(v => v + 1)}
+                    />
+                  : undefined
+              }
               {...commonHeaderProps}
             />
             <ShiftDashboard
@@ -1522,6 +1568,7 @@ export default function App() {
               onUpdateVacation={updateVacation}
               onDeleteVacation={deleteVacation}
               editTrigger={shiftEditTrigger}
+              addTrigger={shiftAddTrigger}
             />
           </div>
         );
