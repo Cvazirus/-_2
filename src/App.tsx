@@ -387,8 +387,11 @@ export default function App() {
       'auth/email-already-in-use': 'Email уже используется',
       'auth/weak-password': 'Пароль слишком слабый (минимум 6 символов)',
       'auth/too-many-requests': 'Слишком много попыток. Попробуйте позже',
+      'auth/operation-not-allowed': 'Email/пароль не включён в Firebase. Включите в Console → Authentication → Sign-in methods',
+      'auth/network-request-failed': 'Нет соединения с интернетом',
+      'auth/api-key-not-valid': 'Неверный API ключ Firebase',
     };
-    return map[code] || 'Ошибка авторизации';
+    return map[code] || `Ошибка: ${code || 'неизвестная'}`;
   };
 
   const handleLoginEmail = async (email: string, password: string): Promise<string | null> => {
