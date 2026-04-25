@@ -110,6 +110,7 @@ export default function App() {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showAutoWriteOffModal, setShowAutoWriteOffModal] = useState(false);
   const [showTgSettings, setShowTgSettings] = useState(false);
+  const [shiftEditTrigger, setShiftEditTrigger] = useState(0);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [showSortModal, setShowSortModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -1497,8 +1498,7 @@ export default function App() {
             <FinanceJournal operations={operations} />
           </div>
         );
-      case 'shifts': {
-        const [shiftEditTrigger, setShiftEditTrigger] = React.useState(0);
+      case 'shifts':
         return (
           <div className="bg-background min-h-[100dvh]">
             <Header
@@ -1526,7 +1526,6 @@ export default function App() {
             />
           </div>
         );
-      }
       default:
         return null;
     }
