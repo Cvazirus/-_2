@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  generateSchedule, getMonthStats, RUSSIAN_HOLIDAYS,
+  generateSchedule, RUSSIAN_HOLIDAYS,
   GeneratedShift, SCHEDULE_TYPE_LABELS,
 } from '../../services/scheduleGenerator';
 import DayMarkModal from './DayMarkModal';
@@ -70,10 +70,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
     setMonth(m => dir === 1 ? addMonths(m, 1) : subMonths(m, 1));
   };
 
-  const year = month.getFullYear();
-  const mon = month.getMonth() + 1;
-
-  const { cells, stats } = useMemo(() => {
+  const cells = useMemo(() => {
     const first = startOfMonth(month);
     const last = endOfMonth(month);
     const shifts = generateSchedule(schedule, format(first, 'yyyy-MM-dd'), format(last, 'yyyy-MM-dd'), RUSSIAN_HOLIDAYS);
@@ -85,27 +82,8 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
       grid.push({ shift: s, actual });
     }
     while (grid.length % 7 !== 0) grid.push(null);
-
-    const st = getMonthStats(schedule, year, mon, RUSSIAN_HOLIDAYS);
-    return { cells: grid, stats: st };
-  }, [month, schedule, actuals, worker.id, year, mon]);
-
-  const monthStart = format(startOfMonth(month), 'yyyy-MM-dd');
-  const monthEnd = format(endOfMonth(month), 'yyyy-MM-dd');
-
-  const vacationCount = useMemo(() => {
-    let count = 0;
-    for (const cell of cells) {
-      if (cell && isOnVacation(cell.shift.date) &&
-          cell.shift.date >= monthStart && cell.shift.date <= monthEnd) count++;
-    }
-    return count;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cells, vacations, monthStart, monthEnd]);
-
-  const markedCount = actuals.filter(a => a.workerId === worker.id &&
-    a.date >= format(startOfMonth(month), 'yyyy-MM-dd') &&
-    a.date <= format(endOfMonth(month), 'yyyy-MM-dd')).length;
+    return grid;
+  }, [month, schedule, actuals, worker.id]);
 
   const selectedShift = selectedDay
     ? cells.find(c => c?.shift.date === selectedDay)?.shift
@@ -148,21 +126,6 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
         <button onClick={() => changeMonth(1)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
           <ChevronRight size={18} className="text-foreground" />
         </button>
-      </div>
-
-      {/* Summary strip */}
-      <div className="mx-4 mb-3 grid grid-cols-4 gap-2">
-        {[
-          { label: 'смен',     value: stats.workDays,    color: 'text-blue-600 dark:text-blue-400' },
-          { label: 'часов',    value: stats.totalHours,  color: 'text-foreground' },
-          { label: 'ночных',   value: stats.nightHours,  color: 'text-purple-600 dark:text-purple-400' },
-          { label: 'отпуск',   value: vacationCount,     color: 'text-teal-600 dark:text-teal-400' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className="bg-card-bg rounded-xl p-2 text-center border border-card-border">
-            <div className={`font-bold text-base ${color}`}>{value}</div>
-            <div className="text-[10px] text-muted-foreground">{label}</div>
-          </div>
-        ))}
       </div>
 
       {/* Tabs */}
@@ -245,11 +208,13 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                 <button
                   key={shift.date}
                   onClick={() => setSelectedDay(shift.date)}
-                  className={`relative rounded-xl aspect-square flex flex-col items-center justify-center p-0.5 transition-all active:scale-95 ${
-                    isToday ? 'ring-2 ring-blue-500' : ''
-                  } ${bgClass}`}
+                  className={`relative rounded-xl aspect-square flex flex-col items-center justify-center p-0.5 transition-all active:scale-95 ${bgClass}`}
                 >
-                  <span className={`text-[18px] font-bold leading-none mb-0.5 ${textClass}`}>
+                  <span className={`text-[18px] font-bold leading-none mb-0.5 ${
+                    isToday
+                      ? 'w-8 h-8 flex items-center justify-center rounded-full bg-blue-600 text-white'
+                      : textClass
+                  }`}>
                     {dayNum}
                   </span>
 
