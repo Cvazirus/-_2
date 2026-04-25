@@ -1497,7 +1497,8 @@ export default function App() {
             <FinanceJournal operations={operations} />
           </div>
         );
-      case 'shifts':
+      case 'shifts': {
+        const [shiftEditTrigger, setShiftEditTrigger] = React.useState(0);
         return (
           <div className="bg-background min-h-[100dvh]">
             <Header
@@ -1505,6 +1506,8 @@ export default function App() {
               onBack={handleBack}
               showSearch={false}
               showMenu={false}
+              showEdit={schedules.length > 0}
+              onEdit={() => setShiftEditTrigger(v => v + 1)}
               {...commonHeaderProps}
             />
             <ShiftDashboard
@@ -1519,9 +1522,11 @@ export default function App() {
               onAddVacation={addVacation}
               onUpdateVacation={updateVacation}
               onDeleteVacation={deleteVacation}
+              editTrigger={shiftEditTrigger}
             />
           </div>
         );
+      }
       default:
         return null;
     }

@@ -25,6 +25,7 @@ interface ShiftDashboardProps {
   onAddVacation: (data: Omit<VacationPeriod, 'id'>) => void;
   onUpdateVacation: (id: string, data: Omit<VacationPeriod, 'id'>) => void;
   onDeleteVacation: (id: string) => void;
+  editTrigger?: number;
 }
 
 export default function ShiftDashboard({
@@ -32,6 +33,7 @@ export default function ShiftDashboard({
   onAddSchedule, onUpdateSchedule, onDeleteSchedule,
   onMarkActual, onDeleteActual,
   onAddVacation, onUpdateVacation, onDeleteVacation,
+  editTrigger,
 }: ShiftDashboardProps) {
   const [activeScheduleId, setActiveScheduleId] = useState<string | null>(() => {
     const saved = localStorage.getItem('shift_active_schedule');
@@ -64,6 +66,13 @@ export default function ShiftDashboard({
 
   const activeSchedule = schedules.find(s => s.id === activeScheduleId) ?? null;
 
+  useEffect(() => {
+    if (editTrigger && editTrigger > 0 && activeSchedule) {
+      setEditingSchedule(activeSchedule);
+      setShowScheduleConfig(true);
+    }
+  }, [editTrigger]);
+
   const handleSetActiveSchedule = (id: string) => {
     setActiveScheduleId(id);
     localStorage.setItem('shift_active_schedule', id);
@@ -75,35 +84,6 @@ export default function ShiftDashboard({
       <div className="px-4 space-y-3 pb-28">
         {activeSchedule ? (
           <>
-            {/* Active schedule card */}
-            <div className="bg-card-bg rounded-2xl border border-card-border p-4">
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div>
-                  <div className="font-bold text-foreground text-base">{activeSchedule.name}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {SCHEDULE_TYPE_LABELS[activeSchedule.type]} · с {activeSchedule.startDate}
-                  </div>
-                </div>
-                <div className="flex gap-1.5 shrink-0">
-                  <button
-                    onClick={() => { setEditingSchedule(activeSchedule); setShowScheduleConfig(true); }}
-                    className="w-9 h-9 flex items-center justify-center rounded-xl border border-card-border text-muted-foreground"
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  {schedules.length > 1 && (
-                    <button
-                      onClick={() => setShowScheduleList(v => !v)}
-                      className="px-3 h-9 flex items-center justify-center rounded-xl border border-card-border text-xs text-muted-foreground font-medium"
-                    >
-                      Сменить
-                    </button>
-                  )}
-                </div>
-              </div>
-
-            </div>
-
             {/* Встроенный календарь */}
             <ShiftCalendar
               embedded
