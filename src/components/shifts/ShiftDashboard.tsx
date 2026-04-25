@@ -39,7 +39,6 @@ export default function ShiftDashboard({
     if (saved && schedules.find(s => s.id === saved)) return saved;
     return schedules[0]?.id ?? null;
   });
-  const [showCalendar, setShowCalendar] = useState(false);
   const [month, setMonth] = useState(new Date());
   const [showScheduleConfig, setShowScheduleConfig] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<ShiftSchedule | null>(null);
@@ -86,20 +85,6 @@ export default function ShiftDashboard({
     localStorage.setItem('shift_active_schedule', id);
     setShowScheduleList(false);
   };
-
-  if (showCalendar && activeSchedule) {
-    return (
-      <ShiftCalendar
-        worker={{ ...SELF_WORKER, scheduleId: activeSchedule.id }}
-        schedule={activeSchedule}
-        actuals={actuals}
-        vacations={vacations}
-        onMarkActual={onMarkActual}
-        onDeleteActual={onDeleteActual}
-        onBack={() => setShowCalendar(false)}
-      />
-    );
-  }
 
   return (
     <div className="bg-background min-h-[calc(100dvh-64px)] relative">
@@ -168,14 +153,19 @@ export default function ShiftDashboard({
                 </div>
               )}
 
-              <button
-                onClick={() => setShowCalendar(true)}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-sm transition-colors"
-              >
-                <Calendar size={18} />
-                Открыть календарь
-              </button>
             </div>
+
+            {/* Встроенный календарь */}
+            <ShiftCalendar
+              embedded
+              worker={{ ...SELF_WORKER, scheduleId: activeSchedule.id }}
+              schedule={activeSchedule}
+              actuals={actuals}
+              vacations={vacations}
+              onMarkActual={onMarkActual}
+              onDeleteActual={onDeleteActual}
+              onBack={() => {}}
+            />
 
             {/* Schedule switcher */}
             <AnimatePresence>
@@ -238,21 +228,6 @@ export default function ShiftDashboard({
             >
               <Plus size={14} /> Добавить ещё график
             </button>
-
-            {/* Shift types legend */}
-            {activeSchedule.shifts.length > 0 && (
-              <div className="bg-card-bg rounded-2xl border border-card-border p-4">
-                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Типы смен</div>
-                <div className="space-y-2">
-                  {activeSchedule.shifts.map((sh, i) => (
-                    <div key={i} className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-foreground">{sh.label}</span>
-                      <span className="text-sm text-muted-foreground">{sh.start} – {sh.end}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Vacations */}
             <div className="bg-card-bg rounded-2xl border border-card-border p-4">

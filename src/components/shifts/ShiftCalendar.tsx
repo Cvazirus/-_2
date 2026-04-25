@@ -18,6 +18,7 @@ interface ShiftCalendarProps {
   onMarkActual: (actual: ShiftActual) => void;
   onDeleteActual: (id: string) => void;
   onBack: () => void;
+  embedded?: boolean;
 }
 
 const SHIFT_BG = [
@@ -55,7 +56,7 @@ const WEEK_DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 interface Cell { shift: GeneratedShift; actual?: ShiftActual }
 
-export default function ShiftCalendar({ worker, schedule, actuals, vacations, onMarkActual, onDeleteActual, onBack }: ShiftCalendarProps) {
+export default function ShiftCalendar({ worker, schedule, actuals, vacations, onMarkActual, onDeleteActual, onBack, embedded }: ShiftCalendarProps) {
   const isOnVacation = (date: string) =>
     vacations.some(v => date >= v.startDate && date <= v.endDate);
   const [month, setMonth] = useState(new Date());
@@ -114,17 +115,18 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
     : undefined;
 
   return (
-    <div className="bg-background min-h-[calc(100dvh-64px)]">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-card-border">
-        <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
-          <ArrowLeft size={20} className="text-foreground" />
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="font-semibold text-foreground truncate">{schedule.name}</div>
-          <div className="text-xs text-muted-foreground">{SCHEDULE_TYPE_LABELS[schedule.type]}</div>
+    <div className={embedded ? '' : 'bg-background min-h-[calc(100dvh-64px)]'}>
+      {!embedded && (
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-card-border">
+          <button onClick={onBack} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
+            <ArrowLeft size={20} className="text-foreground" />
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="font-semibold text-foreground truncate">{schedule.name}</div>
+            <div className="text-xs text-muted-foreground">{SCHEDULE_TYPE_LABELS[schedule.type]}</div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Month nav */}
       <div className="flex items-center justify-between px-4 py-2.5">
