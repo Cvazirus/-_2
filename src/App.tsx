@@ -24,8 +24,8 @@ import SortModal, { SortConfig } from './components/SortModal';
 import LoginModal from './components/LoginModal';
 import { sendTelegramMessage } from './services/telegram';
 import { Sun, Moon, Cloud, LogIn, LogOut, RefreshCw, MoreHorizontal, Edit2, Plus } from 'lucide-react';
-import { auth, db, googleProvider } from './firebase';
-import { onAuthStateChanged, signInWithRedirect, getRedirectResult, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from 'firebase/auth';
+import { auth, db } from './firebase';
+import { onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { differenceInHours } from 'date-fns';
 
@@ -261,9 +261,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Обработка возврата после Google redirect
-    getRedirectResult(auth).catch(console.error);
-
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u);
       if (u) setShowLoginModal(false);
@@ -379,16 +376,6 @@ export default function App() {
 
   const handleLogin = () => {
     setShowLoginModal(true);
-  };
-
-  const handleLoginGoogle = async (): Promise<void> => {
-    try {
-      await signInWithRedirect(auth, googleProvider);
-      // страница перейдёт на Google — код ниже не выполняется
-    } catch (error) {
-      console.error('Google login error:', error);
-      showToast('Ошибка входа через Google');
-    }
   };
 
   const getEmailAuthError = (code: string): string => {
@@ -1816,7 +1803,6 @@ export default function App() {
 
       {showLoginModal && (
         <LoginModal
-          onLoginGoogle={handleLoginGoogle}
           onLoginEmail={handleLoginEmail}
           onRegisterEmail={handleRegisterEmail}
           onClose={() => setShowLoginModal(false)}
