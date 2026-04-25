@@ -7,7 +7,7 @@ All responses and internal reasoning/thinking must be in Russian.
 At the end of every response, always show the Termux deploy command:
 
 ```
-cd /data/data/com.termux/files/home/-_2 && firebase deploy --only hosting
+cd ~/sklad && firebase deploy --only hosting --project sklad-afa39
 ```
 
 The user copies this command from the response to run in Termux.
