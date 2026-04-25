@@ -23,7 +23,7 @@ import CsvOperationsModal from './components/CsvOperationsModal';
 import SortModal, { SortConfig } from './components/SortModal';
 import LoginModal from './components/LoginModal';
 import { sendTelegramMessage } from './services/telegram';
-import { Sun, Moon, Cloud, LogIn, LogOut, RefreshCw } from 'lucide-react';
+import { Sun, Moon, Cloud, LogIn, LogOut, RefreshCw, MoreHorizontal, Edit2, Plus } from 'lucide-react';
 import { auth, db, googleProvider } from './firebase';
 import { onAuthStateChanged, signInWithPopup, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, User } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
