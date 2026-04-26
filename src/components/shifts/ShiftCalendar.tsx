@@ -2,7 +2,7 @@ import { useState, useMemo, useRef } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths, differenceInDays, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
   generateSchedule, RUSSIAN_HOLIDAYS,
@@ -49,7 +49,7 @@ const STATUS_COLOR: Record<ShiftActual['status'], string> = {
   vacation: 'text-teal-600 dark:text-teal-400',
 };
 const STATUS_ICON: Record<ShiftActual['status'], string> = {
-  ok: '✓', late: '!', miss: '✕', overtime: '+', vacation: '🏖',
+  ok: '✓', late: '!', miss: '✕', overtime: '+', vacation: 'О',
 };
 
 const WEEK_DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
@@ -182,7 +182,17 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const dayNum = parseInt(shift.date.slice(8));
               const isToday = shift.date === format(new Date(), 'yyyy-MM-dd');
               const colIdx = shift.shiftIndex;
-              const isWeekend = (getDay(new Date(shift.date + 'T00:00:00')) + 6) % 7 >= 5;
+              const dayOfWeekIdx = (getDay(new Date(shift.date + 'T00:00:00')) + 6) % 7;
+              const isWeekend = dayOfWeekIdx >= 5;
+              const isSunday = dayOfWeekIdx === 6;
+
+              let cycleWeek: number | null = null;
+              if (isSunday && schedule.type !== '12_cycle') {
+                const daysSinceStart = differenceInDays(parseISO(shift.date), parseISO(schedule.startDate));
+                const cycleLen = schedule.type === '8_3' ? 21 : 14;
+                const posInCycle = ((daysSinceStart % cycleLen) + cycleLen) % cycleLen;
+                cycleWeek = Math.floor(posInCycle / 7) + 1;
+              }
               const isVacation = isOnVacation(shift.date) || actual?.status === 'vacation';
               const isNonWorkHoliday = shift.isHoliday && shift.isOff && !isVacation;
 
@@ -219,14 +229,22 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                   </span>
 
                   {isVacation ? (
-                    <span className="text-[10px] leading-none">🏖</span>
+                    <span className="text-[9px] font-semibold leading-none text-teal-700 dark:text-teal-300">ОТП</span>
                   ) : isNonWorkHoliday ? (
-                    <span className="text-[10px] leading-none">🎉</span>
+                    <span className="text-[9px] font-semibold leading-none text-green-700 dark:text-green-300">ПР</span>
                   ) : !shift.isOff && shift.shift ? (
                     <span className={`text-[9px] font-semibold leading-none text-center ${textClass}`}>
                       {shift.shift.label}
                     </span>
                   ) : null}
+
+                  {cycleWeek !== null && (
+                    <span className={`absolute bottom-0.5 left-0.5 text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center text-white ${
+                      ['bg-blue-500', 'bg-amber-500', 'bg-purple-500'][(cycleWeek - 1) % 3]
+                    }`}>
+                      {cycleWeek}
+                    </span>
+                  )}
 
                   {actual && actual.status !== 'vacation' && (
                     <span className={`absolute top-0.5 right-0.5 w-2 h-2 rounded-full ${STATUS_DOT[actual.status]}`} />
