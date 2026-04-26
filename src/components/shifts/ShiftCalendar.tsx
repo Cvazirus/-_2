@@ -236,9 +236,6 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                     <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-rose-400" />
                   )}
 
-                  {shift.nightHours > 0 && !isVacation && (
-                    <span className="absolute bottom-0.5 right-0.5 text-[8px] text-white/80">🌙</span>
-                  )}
                 </button>
               );
             })}
@@ -279,7 +276,7 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                 {!shift.isOff && (
                   <div className="text-xs text-muted-foreground">
                     {shift.shift?.label} · {shift.shift?.start}–{shift.shift?.end} · {shift.hours}ч
-                    {shift.nightHours > 0 && ` · 🌙${shift.nightHours}ч`}
+                    {shift.nightHours > 0 && ` · ночных: ${shift.nightHours}ч`}
                   </div>
                 )}
                 {actual && (
