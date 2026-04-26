@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths, addDays, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  generateSchedule, RUSSIAN_HOLIDAYS, getShiftForDate,
+  generateSchedule, getMonthStats, RUSSIAN_HOLIDAYS, getShiftForDate,
   GeneratedShift, SCHEDULE_TYPE_LABELS,
 } from '../../services/scheduleGenerator';
 import DayMarkModal from './DayMarkModal';
@@ -70,6 +70,10 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
     setMonth(m => dir === 1 ? addMonths(m, 1) : subMonths(m, 1));
   };
 
+  const monthStats = useMemo(() =>
+    getMonthStats(schedule, month.getFullYear(), month.getMonth() + 1),
+  [month, schedule]);
+
   const cells = useMemo(() => {
     const first = startOfMonth(month);
     const last = endOfMonth(month);
@@ -126,6 +130,22 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
         <button onClick={() => changeMonth(1)} className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-muted">
           <ChevronRight size={18} className="text-foreground" />
         </button>
+      </div>
+
+      {/* Stats strip */}
+      <div className="flex gap-2 px-4 pb-2">
+        <div className="flex-1 bg-card-bg border border-card-border rounded-xl py-2 flex flex-col items-center">
+          <span className="text-[10px] text-muted-foreground leading-none mb-0.5">Смен</span>
+          <span className="text-sm font-bold text-foreground">{monthStats.workDays}</span>
+        </div>
+        <div className="flex-1 bg-card-bg border border-card-border rounded-xl py-2 flex flex-col items-center">
+          <span className="text-[10px] text-muted-foreground leading-none mb-0.5">Часов</span>
+          <span className="text-sm font-bold text-foreground">{monthStats.totalHours}</span>
+        </div>
+        <div className="flex-1 bg-card-bg border border-card-border rounded-xl py-2 flex flex-col items-center">
+          <span className="text-[10px] text-muted-foreground leading-none mb-0.5">Ночных</span>
+          <span className="text-sm font-bold text-purple-500">{monthStats.nightHours}</span>
+        </div>
       </div>
 
       {/* Tabs */}
