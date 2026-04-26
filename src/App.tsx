@@ -1375,6 +1375,9 @@ export default function App() {
               user={user}
               onLogin={handleLogin}
               onLogout={handleLogout}
+              onSync={() => syncData(true)}
+              onPull={handlePullData}
+              isSyncing={isSyncing}
             />
           </div>
         );
