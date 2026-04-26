@@ -65,7 +65,8 @@ export default function PartDetail({ part, onUpdate, onDelete, onManualWriteOff 
       };
       const newTotal = part.operationNumbers.reduce((sum, op) => sum + (newPrices[op] || 0), 0);
       onUpdate({
-        operationPrices: newPrices
+        operationPrices: newPrices,
+        pricePerUnit: newTotal,
       });
       setEditField(null);
       return;
