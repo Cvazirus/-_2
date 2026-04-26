@@ -1223,14 +1223,16 @@ export default function App() {
     sendTelegramMessage(`🔄 <b>Движение детали</b>\nТип: ${typeStr}\nДеталь: <code>${part.code}</code> (${part.name})\nКоличество: ${quantity} шт.\nОстаток: ${becameQuantity} шт.`);
   };
 
-  const handleManualWriteOff = (partId: string, writeOffQty: number, includedOperations: string[]) => {
+  const handleManualWriteOff = (partId: string, writeOffQty: number, includedOperations: string[], priceOverride?: number) => {
     const part = parts.find(p => p.id === partId);
     if (!part) return;
 
     const newQuantity = part.currentQuantity - writeOffQty;
-    const customPricePerUnit = part.operationNumbers.length > 0 
-      ? includedOperations.reduce((sum, op) => sum + (part.operationPrices?.[op] || 0), 0)
-      : part.pricePerUnit;
+    const customPricePerUnit = priceOverride !== undefined
+      ? priceOverride
+      : part.operationNumbers.length > 0
+        ? includedOperations.reduce((sum, op) => sum + (part.operationPrices?.[op] || 0), 0)
+        : part.pricePerUnit;
 
     const updatedPart: Part = {
       ...part,
@@ -1449,7 +1451,7 @@ export default function App() {
                 handleBack();
                 showToast('Деталь удалена');
               }}
-              onManualWriteOff={(qty, ops) => handleManualWriteOff(selectedPart.id, qty, ops)}
+              onManualWriteOff={(qty, ops, price) => handleManualWriteOff(selectedPart.id, qty, ops, price)}
             />}
           </div>
         );

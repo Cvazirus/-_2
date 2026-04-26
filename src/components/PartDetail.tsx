@@ -11,7 +11,7 @@ interface PartDetailProps {
   part: Part;
   onUpdate: (updatedData: Partial<Part>) => void;
   onDelete?: () => void;
-  onManualWriteOff?: (qty: number, ops: string[]) => void;
+  onManualWriteOff?: (qty: number, ops: string[], price: number) => void;
 }
 
 export default function PartDetail({ part, onUpdate, onDelete, onManualWriteOff }: PartDetailProps) {
@@ -310,9 +310,9 @@ export default function PartDetail({ part, onUpdate, onDelete, onManualWriteOff 
           part={part}
           initialWriteOffQty={pendingWriteOffQty}
           onClose={() => setPendingWriteOffQty(null)}
-          onConfirm={(qty, ops) => {
+          onConfirm={(qty, ops, price) => {
             setPendingWriteOffQty(null);
-            onManualWriteOff(qty, ops);
+            onManualWriteOff(qty, ops, price);
           }}
         />
       )}
