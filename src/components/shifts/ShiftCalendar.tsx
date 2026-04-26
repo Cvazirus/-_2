@@ -2,10 +2,10 @@ import { useState, useMemo, useRef } from 'react';
 import { Worker, ShiftSchedule, ShiftActual, VacationPeriod } from '../../types';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths, differenceInDays, parseISO } from 'date-fns';
+import { format, startOfMonth, endOfMonth, getDay, addMonths, subMonths, addDays, parseISO } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import {
-  generateSchedule, RUSSIAN_HOLIDAYS,
+  generateSchedule, RUSSIAN_HOLIDAYS, getShiftForDate,
   GeneratedShift, SCHEDULE_TYPE_LABELS,
 } from '../../services/scheduleGenerator';
 import DayMarkModal from './DayMarkModal';
@@ -186,12 +186,15 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
               const isWeekend = dayOfWeekIdx >= 5;
               const isSunday = dayOfWeekIdx === 6;
 
-              let cycleWeek: number | null = null;
-              if (isSunday && schedule.type !== '12_cycle') {
-                const daysSinceStart = differenceInDays(parseISO(shift.date), parseISO(schedule.startDate));
-                const cycleLen = schedule.type === '8_3' ? 21 : 14;
-                const posInCycle = ((daysSinceStart % cycleLen) + cycleLen) % cycleLen;
-                cycleWeek = Math.floor(posInCycle / 7) + 1;
+              // Показать метку на воскресенье только если следующий понедельник — ночная смена (старт после 20:00)
+              let showNightWeekStart = false;
+              if (isSunday) {
+                const mondayStr = format(addDays(parseISO(shift.date), 1), 'yyyy-MM-dd');
+                const { shift: mondayShift } = getShiftForDate(schedule, mondayStr);
+                if (mondayShift && !RUSSIAN_HOLIDAYS.includes(mondayStr)) {
+                  const [startH] = mondayShift.start.split(':').map(Number);
+                  showNightWeekStart = startH >= 20;
+                }
               }
               const isVacation = isOnVacation(shift.date) || actual?.status === 'vacation';
               const isNonWorkHoliday = shift.isHoliday && shift.isOff && !isVacation;
@@ -238,11 +241,9 @@ export default function ShiftCalendar({ worker, schedule, actuals, vacations, on
                     </span>
                   ) : null}
 
-                  {cycleWeek !== null && (
-                    <span className={`absolute bottom-0.5 left-0.5 text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center text-white ${
-                      ['bg-blue-500', 'bg-amber-500', 'bg-purple-500'][(cycleWeek - 1) % 3]
-                    }`}>
-                      {cycleWeek}
+                  {showNightWeekStart && (
+                    <span className="absolute bottom-0.5 left-0.5 text-[7px] font-bold w-3.5 h-3.5 rounded-full flex items-center justify-center bg-purple-600 text-white">
+                      3
                     </span>
                   )}
 
