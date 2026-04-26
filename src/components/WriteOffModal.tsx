@@ -11,9 +11,7 @@ interface WriteOffModalProps {
 
 export default function WriteOffModal({ part, initialWriteOffQty, onClose, onConfirm }: WriteOffModalProps) {
   const [qty, setQty] = useState(initialWriteOffQty.toString());
-  const [mode, setMode] = useState<'total' | 'ops'>(
-    part.operationNumbers.length > 0 ? 'ops' : 'total'
-  );
+  const [mode, setMode] = useState<'total' | 'ops'>('total');
   const [includedOps, setIncludedOps] = useState<string[]>(part.operationNumbers);
 
   const toggleOp = (op: string) => {
