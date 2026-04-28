@@ -33,6 +33,15 @@ const DEFAULT_MONTH_DATA: MonthFinanceData = {
   actualAdvance: '',
 };
 
+const PRESET_FINANCE_DATA: Record<string, MonthFinanceData> = {
+  '2025-10': { tariff: 344.4, premiumRate: 50, totalHours: 184,  nightHours: 19.5, holidayHours: 0,  holidayPiecework: 0,       otherPay: 8586.33,  isUnionMember: true, actualAdvance: 35803.44 },
+  '2025-11': { tariff: 362.9, premiumRate: 50, totalHours: 127,  nightHours: 15.5, holidayHours: 0,  holidayPiecework: 0,       otherPay: 2782.18,  isUnionMember: true, actualAdvance: 21572.63 },
+  '2025-12': { tariff: 362.9, premiumRate: 50, totalHours: 144,  nightHours: 12,   holidayHours: 0,  holidayPiecework: 0,       otherPay: 23901.22, isUnionMember: true, actualAdvance: 53199.82 },
+  '2026-01': { tariff: 362.9, premiumRate: 50, totalHours: 120,  nightHours: 7.5,  holidayHours: 6,  holidayPiecework: 0,       otherPay: 17938.87, isUnionMember: true, actualAdvance: 16158.21 },
+  '2026-02': { tariff: 362.9, premiumRate: 50, totalHours: 152,  nightHours: 15,   holidayHours: 18, holidayPiecework: 9327.03, otherPay: 1290.14,  isUnionMember: true, actualAdvance: 43805.91 },
+  '2026-03': { tariff: 362.9, premiumRate: 50, totalHours: 168,  nightHours: 18,   holidayHours: 12, holidayPiecework: 5581.25, otherPay: 53600.90, isUnionMember: true, actualAdvance: 76208.64 },
+};
+
 export default function FinanceJournal({ operations }: FinanceJournalProps) {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -51,13 +60,14 @@ export default function FinanceJournal({ operations }: FinanceJournalProps) {
   const monthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
 
   const [financeData, setFinanceData] = useState<Record<string, MonthFinanceData>>(() => {
+    let saved: Record<string, MonthFinanceData> = {};
     try {
-      const saved = localStorage.getItem('app_finance_data');
-      if (saved) return JSON.parse(saved);
+      const raw = localStorage.getItem('app_finance_data');
+      if (raw) saved = JSON.parse(raw);
     } catch (e) {
       console.error('Error parsing finance data', e);
     }
-    return {};
+    return { ...PRESET_FINANCE_DATA, ...saved };
   });
 
   const currentData = financeData[monthKey] || DEFAULT_MONTH_DATA;
