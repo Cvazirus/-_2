@@ -18,6 +18,6 @@ cd ~/sklad && firebase hosting:channel:deploy dev --project sklad-afa39
 cd ~/sklad && firebase deploy --only hosting --project sklad-afa39
 ```
 
-At the end of every response, always show the release deploy command (the second one).
+At the end of every response, always show the DEV channel command (the first one).
 The user copies it from the response to run in Termux.
 App URL: https://sklad-afa39.web.app/
