@@ -50,6 +50,9 @@ export default function ShiftDashboard({
   const [showVacationModal, setShowVacationModal] = useState(false);
   const [editingVacation, setEditingVacation] = useState<VacationPeriod | null>(null);
 
+  const editTriggerRef = useRef(editTrigger);
+  const addTriggerRef = useRef(addTrigger);
+
   const prevScheduleLenRef = useRef(schedules.length);
   useEffect(() => {
     if (schedules.length > prevScheduleLenRef.current && schedules.length > 0) {
@@ -71,14 +74,16 @@ export default function ShiftDashboard({
   const activeSchedule = schedules.find(s => s.id === activeScheduleId) ?? null;
 
   useEffect(() => {
-    if (editTrigger && editTrigger > 0 && activeSchedule) {
+    if (editTrigger > editTriggerRef.current && activeSchedule) {
+      editTriggerRef.current = editTrigger;
       setEditingSchedule(activeSchedule);
       setShowScheduleConfig(true);
     }
   }, [editTrigger]);
 
   useEffect(() => {
-    if (addTrigger && addTrigger > 0) {
+    if (addTrigger > addTriggerRef.current) {
+      addTriggerRef.current = addTrigger;
       setEditingSchedule(null);
       setShowScheduleConfig(true);
     }
