@@ -1161,6 +1161,10 @@ export default function App() {
       setSelectedPart(updatedPart);
     }
 
+    if (updatedData.currentQuantity !== undefined && newQuantity > oldQuantity) {
+      createOperation(updatedPart, newQuantity - oldQuantity, oldQuantity, 'arrival');
+    }
+
     updateLocalTimestamp();
   };
 
